@@ -1,41 +1,42 @@
+using MongoDB.Bson;
+using MongoDB.Driver;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// --- Mongo config
+var mongoConnectionString =
+    builder.Configuration["MONGODB:CONNECTION_STRING"]
+    ?? throw new InvalidOperationException("MONGODB:CONNECTION_STRING is not set");
 
+var mongoDatabaseName =
+    builder.Configuration["MONGODB:DATABASE"]
+    ?? throw new InvalidOperationException("MONGODB:DATABASE is not set");
+
+builder.Services.AddSingleton<IMongoClient>(_ =>
+    new MongoClient(mongoConnectionString));
+
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase(mongoDatabaseName);
+});
+
+// --- App
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.MapGet("/api/health", async (IMongoDatabase db, IWebHostEnvironment env) =>
 {
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    // Ping MongoDB
+    var command = new BsonDocument("ping", 1);
+    await db.RunCommandAsync<BsonDocument>(command);
+    
+    return Results.Json(new
+    {
+        status = "ok",
+        service = "realestate-api",
+        environment = env.EnvironmentName,
+        mongo = "ok"
+    });
+});
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -68,7 +68,7 @@ docker compose up cms
 Or start everything:
 
 ```bash
-docker compose up
+docker compose --profile cms up -d
 ```
 Sanity Studio will be available at:
 
