@@ -1,5 +1,3 @@
-
-
 # Real Estate Mini Portal
 
 Educational full-stack project for learning **Vue 3**, **.NET Web API (C#)**, and **Sanity CMS** in a real estate domain.
