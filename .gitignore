@@ -1,0 +1,48 @@
+# Env/Config
+.env
+.env.*
+!.env.example
+
+# .NET appsettings
+appsettings.*
+!appsettings.json
+!appsettings.example.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
+*.sln.iml
+*.csproj.iml
+
+# Node
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+
+# .NET
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
+**/*.cache
+**/*.log
+
+# Sanity
+.pnp
+.pnp.js
+.sanity
+*.pem
+
+# Other
+.vscode/
+*.log
+*.log*
+/coverage
+
+# Typescript
+*.tsbuildinfo
