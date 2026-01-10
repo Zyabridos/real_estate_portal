@@ -1,4 +1,3 @@
-
 # Real Estate Mini Portal
 
 Educational full-stack project for learning **Vue 3**, **.NET Web API (C#)**, and **Sanity CMS** in a real estate domain.
@@ -39,3 +38,36 @@ The project is inspired by data-driven listing systems used for managing propert
   Makefile
   LICENSE
 ```
+## Environment Variables
+
+Rename `.env` file:
+```bash  
+mv .env.example .env
+```  
+Then set correct values to keys.
+
+
+## Development Commands
+
+Common development tasks are automated via `Makefile`.
+
+To see the full list of available commands:
+```bash
+make help
+```
+
+Typical workflow:
+```bash
+make up-d    # Start all services in detached mode
+make down    # Stop services 
+make restart # Restart services 
+make logs    # View service logs
+```
+
+----------
+
+## Notes on Configuration
+
+-   Frontend API requests are routed through a Vite development proxy (`/api → backend`).
+-   Backend services communicate with MongoDB via the Docker network.
+-   CMS is optional and can be started separately using Docker profiles.
