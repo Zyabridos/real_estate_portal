@@ -29,6 +29,10 @@ dev-cms:
 dev:
 	make dev-backend && make dev-frontend && make dev-cms
 
+test-back:
+	@echo "$(LIGHT_BLUE)Starting integration tests for backend...$(RESET)"
+	cd backend && dotnet test RealEstate.slnx
+
 # Docker
 build:
 	@echo "$(LIGHT_BLUE)Building Docker images...$(RESET)"
