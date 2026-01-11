@@ -8,5 +8,4 @@
   <Folder Name="/tests/">
     <Project Path="tests/RealEstate.Infrastructure.Tests/RealEstate.Infrastructure.Tests.csproj" />
   </Folder>
-  <Project Path="RealEstate.Api/RealEstate.Api.csproj" />
 </Solution>
