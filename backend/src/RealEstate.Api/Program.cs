@@ -1,32 +1,54 @@
-using MongoDB.Bson;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using MongoDB.Bson;
+using RealEstate.Infrastructure.Mongo;
+using RealEstate.Infrastructure.Repositories;
+using RealEstate.Infrastructure.Mongo.Indexes;
+using RealEstate.Infrastructure.Mongo.Conventions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Mongo config
-var mongoConnectionString =
-    builder.Configuration["MONGODB:CONNECTION_STRING"]
-    ?? throw new InvalidOperationException("MONGODB:CONNECTION_STRING is not set");
+builder.Services.AddControllers();
 
-var mongoDatabaseName =
-    builder.Configuration["MONGODB:DATABASE"]
-    ?? throw new InvalidOperationException("MONGODB:DATABASE is not set");
+builder.Services.AddOptions<MongoOptions>()
+    .Bind(builder.Configuration.GetSection(MongoOptions.SectionName))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectionString), "Mongo:ConnectionString is required")
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Database), "Mongo:Database is required")
+    .ValidateOnStart(); // => and drop the app if fails
 
-builder.Services.AddSingleton<IMongoClient>(_ =>
-    new MongoClient(mongoConnectionString));
+// Mongo config
+MongoConventions.Register();
 
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
+// Mongo DI
+builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(mongoDatabaseName);
+    var opt = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
+    return new MongoClient(opt.ConnectionString);
 });
+
+// Scoped
+builder.Services.AddScoped<IMongoDatabase>(sp =>
+{
+    var opt = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase(opt.Database);
+});
+
+// Repositories
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<IBrokerRepository, BrokerRepository>();
+builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+
+// Index initialization (HostedService)
+builder.Services.AddHostedService<MongoIndexInitializer>();
 
 // --- App
 var app = builder.Build();
 
+app.MapControllers();
+// Health check with pinging of MongoDB
 app.MapGet("/api/health", async (IMongoDatabase db, IWebHostEnvironment env) =>
 {
-    // Ping MongoDB
     var command = new BsonDocument("ping", 1);
     await db.RunCommandAsync<BsonDocument>(command);
     
