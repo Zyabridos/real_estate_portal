@@ -20,7 +20,7 @@ The project is inspired by data-driven listing systems used for managing propert
 ### Backend
 - .NET 10 (ASP.NET Core Web API)
 - Entity Framework Core
-- Here will come DB eventually - not decided yet
+- MongoDB
 
 ### CMS
 - Sanity v3
