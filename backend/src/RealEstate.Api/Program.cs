@@ -1,16 +1,26 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using RealEstate.Application.Services;
 using RealEstate.Infrastructure.Mongo;
 using RealEstate.Infrastructure.Repositories;
 using RealEstate.Infrastructure.Mongo.Indexes;
 using RealEstate.Infrastructure.Mongo.Conventions;
+using RealEstate.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(PropertiesMappingProfile).Assembly);
 
+
+// FluentValidation registration
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validation.Leads.CreateLeadRequestValidator).Assembly);
+
+// MongoDB registration
 builder.Services.AddOptions<MongoOptions>()
     .Bind(builder.Configuration.GetSection(MongoOptions.SectionName))
     .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectionString), "Mongo:ConnectionString is required")
