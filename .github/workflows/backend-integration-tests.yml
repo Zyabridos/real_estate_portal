@@ -1,4 +1,4 @@
-name: backend-ci
+name: backend-integration-testss
 
 on:
   pull_request:

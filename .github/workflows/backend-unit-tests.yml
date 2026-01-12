@@ -1,4 +1,4 @@
-name: backend-ci
+name: backend-unit-tests
 
 on:
   pull_request:
