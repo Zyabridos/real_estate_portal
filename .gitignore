@@ -5,7 +5,7 @@
 
 # .NET appsettings
 appsettings.*
-!appsettings.json
+appsettings.*.json
 !appsettings.example.json
 
 # OS

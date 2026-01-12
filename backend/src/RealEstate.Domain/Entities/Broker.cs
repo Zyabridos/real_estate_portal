@@ -9,6 +9,6 @@ public sealed class Broker
     public string Email { get; set; } = default!;
     public string Phone { get; set; } = default!;
     public string? PhotoUrl { get; set; }
-
+    public string? MainImageUrl { get; set; }
     public Guid AgencyId { get; set; }
 }
