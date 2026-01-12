@@ -8,6 +8,10 @@ The project is inspired by data-driven listing systems used for managing propert
 
 ---
 
+## Badges
+[![Backend Integration Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml)
+
+
 ## Tech Stack
 
 ### Frontend
