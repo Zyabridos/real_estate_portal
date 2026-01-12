@@ -5,7 +5,7 @@ namespace RealEstate.Application.Validation.Properties;
 
 public sealed class PropertyListQueryValidator : AbstractValidator<PropertyListQuery>
 {
-    private const int MaxPageSize = 100;
+    private const int MaxPageSize = 100; // protect API from request of, for example, pageSize=1000000000
 
     public PropertyListQueryValidator()
     {
