@@ -103,3 +103,5 @@ docker run -p 5000:5000 --env-file .env realestate-backend
 - Focus is on clean architecture, testability, and maintainability
 - Authentication & authorization are intentionally out of scope for the initial phase
 - The API is designed to be consumed by a SPA frontend
+- CI runs on PRs/pushes and initialize restore/build/test
+- Integration tests require Docker because they use Testcontainers
