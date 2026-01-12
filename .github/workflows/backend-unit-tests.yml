@@ -1,18 +1,18 @@
-name: backend-integration-testss
+name: backend-unit-tests
 
 on:
   pull_request:
     paths:
       - "backend/**"
-      - ".github/workflows/backend-integration-tests.yml"
+      - ".github/workflows/backend-unit-tests.yml"
   push:
     branches: ["main"]
     paths:
       - "backend/**"
-      - ".github/workflows/backend-integration-tests.yml"
+      - ".github/workflows/backend-unit-tests.yml"
 
 concurrency:
-  group: backend-backend-integration-tests-${{ github.ref }}
+  group: backend-backend-unit-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
