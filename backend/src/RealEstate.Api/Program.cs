@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using RealEstate.Application.Services;
 using RealEstate.Infrastructure.Mongo;
 using RealEstate.Infrastructure.Repositories;
 using RealEstate.Infrastructure.Mongo.Indexes;
