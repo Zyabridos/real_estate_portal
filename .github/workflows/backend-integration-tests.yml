@@ -4,16 +4,15 @@ on:
   pull_request:
     paths:
       - "backend/**"
-      - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/backend-integration-tests.yml"
   push:
-    branches:
-      - "**"
+    branches: ["main"]
     paths:
       - "backend/**"
-      - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/backend-integration-tests.yml"
 
 concurrency:
-  group: backend-ci-${{ github.ref }}
+  group: backend-backend-integration-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
