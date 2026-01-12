@@ -30,22 +30,36 @@ The backend is intended to be used together with:
 MongoDB is used for **business data only**  
 (articles, blog content, guides are handled by Sanity CMS).
 
+## Repository Structure
+```bash
+src/
+  RealEstate.Api/
+  RealEstate.Application/
+  RealEstate.Domain/
+  RealEstate.Infrastructure/
+tests/
+  RealEstate.Infrastructure.Tests/
+  RealEstate.Validation.Tests/
+.env.example
+Dockerfile
+RealEstate.sln
+```
 
 ## MongoDB Configuration
 
 The API uses the Options pattern for MongoDB configuration.
 
-Required configuration section:
+Rename appsettings.example.json:
 
 ```
-json
-"Mongo": {
-  "ConnectionString": "mongodb://localhost:27017",
-  "Database": "realestate"
-}
+mv backend/src/RealEstate.Api/appsettings.example.json backend/src/RealEstate.Api/appsettings.json
 ```
-See appsettings.example.json for reference.
-
+Then adjust the values according to your local environment.
+```bash
+nano backend/src/RealEstate.Api/appsettings.json
+# or
+code backend/src/RealEstate.Api/appsettings.json
+```
 ## MongoDB Conventions
 Global MongoDB conventions are configured on application startup:
 - camelCase field names
