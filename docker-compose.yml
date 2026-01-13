@@ -18,10 +18,10 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://0.0.0.0:5000"
-      MONGODB__DATABASE: ${MONGO_DATABASE}
-      MONGODB__CONNECTION_STRING: "mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin"
+      MONGO__DATABASE: ${MONGO_DATABASE}
+      MONGO__CONNECTIONSTRING: "mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin"
     ports:
-      - "5050:5000"
+      - "5055:5000"
     depends_on:
       - mongodb
 
