@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RealEstate.Domain\RealEstate.Domain.csproj" />
+    <ProjectReference Include="..\src\RealEstate.Application\RealEstate.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

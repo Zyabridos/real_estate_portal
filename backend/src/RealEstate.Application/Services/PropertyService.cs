@@ -5,74 +5,92 @@ using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Application.Interfaces.Services;
 using RealEstate.Application.Queries.Properties;
 using RealEstate.Domain.Enums;
-
-namespace RealEstate.Application.Services;
+using RealEstate.Domain.Entities;
 
 public sealed class PropertyService : IPropertyService
 {
     private readonly IPropertyRepository _propertyRepository;
-    private readonly IMapper _mapper;
 
-    public PropertyService(IPropertyRepository propertyRepository, IMapper mapper)
+    public PropertyService(IPropertyRepository propertyRepository)
     {
         _propertyRepository = propertyRepository;
-        _mapper = mapper;
     }
 
-    public async Task<PagedResult<PropertyListItemDto>> GetListAsync(
-        PropertyListQuery query,
-        CancellationToken cancellationToken)
+    public async Task<PagedResult<PropertyListItemDto>> GetListAsync(PropertyListQuery query, CancellationToken ct)
     {
-        var type = ParseNullableEnum<PropertyType>(query.Type);
-        var status = ParseNullableEnum<PropertyStatus>(query.Status);
+        var (items, totalCount) = await _propertyRepository.GetListAsync(query, ct);
 
-        var page = await _propertyRepository.FindPagedAsync(
-            query.City,
-            type,
-            status,
-            query.MinPrice,
-            query.MaxPrice,
-            query.Page,
-            query.PageSize,
-            cancellationToken
-        );
-
-        var items = _mapper.Map<List<PropertyListItemDto>>(page.Items);
+        var dtoItems = items.Select(x => new PropertyListItemDto(
+            x.Id, x.Title, x.City, x.Price, x.Type, x.Status, x.MainImageUrl
+        )).ToList();
 
         return new PagedResult<PropertyListItemDto>
         {
-            Items = items,
-            Page = page.Page,
-            PageSize = page.PageSize,
-            TotalCount = page.TotalCount
+            Items = dtoItems,
+            TotalCount = totalCount,
+            Page = query.Page,
+            PageSize = query.PageSize
         };
     }
 
-    public async Task<PropertyDetailsDto?> GetByIdAsync(
-        string id,
-        CancellationToken cancellationToken)
+    public async Task<PropertyDetailsDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        if (!Guid.TryParse(id, out var guid))
-        {
-            return null;
-        }
-
-        var property = await _propertyRepository.FindByIdAsync(guid, cancellationToken);
-
-        return property is null ? null : _mapper.Map<PropertyDetailsDto>(property);
+        var entity = await _propertyRepository.GetByIdAsync(id, ct);
+        return entity is null ? null : ToDetailsDto(entity);
     }
 
-    private static TEnum? ParseNullableEnum<TEnum>(string? value)
-        where TEnum : struct, Enum
+    public async Task<PropertyDetailsDto> CreateAsync(CreatePropertyRequest request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(value))
+        var entity = new Property
         {
-            return null;
-        }
+            Id = Guid.NewGuid(),
+            Title = request.Title,
+            Description = request.Description,
+            Address = request.Address,
+            City = request.City,
+            Price = request.Price,
+            Type = request.Type,
+            Bedrooms = request.Bedrooms,
+            Bathrooms = request.Bathrooms,
+            Area = request.Area,
+            Status = request.Status,
+            MainImageUrl = request.MainImageUrl,
+            BrokerId = request.BrokerId,
+            CreatedAt = DateTime.UtcNow
+        };
 
-        // Allow "active"/"Active", "sold"/"Sold", etc.
-        return Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed)
-            ? parsed
-            : null;
+        await _propertyRepository.CreateAsync(entity, ct);
+        return ToDetailsDto(entity);
     }
+
+    public async Task<PropertyDetailsDto?> UpdateAsync(Guid id, UpdatePropertyRequest request, CancellationToken ct)
+    {
+        var entity = await _propertyRepository.GetByIdAsync(id, ct);
+        if (entity is null) return null;
+
+        entity.Title = request.Title;
+        entity.Description = request.Description;
+        entity.Address = request.Address;
+        entity.City = request.City;
+        entity.Price = request.Price;
+        entity.Type = request.Type;
+        entity.Bedrooms = request.Bedrooms;
+        entity.Bathrooms = request.Bathrooms;
+        entity.Area = request.Area;
+        entity.Status = request.Status;
+        entity.MainImageUrl = request.MainImageUrl;
+        entity.BrokerId = request.BrokerId;
+
+        var updated = await _propertyRepository.UpdateAsync(entity, ct);
+        return updated ? ToDetailsDto(entity) : null;
+    }
+
+    public Task<bool> DeleteAsync(Guid id, CancellationToken ct)
+        => _propertyRepository.DeleteAsync(id, ct);
+
+    private static PropertyDetailsDto ToDetailsDto(Property x) => new(
+        x.Id, x.Title, x.Description, x.Address, x.City, x.Price,
+        x.Type, x.Bedrooms, x.Bathrooms, x.Area, x.Status,
+        x.MainImageUrl, x.BrokerId, x.CreatedAt
+    );
 }
