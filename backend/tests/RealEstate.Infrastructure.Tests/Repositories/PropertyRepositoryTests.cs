@@ -127,7 +127,7 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
             pageSize: 10,
             ct: CancellationToken.None);
 
-        page.Total.Should().Be(1);
+        page.TotalCount.Should().Be(1);
         page.Items.Should().HaveCount(1);
         page.Items[0].Type.Should().Be(PropertyType.Apartment);
     }

@@ -1,6 +1,6 @@
 using RealEstate.Domain.Entities;
 
-namespace RealEstate.Application.Services;
+namespace RealEstate.Application.Interfaces.Repositories;
 
 public interface IBrokerRepository
 {

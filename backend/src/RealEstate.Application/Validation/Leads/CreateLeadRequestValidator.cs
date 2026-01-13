@@ -14,15 +14,15 @@ public sealed class CreateLeadRequestValidator : AbstractValidator<CreateLeadReq
         RuleFor(x => x.Name)
             .NotEmpty()
             .MinimumLength(2)
-            .MaximumLength(100);
+            .MaximumLength(50);
 
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress()
-            .MaximumLength(200);
+            .MaximumLength(100);
 
         RuleFor(x => x.Phone)
-            .MaximumLength(50);
+            .MaximumLength(20);
 
         RuleFor(x => x.Message)
             .MaximumLength(2000);

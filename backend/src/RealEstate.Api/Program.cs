@@ -3,7 +3,8 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using RealEstate.Application.Services;
+using RealEstate.Application.Interfaces.Services;
+using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Infrastructure.Mongo;
 using RealEstate.Infrastructure.Repositories;
 using RealEstate.Infrastructure.Mongo.Indexes;
@@ -13,8 +14,7 @@ using RealEstate.Application.Mapping;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddAutoMapper(typeof(PropertiesMappingProfile).Assembly);
-
+builder.Services.AddAutoMapper(typeof(ApplicationMappingProfile).Assembly);
 
 // FluentValidation registration
 builder.Services.AddFluentValidationAutoValidation();

@@ -1,6 +1,6 @@
 using MongoDB.Driver;
-using RealEstate.Application.DTOs;
-using RealEstate.Application.Services;
+using RealEstate.Application.Common;
+using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 using RealEstate.Infrastructure.Mongo;
@@ -34,7 +34,6 @@ public sealed class PropertyRepository : IPropertyRepository
         return res.DeletedCount == 1;
     }
 
-    // SELECT * FROM properties WHERE brokerId = ? ORDER BY createdAt DESC LIMIT ?
     public async Task<IReadOnlyList<Property>> FindByBrokerIdAsync(Guid brokerId, int limit, CancellationToken ct)
     {
         var items = await _collection.Find(x => x.BrokerId == brokerId)
@@ -75,21 +74,19 @@ public sealed class PropertyRepository : IPropertyRepository
         if (maxPrice is not null)
             filter &= Builders<Property>.Filter.Lte(x => x.Price, maxPrice.Value);
 
-        var total = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
+        var totalCount = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
 
-        // SELECT * FROM properties WHERE ... ORDER BY createdAt DESC OFFSET (page-1)*pageSize LIMIT pageSize
         var items = await _collection.Find(filter)
             .SortByDescending(x => x.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Limit(pageSize)
             .ToListAsync(ct);
 
-        return new PagedResult<Property>
-        {
-            Items = items,
-            Total = total,
-            Page = page,
-            PageSize = pageSize
-        };
+        return new PagedResult<Property>(
+            items,
+            page,
+            pageSize,
+            totalCount
+        );
     }
 }

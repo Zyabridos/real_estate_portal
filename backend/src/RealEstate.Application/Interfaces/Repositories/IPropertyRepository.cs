@@ -1,8 +1,8 @@
-using RealEstate.Application.DTOs;
+using RealEstate.Application.Common;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 
-namespace RealEstate.Application.Services;
+namespace RealEstate.Application.Interfaces.Repositories;
 
 public interface IPropertyRepository
 {
@@ -20,7 +20,8 @@ public interface IPropertyRepository
         decimal? maxPrice,
         int page,
         int pageSize,
-        CancellationToken ct);
+        CancellationToken ct
+    );
 
     Task<IReadOnlyList<Property>> FindByBrokerIdAsync(Guid brokerId, int limit, CancellationToken ct);
 }

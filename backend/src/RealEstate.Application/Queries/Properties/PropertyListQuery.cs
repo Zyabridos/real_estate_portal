@@ -1,4 +1,4 @@
-namespace RealEstate.Application.DTOs.Properties;
+namespace RealEstate.Application.Queries.Properties;
 
 public sealed record PropertyListQuery(
     string? City,
