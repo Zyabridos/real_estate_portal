@@ -13,20 +13,25 @@ using RealEstate.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Controllers
 builder.Services.AddControllers();
 
-// FluentValidation registration
+// FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validation.Leads.CreateLeadRequestValidator).Assembly);
 
-// MongoDB registration
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Mongo options
 builder.Services.AddOptions<MongoOptions>()
     .Bind(builder.Configuration.GetSection(MongoOptions.SectionName))
     .Validate(o => !string.IsNullOrWhiteSpace(o.ConnectionString), "Mongo:ConnectionString is required")
     .Validate(o => !string.IsNullOrWhiteSpace(o.Database), "Mongo:Database is required")
-    .ValidateOnStart(); // => and drop the app if fails
+    .ValidateOnStart();
 
-// Mongo config
+// Mongo conventions
 MongoConventions.Register();
 
 // Mongo DI
@@ -36,7 +41,6 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(opt.ConnectionString);
 });
 
-// Scoped
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var opt = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
@@ -44,24 +48,39 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     return client.GetDatabase(opt.Database);
 });
 
-// Repositories
+// Repos
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
-builder.Services.AddScoped<IBrokerRepository, BrokerRepository>();
-builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+// - not critical, connect when at least properties will work
+// builder.Services.AddScoped<IBrokerRepository, BrokerRepository>();
+// builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 
-// Index initialization (HostedService)
+// Services
+builder.Services.AddScoped<IPropertyService, PropertyService>();
+// - not critical, connect when at least properties will work
+// builder.Services.AddScoped<IBrokerService, BrokerService>();
+// builder.Services.AddScoped<ILeadService, LeadService>();
+
+// Index initialization
 builder.Services.AddHostedService<MongoIndexInitializer>();
 
-// --- App
+// ---- BUILD
 var app = builder.Build();
 
+// Swagger middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.MapControllers();
-// Health check with pinging of MongoDB
+
+// Health - TODO: move to Controllers
 app.MapGet("/api/health", async (IMongoDatabase db, IWebHostEnvironment env) =>
 {
     var command = new BsonDocument("ping", 1);
     await db.RunCommandAsync<BsonDocument>(command);
-    
+
     return Results.Json(new
     {
         status = "ok",
