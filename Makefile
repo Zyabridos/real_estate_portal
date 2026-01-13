@@ -21,7 +21,7 @@ dev-frontend:
 	cd frontend && npm run dev
 
 dev-backend:
-	cd backend/RealEstate.Api && dotnet watch run
+	cd backend/src/RealEstate.Api && dotnet watch run
 
 dev-cms:
 	cd cms && npm run dev
@@ -29,9 +29,27 @@ dev-cms:
 dev:
 	make dev-backend && make dev-frontend && make dev-cms
 
+backend-full-rebuild:
+	cd backend && \
+    dotnet nuget locals all --clear && \
+    rm -rf src/**/bin src/**/obj && \
+    dotnet restore --disable-parallel && \
+    dotnet build && \
+    dotnet run --project src/RealEstate.Api/RealEstate.Api.csproj
+
+frontend-clean-install:
+	cd frontend && \
+	rm -rf node_modules package-lock.json && \
+	npm install
+
 test-back:
 	@echo "$(LIGHT_BLUE)Starting tests for backend...$(RESET)"
 	cd backend && dotnet test RealEstate.slnx
+
+# Pings (temporary??)
+ping-properties:
+	@echo "$(LIGHT_BLUE)Fetching properties list...$(RESET)"
+	 curl -i "http://localhost:5055/api/properties?page=1&pageSize=10"
 
 # Docker
 build:
@@ -90,30 +108,53 @@ sh-frontend:
 # Help
 help:
 	@echo ""
-	@echo "$(LIGHT_BLUE)==============================================$(RESET)"
-	@echo "$(GREEN)      Real Estate Project — Docker Commands$(RESET)"
-	@echo "$(LIGHT_BLUE)==============================================$(RESET)"
+	@echo "$(LIGHT_BLUE)==================================================$(RESET)"
+	@echo "$(GREEN)      Real Estate Project — Available Commands$(RESET)"
+	@echo "$(LIGHT_BLUE)==================================================$(RESET)"
 	@echo ""
-	@echo "$(YELLOW)Main Commands:$(RESET)"
-	@echo "  $(GREEN)build$(RESET)              - Build Docker images"
-	@echo "  $(GREEN)up$(RESET)                 - Start all services (foreground)"
-	@echo "  $(GREEN)up-d$(RESET)               - Start all services in background"
-	@echo "  $(GREEN)down$(RESET)               - Stop and remove all containers"
-	@echo "  $(GREEN)rebuild$(RESET)            - Stop, rebuild and restart all services"
-	@echo "  $(GREEN)restart$(RESET)            - Restart core services (mongodb/backend/frontend)"
-	@echo "  $(GREEN)restart-frontend$(RESET)   - Restart only frontend"
-	@echo "  $(GREEN)restart-backend$(RESET)    - Restart only backend"
-	@echo "  $(GREEN)restart-db$(RESET)         - Restart only mongodb"
-	@echo "  $(GREEN)restart-with-cms$(RESET)   - Restart core services + cms"
+
+	@echo "$(YELLOW)Local development:$(RESET)"
+	@echo "  $(GREEN)dev-backend$(RESET)            - Run backend locally (dotnet watch)"
+	@echo "  $(GREEN)dev-frontend$(RESET)           - Run frontend locally (Vite)"
+	@echo "  $(GREEN)dev-cms$(RESET)                - Run Sanity Studio locally"
+	@echo "  $(GREEN)dev$(RESET)                    - Run backend + frontend + cms"
 	@echo ""
+
+	@echo "$(YELLOW)Reset / bootstrap (local):$(RESET)"
+	@echo "  $(GREEN)backend-full-rebuild$(RESET)   - Full backend reset (NuGet, bin/obj, rebuild & run)"
+	@echo "  $(GREEN)frontend-clean-install$(RESET) - Full frontend reset (node_modules reinstall)"
+	@echo ""
+
+	@echo "$(YELLOW)Testing:$(RESET)"
+	@echo "  $(GREEN)test-back$(RESET)              - Run backend test suite"
+	@echo ""
+
+	@echo "$(YELLOW)Docker commands:$(RESET)"
+	@echo "  $(GREEN)build$(RESET)                  - Build Docker images"
+	@echo "  $(GREEN)up$(RESET)                     - Start all services (foreground)"
+	@echo "  $(GREEN)up-d$(RESET)                   - Start all services (background)"
+	@echo "  $(GREEN)down$(RESET)                   - Stop and remove all containers"
+	@echo "  $(GREEN)rebuild$(RESET)                - Stop, rebuild and restart all services"
+	@echo ""
+
+	@echo "$(YELLOW)Docker service management:$(RESET)"
+	@echo "  $(GREEN)restart$(RESET)                - Restart core services ($(CORE_SERVICES))"
+	@echo "  $(GREEN)restart-backend$(RESET)        - Restart backend container"
+	@echo "  $(GREEN)restart-frontend$(RESET)       - Restart frontend container"
+	@echo "  $(GREEN)restart-db$(RESET)             - Restart mongodb container"
+	@echo "  $(GREEN)restart-with-cms$(RESET)       - Restart core services + cms"
+	@echo ""
+
 	@echo "$(YELLOW)Shell inside containers:$(RESET)"
-	@echo "  $(GREEN)sh-backend$(RESET)         - Shell into backend container"
-	@echo "  $(GREEN)sh-frontend$(RESET)        - Shell into frontend container"
+	@echo "  $(GREEN)sh-backend$(RESET)             - Shell into backend container"
+	@echo "  $(GREEN)sh-frontend$(RESET)            - Shell into frontend container"
 	@echo ""
-	@echo " $(YELLOW)Cleanup:$(RESET)"
-	@echo "  $(GREEN)prune$(RESET)              - Remove Docker unused resources"
-	@echo "  $(GREEN)clean$(RESET)              - Full cleanup ($(RED)danger!$(RESET))"
+
+	@echo "$(YELLOW)Cleanup:$(RESET)"
+	@echo "  $(GREEN)prune$(RESET)                  - Remove unused Docker resources"
+	@echo "  $(GREEN)clean$(RESET)                  - Full Docker cleanup ($(RED)danger!$(RESET))"
 	@echo ""
+
 	@echo "$(PURPLE)Usage:$(RESET)"
 	@echo "  make <command>"
 	@echo ""
