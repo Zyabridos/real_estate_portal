@@ -30,7 +30,7 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
             Type = PropertyType.Apartment,
             Bedrooms = 2,
             Bathrooms = 1,
-            Area = 66.6,
+            Area = 66_6,
             BrokerId = brokerId,
             Status = PropertyStatus.Active,
             CreatedAt = DateTime.UtcNow

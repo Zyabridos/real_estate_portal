@@ -82,11 +82,13 @@ public sealed class PropertyRepository : IPropertyRepository
             .Limit(pageSize)
             .ToListAsync(ct);
 
-        return new PagedResult<Property>(
-            items,
-            page,
-            pageSize,
-            totalCount
-        );
+        return new PagedResult<Property>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+
     }
 }

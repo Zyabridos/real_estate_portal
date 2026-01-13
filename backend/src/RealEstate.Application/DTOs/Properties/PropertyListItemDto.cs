@@ -1,11 +1,13 @@
+using RealEstate.Domain.Enums;
+
 namespace RealEstate.Application.DTOs.Properties;
 
 public sealed record PropertyListItemDto(
-    string Id,
+    Guid Id,
     string Title,
     string City,
     decimal Price,
-    string Type,
-    string Status,
+    PropertyType Type,
+    PropertyStatus Status,
     string? MainImageUrl
 );

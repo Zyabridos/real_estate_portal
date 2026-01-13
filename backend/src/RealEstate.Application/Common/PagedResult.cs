@@ -2,16 +2,8 @@ namespace RealEstate.Application.Common;
 
 public sealed class PagedResult<T>
 {
-    public IReadOnlyList<T> Items { get; }
-    public int Page { get; }
-    public int PageSize { get; }
-    public long TotalCount { get; }
-
-    public PagedResult(IReadOnlyList<T> items, int page, int pageSize, long totalCount)
-    {
-        Items = items;
-        Page = page;
-        PageSize = pageSize;
-        TotalCount = totalCount;
-    }
+    public required IReadOnlyList<T> Items { get; init; }
+    public required long TotalCount { get; init; }
+    public required int Page { get; init; }
+    public required int PageSize { get; init; }
 }

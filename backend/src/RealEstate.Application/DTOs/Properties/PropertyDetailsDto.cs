@@ -1,18 +1,20 @@
+using RealEstate.Domain.Enums;
+
 namespace RealEstate.Application.DTOs.Properties;
 
 public sealed record PropertyDetailsDto(
-    string Id,
+    Guid Id,
     string Title,
-    string Description,
+    string? Description,
     string Address,
     string City,
     decimal Price,
-    string Type,
+    PropertyType Type,
     int Bedrooms,
     int Bathrooms,
     decimal Area,
-    string Status,
+    PropertyStatus Status,
     string? MainImageUrl,
-    string BrokerId,
+    Guid BrokerId,
     DateTime CreatedAt
 );

@@ -39,12 +39,13 @@ public sealed class PropertyService : IPropertyService
 
         var items = _mapper.Map<List<PropertyListItemDto>>(page.Items);
 
-        return new PagedResult<PropertyListItemDto>(
-            items,
-            page.Page,
-            page.PageSize,
-            page.TotalCount
-        );
+        return new PagedResult<PropertyListItemDto>
+        {
+            Items = items,
+            Page = page.Page,
+            PageSize = page.PageSize,
+            TotalCount = page.TotalCount
+        };
     }
 
     public async Task<PropertyDetailsDto?> GetByIdAsync(
