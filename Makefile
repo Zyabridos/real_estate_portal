@@ -1,9 +1,15 @@
 # Project services
 BACKEND   		= backend
 FRONTEND  		= frontend
-DATABASE		= mongo
 CORE_SERVICES   = mongodb backend frontend
 CMS_SERVICE     = cms
+
+# Ports and URLs (single source of truth is scripts/lib/config.sh,
+# but we pass defaults from Makefile too if you want)
+BACKEND_PORT    ?= 5055
+FRONTEND_PORT   ?= 3000
+MONGO_PORT      ?= 27017
+BACKEND_URL     ?= http://localhost:$(BACKEND_PORT)
 
 # ANSI colors & styles
 RESET    = \033[0m
@@ -46,10 +52,17 @@ test-back:
 	@echo "$(LIGHT_BLUE)Starting tests for backend...$(RESET)"
 	cd backend && dotnet test RealEstate.slnx
 
-# Pings (temporary??)
+# Pings
+ping-api:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_api.sh
+
 ping-properties:
-	@echo "$(LIGHT_BLUE)Fetching properties list...$(RESET)"
-	 curl -i "http://localhost:5055/api/properties?page=1&pageSize=10"
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_properties.sh
+
+ping-property:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_property_by_id.sh "$(ID)"
+
+smoke-api: ping-api ping-properties
 
 # Docker
 build:
@@ -92,7 +105,7 @@ rebuild:
 	@echo "$(PURPLE)Rebuilding Docker services...$(RESET)"
 	docker compose down
 	docker compose build
-	docker compose up
+	docker compose up -d
 
 # Docker Shell
 sh-backend:
@@ -103,58 +116,5 @@ sh-frontend:
 	@echo "$(GREEN)Opening shell in frontend...$(RESET)"
 	docker compose exec $(FRONTEND) sh
 
-
-
-# Help
 help:
-	@echo ""
-	@echo "$(LIGHT_BLUE)==================================================$(RESET)"
-	@echo "$(GREEN)      Real Estate Project — Available Commands$(RESET)"
-	@echo "$(LIGHT_BLUE)==================================================$(RESET)"
-	@echo ""
-
-	@echo "$(YELLOW)Local development:$(RESET)"
-	@echo "  $(GREEN)dev-backend$(RESET)            - Run backend locally (dotnet watch)"
-	@echo "  $(GREEN)dev-frontend$(RESET)           - Run frontend locally (Vite)"
-	@echo "  $(GREEN)dev-cms$(RESET)                - Run Sanity Studio locally"
-	@echo "  $(GREEN)dev$(RESET)                    - Run backend + frontend + cms"
-	@echo ""
-
-	@echo "$(YELLOW)Reset / bootstrap (local):$(RESET)"
-	@echo "  $(GREEN)backend-full-rebuild$(RESET)   - Full backend reset (NuGet, bin/obj, rebuild & run)"
-	@echo "  $(GREEN)frontend-clean-install$(RESET) - Full frontend reset (node_modules reinstall)"
-	@echo ""
-
-	@echo "$(YELLOW)Testing:$(RESET)"
-	@echo "  $(GREEN)test-back$(RESET)              - Run backend test suite"
-	@echo ""
-
-	@echo "$(YELLOW)Docker commands:$(RESET)"
-	@echo "  $(GREEN)build$(RESET)                  - Build Docker images"
-	@echo "  $(GREEN)up$(RESET)                     - Start all services (foreground)"
-	@echo "  $(GREEN)up-d$(RESET)                   - Start all services (background)"
-	@echo "  $(GREEN)down$(RESET)                   - Stop and remove all containers"
-	@echo "  $(GREEN)rebuild$(RESET)                - Stop, rebuild and restart all services"
-	@echo ""
-
-	@echo "$(YELLOW)Docker service management:$(RESET)"
-	@echo "  $(GREEN)restart$(RESET)                - Restart core services ($(CORE_SERVICES))"
-	@echo "  $(GREEN)restart-backend$(RESET)        - Restart backend container"
-	@echo "  $(GREEN)restart-frontend$(RESET)       - Restart frontend container"
-	@echo "  $(GREEN)restart-db$(RESET)             - Restart mongodb container"
-	@echo "  $(GREEN)restart-with-cms$(RESET)       - Restart core services + cms"
-	@echo ""
-
-	@echo "$(YELLOW)Shell inside containers:$(RESET)"
-	@echo "  $(GREEN)sh-backend$(RESET)             - Shell into backend container"
-	@echo "  $(GREEN)sh-frontend$(RESET)            - Shell into frontend container"
-	@echo ""
-
-	@echo "$(YELLOW)Cleanup:$(RESET)"
-	@echo "  $(GREEN)prune$(RESET)                  - Remove unused Docker resources"
-	@echo "  $(GREEN)clean$(RESET)                  - Full Docker cleanup ($(RED)danger!$(RESET))"
-	@echo ""
-
-	@echo "$(PURPLE)Usage:$(RESET)"
-	@echo "  make <command>"
-	@echo ""
+	chmod +x scripts/bash/help.sh && @./scripts/bash/help.sh
