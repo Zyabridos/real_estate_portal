@@ -1,5 +1,4 @@
 using FluentValidation;
-using RealEstate.Application.DTOs.Properties;
 using RealEstate.Application.Queries.Properties;
 
 namespace RealEstate.Application.Validation.Properties;
