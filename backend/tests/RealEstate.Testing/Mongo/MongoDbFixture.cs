@@ -11,6 +11,9 @@ public sealed class MongoDbFixture : IAsyncLifetime
     public IMongoClient Client { get; private set; } = default!;
     public IMongoDatabase Database { get; private set; } = default!;
 
+    public string ConnectionString { get; private set; } = default!;
+    public string DatabaseName { get; private set; } = default!;
+
     public async Task InitializeAsync()
     {
         _container = new MongoDbBuilder()
@@ -19,8 +22,11 @@ public sealed class MongoDbFixture : IAsyncLifetime
 
         await _container.StartAsync();
 
-        Client = new MongoClient(_container.GetConnectionString());
-        Database = Client.GetDatabase($"realestate_api_tests_{Guid.NewGuid():N}");
+        ConnectionString = _container.GetConnectionString();
+        DatabaseName = $"realestate_api_tests_{Guid.NewGuid():N}";
+
+        Client = new MongoClient(ConnectionString);
+        Database = Client.GetDatabase(DatabaseName);
     }
 
     public async Task DisposeAsync()

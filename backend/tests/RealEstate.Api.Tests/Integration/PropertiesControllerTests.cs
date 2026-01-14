@@ -21,7 +21,12 @@ public sealed class PropertiesControllerTests : MongoDbTestBase
 
     public PropertiesControllerTests(MongoDbFixture fixture) : base(fixture)
     {
-        var factory = new CustomWebApplicationFactory(Fixture.Database);
+        var factory = new CustomWebApplicationFactory(
+            fixture.Database,
+            fixture.ConnectionString,
+            fixture.DatabaseName
+        );
+
         _client = factory.CreateClient();
 
         _properties = Fixture.Database.GetCollection<Property>("properties");
