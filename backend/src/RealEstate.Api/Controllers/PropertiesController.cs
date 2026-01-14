@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
+using RealEstate.Api.Swagger.Examples.Properties;
 using RealEstate.Application.Common;
 using RealEstate.Application.DTOs.Properties;
 using RealEstate.Application.Interfaces.Services;
@@ -21,6 +23,7 @@ public sealed class PropertiesController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<PropertyListItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[SwaggerResponseExample(StatusCodes.Status200OK, typeof(PropertyListResponseExample))]
     public async Task<ActionResult<PagedResult<PropertyListItemDto>>> GetList(
         [FromQuery] PropertyListQuery query,
         CancellationToken ct)
@@ -32,29 +35,25 @@ public sealed class PropertiesController : ControllerBase
 
     // GET /api/properties/{id}
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(PropertyDetailsDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PropertyDetailsDto>> GetById(string id, CancellationToken ct)
+	[ProducesResponseType(typeof(PropertyDetailsDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+	[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+	[SwaggerResponseExample(StatusCodes.Status200OK, typeof(PropertyDetailsResponseExample))]
+	public async Task<ActionResult<PropertyDetailsDto>> GetById(string id, CancellationToken ct)
 	{
-    if (!Guid.TryParse(id, out var guid))
-    {
-        return BadRequest(Problem( 
-			title: "Invalid id", 
-			detail: "Property id must be a valid GUID.", 
-			statusCode: StatusCodes.Status400BadRequest));
-    }
+    	if (!Guid.TryParse(id, out var guid))
+    	{ 
+			return NotFound(Problem(
+    		title: "Not found",
+    		detail: $"Property '{id}' was not found.",
+    		statusCode: StatusCodes.Status404NotFound));
+		}
 
-    	var dto = await _service.GetByIdAsync(guid, ct);
+    var dto = await _service.GetByIdAsync(guid, ct);
+    if (dto is null) return NotFound();
 
-    	if (dto is null)
-    	{
-        	return NotFound();
-    	}
-
-    	return Ok(dto);
-	}
-
+    return Ok(dto);
+}
 
     // POST /api/properties
     [HttpPost]

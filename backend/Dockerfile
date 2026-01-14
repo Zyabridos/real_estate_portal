@@ -3,7 +3,7 @@ WORKDIR /src
 
 # COPY . ./ often break restore, therefore we copy exactly only solutions we need:
 COPY RealEstate.slnx ./
-COPY src/RealEstate.Api ./src//RealEstate.Api
+COPY src/RealEstate.Api ./src/RealEstate.Api
 
 # Copy csproj files (more control over what is going on in container)
 COPY src/RealEstate.Api/RealEstate.Api.csproj ./src/RealEstate.Api/
@@ -28,3 +28,4 @@ ENV ASPNETCORE_URLS=http://0.0.0.0:5000
 EXPOSE 5000
 
 CMD ["dotnet", "RealEstate.Api.dll"]
+

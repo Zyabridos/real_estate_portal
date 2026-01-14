@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Interfaces.Services;
 using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Infrastructure.Mongo;
@@ -20,9 +21,18 @@ builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validation.Leads.CreateLeadRequestValidator).Assembly);
 
+//Mapper
+builder.Services.AddAutoMapper(typeof(PropertyProfile).Assembly);
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+	c.ExampleFilters(); // turn on filters
+    // Optional but nice to have: show full type names less often, keep schemas clean
+    c.SupportNonNullableReferenceTypes();
+});
+builder.Services.AddSwaggerExamplesFromAssemblies(typeof(Program).Assembly);
 
 // Mongo options
 builder.Services.AddOptions<MongoOptions>()

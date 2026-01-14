@@ -9,5 +9,6 @@ public sealed record PropertyListItemDto(
     decimal Price,
     PropertyType Type,
     PropertyStatus Status,
-    string? MainImageUrl
+    string? MainImageUrl,
+    DateTime CreatedAt
 );
