@@ -1,0 +1,33 @@
+<Project>
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Application -->
+        <PackageVersion Include="AutoMapper" Version="12.0.1" />
+        <PackageVersion Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+
+        <PackageVersion Include="FluentValidation" Version="11.3.1" />
+        <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.3.1" />
+        <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
+
+        <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+        <PackageVersion Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
+
+        <!-- Infrastructure / hosting abstractions -->
+        <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.1" />
+
+        <!-- Mongo / Testcontainers -->
+        <PackageVersion Include="MongoDB.Driver" Version="3.5.2" />
+        <PackageVersion Include="Testcontainers.MongoDb" Version="4.10.0" />
+
+        <!-- Test -->
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+        <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+        <PackageVersion Include="FluentAssertions" Version="8.8.0" />
+        <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.1" />
+        <PackageVersion Include="xunit" Version="2.9.3" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    </ItemGroup>
+</Project>
