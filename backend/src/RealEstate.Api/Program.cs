@@ -16,6 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(PropertiesMappingProfile).Assembly);
 
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
