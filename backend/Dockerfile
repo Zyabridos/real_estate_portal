@@ -4,6 +4,7 @@ WORKDIR /src
 # COPY . ./ often break restore, therefore we copy exactly only solutions we need:
 COPY RealEstate.slnx ./
 COPY src/RealEstate.Api ./src/RealEstate.Api
+Copy ./Directory.Packages.props ./Directory.Packages.props
 
 # Copy csproj files (more control over what is going on in container)
 COPY src/RealEstate.Api/RealEstate.Api.csproj ./src/RealEstate.Api/
