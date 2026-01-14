@@ -6,6 +6,7 @@
     <Project Path="src/RealEstate.Infrastructure/RealEstate.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/RealEstate.Api.Tests/RealEstate.Api.Tests.csproj" />
     <Project Path="tests/RealEstate.Infrastructure.Tests/RealEstate.Infrastructure.Tests.csproj" />
     <Project Path="tests/RealEstate.Validation.Tests/RealEstate.Validation.Tests.csproj" />
   </Folder>
