@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
-namespace RealEstate.Api.Tests.Fixtures;
+namespace RealEstate.Testing.Fixtures;
 
 public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
@@ -26,7 +26,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
             foreach (var d in mongoDbDescriptors)
                 services.Remove(d);
 
-            // Remove IMongoClient too (optional but clean)
+            // Remove IMongoClient too (not necessary, but clean)
             var mongoClientDescriptors = services
                 .Where(d => d.ServiceType == typeof(IMongoClient))
                 .ToList();

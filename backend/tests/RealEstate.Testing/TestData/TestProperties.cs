@@ -1,7 +1,7 @@
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 
-namespace RealEstate.Api.Tests.TestData;
+namespace RealEstate.Testing.TestData;
 
 public static class TestProperties
 {

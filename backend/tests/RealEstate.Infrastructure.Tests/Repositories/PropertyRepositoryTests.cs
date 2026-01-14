@@ -3,7 +3,7 @@ using RealEstate.Application.Queries.Properties;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 using RealEstate.Infrastructure.Repositories;
-using RealEstate.Infrastructure.Tests.Fixtures;
+using RealEstate.Testing.Mongo;
 using Xunit;
 
 namespace RealEstate.Infrastructure.Tests.Repositories;

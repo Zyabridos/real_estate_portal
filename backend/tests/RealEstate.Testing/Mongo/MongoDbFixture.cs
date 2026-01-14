@@ -2,7 +2,7 @@ using MongoDB.Driver;
 using Testcontainers.MongoDb;
 using Xunit;
 
-namespace RealEstate.Api.Tests.Fixtures;
+namespace RealEstate.Testing.Mongo;
 
 public sealed class MongoDbFixture : IAsyncLifetime
 {
