@@ -15,7 +15,7 @@ public sealed class Property
     public PropertyType Type { get; set; }
     public int Bedrooms { get; set; }
     public int Bathrooms { get; set; }
-    public double Area { get; set; }
+    public decimal Area { get; set; }
 
     public Guid BrokerId { get; set; }
     public PropertyStatus Status { get; set; }

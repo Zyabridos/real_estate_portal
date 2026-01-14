@@ -1,6 +1,7 @@
 using RealEstate.Infrastructure.Mongo.Conventions;
+using Xunit;
 
-namespace RealEstate.Infrastructure.Tests.Fixtures;
+namespace RealEstate.Testing.Mongo;
 
 public abstract class MongoDbTestBase : IAsyncLifetime
 {

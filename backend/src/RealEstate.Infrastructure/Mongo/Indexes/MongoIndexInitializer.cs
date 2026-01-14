@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -8,12 +9,12 @@ namespace RealEstate.Infrastructure.Mongo.Indexes;
 
 public sealed class MongoIndexInitializer : IHostedService
 {
-    private readonly IMongoDatabase _db;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MongoIndexInitializer> _logger;
 
-    public MongoIndexInitializer(IMongoDatabase db, ILogger<MongoIndexInitializer> logger)
+    public MongoIndexInitializer(IServiceScopeFactory scopeFactory, ILogger<MongoIndexInitializer> logger)
     {
-        _db = db;
+        _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
@@ -21,8 +22,11 @@ public sealed class MongoIndexInitializer : IHostedService
     {
         _logger.LogInformation("Ensuring MongoDB indexes...");
 
-        var properties = _db.GetCollection<Property>(MongoCollectionNames.Properties);
-        var leads = _db.GetCollection<Lead>(MongoCollectionNames.Leads);
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+
+        var properties = db.GetCollection<Property>(MongoCollectionNames.Properties);
+        var leads = db.GetCollection<Lead>(MongoCollectionNames.Leads);
 
         // Properties: brokerId, city, type, status + compound city+type
         await properties.Indexes.CreateManyAsync(new[]

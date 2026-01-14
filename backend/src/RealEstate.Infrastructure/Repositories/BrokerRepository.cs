@@ -1,5 +1,5 @@
 using MongoDB.Driver;
-using RealEstate.Application.Services;
+using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Domain.Entities;
 using RealEstate.Infrastructure.Mongo;
 

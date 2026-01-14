@@ -1,7 +1,7 @@
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 
-namespace RealEstate.Application.Services;
+namespace RealEstate.Application.Interfaces.Repositories;
 
 public interface ILeadRepository
 {

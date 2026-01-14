@@ -71,10 +71,19 @@ make restart # Restart services
 make logs    # View service logs
 ```
 
-----------
+## Testing
+Run all backend tests:
+```bash
+make test-back
+```
+Or directly:
+```bash
+dotnet test backend/RealEstate.slnx
+```
 
 ## Notes on Configuration
-
--   Frontend API requests are routed through a Vite development proxy (`/api → backend`).
--   Backend services communicate with MongoDB via the Docker network.
--   CMS is optional and can be started separately using Docker profiles.
+- Frontend API calls are proxied via Vite (/api → backend)
+- Backend communicates with MongoDB via Docker network
+- MongoDB runs only once per test suite (Testcontainers)
+- CMS is optional and started via Docker profiles
+- Swagger UI is available in development mode

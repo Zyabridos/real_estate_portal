@@ -1,8 +1,9 @@
 using FluentAssertions;
+using RealEstate.Application.Queries.Properties;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 using RealEstate.Infrastructure.Repositories;
-using RealEstate.Infrastructure.Tests.Fixtures;
+using RealEstate.Testing.Mongo;
 using Xunit;
 
 namespace RealEstate.Infrastructure.Tests.Repositories;
@@ -10,7 +11,9 @@ namespace RealEstate.Infrastructure.Tests.Repositories;
 [Collection("MongoDb")]
 public sealed class PropertyRepositoryTests : MongoDbTestBase
 {
-    public PropertyRepositoryTests(MongoDbFixture fixture) : base(fixture) { }
+    public PropertyRepositoryTests(MongoDbFixture fixture) : base(fixture)
+    {
+    }
 
     [Fact]
     public async Task Create_then_GetById_returns_entity()
@@ -30,7 +33,7 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
             Type = PropertyType.Apartment,
             Bedrooms = 2,
             Bathrooms = 1,
-            Area = 66.6,
+            Area = 66_6,
             BrokerId = brokerId,
             Status = PropertyStatus.Active,
             CreatedAt = DateTime.UtcNow
@@ -38,7 +41,7 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
 
         await repo.CreateAsync(entity, CancellationToken.None);
 
-        var found = await repo.FindByIdAsync(id, CancellationToken.None);
+        var found = await repo.GetByIdAsync(id, CancellationToken.None);
 
         found.Should().NotBeNull();
         found!.Id.Should().Be(id);
@@ -73,12 +76,12 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
         var updated = await repo.UpdateAsync(entity, CancellationToken.None);
         updated.Should().BeTrue();
 
-        var found = await repo.FindByIdAsync(entity.Id, CancellationToken.None);
+        var found = await repo.GetByIdAsync(entity.Id, CancellationToken.None);
         found!.Title.Should().Be("New title");
     }
 
     [Fact]
-    public async Task FindPaged_filters_by_city_and_type()
+    public async Task GetList_filters_by_city_and_type()
     {
         var repo = new PropertyRepository(Fixture.Database);
 
@@ -95,7 +98,7 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
             Type = PropertyType.Apartment,
             Bedrooms = 1,
             Bathrooms = 1,
-            Area = 40,
+            Area = 40m,
             BrokerId = broker,
             Status = PropertyStatus.Active,
             CreatedAt = now.AddMinutes(-1)
@@ -111,24 +114,27 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
             Type = PropertyType.House,
             Bedrooms = 3,
             Bathrooms = 2,
-            Area = 120,
+            Area = 120m,
             BrokerId = broker,
             Status = PropertyStatus.Active,
             CreatedAt = now.AddMinutes(-2)
         }, CancellationToken.None);
 
-        var page = await repo.FindPagedAsync(
-            city: "Trondheim",
-            type: PropertyType.Apartment,
-            status: null,
-            minPrice: null,
-            maxPrice: null,
-            page: 1,
-            pageSize: 10,
-            ct: CancellationToken.None);
+        var query = new PropertyListQuery(
+            City: "Trondheim",
+            Type: "Apartment",
+            Status: null,
+            MinPrice: null,
+            MaxPrice: null,
+            Page: 1,
+            PageSize: 10,
+            Sort: "createdAtDesc"
+        );
 
-        page.Total.Should().Be(1);
-        page.Items.Should().HaveCount(1);
-        page.Items[0].Type.Should().Be(PropertyType.Apartment);
+        var (items, total) = await repo.GetListAsync(query, CancellationToken.None);
+
+        total.Should().Be(1);
+        items.Should().HaveCount(1);
+        items[0].Type.Should().Be(PropertyType.Apartment);
     }
 }

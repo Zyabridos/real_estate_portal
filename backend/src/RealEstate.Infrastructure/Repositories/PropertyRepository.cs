@@ -1,6 +1,6 @@
 using MongoDB.Driver;
-using RealEstate.Application.DTOs;
-using RealEstate.Application.Services;
+using RealEstate.Application.Interfaces.Repositories;
+using RealEstate.Application.Queries.Properties;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 using RealEstate.Infrastructure.Mongo;
@@ -16,7 +16,7 @@ public sealed class PropertyRepository : IPropertyRepository
         _collection = db.GetCollection<Property>(MongoCollectionNames.Properties);
     }
 
-    public Task<Property?> FindByIdAsync(Guid id, CancellationToken ct) =>
+    public Task<Property?> GetByIdAsync(Guid id, CancellationToken ct) =>
         _collection.Find(x => x.Id == id).FirstOrDefaultAsync(ct);
 
     public Task CreateAsync(Property entity, CancellationToken ct) =>
@@ -24,8 +24,12 @@ public sealed class PropertyRepository : IPropertyRepository
 
     public async Task<bool> UpdateAsync(Property entity, CancellationToken ct)
     {
-        var res = await _collection.ReplaceOneAsync(x => x.Id == entity.Id, entity, cancellationToken: ct);
-        return res.MatchedCount == 1 && res.ModifiedCount == 1;
+        var res = await _collection.ReplaceOneAsync(
+            x => x.Id == entity.Id,
+            entity,
+            cancellationToken: ct);
+
+        return res.MatchedCount == 1;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
@@ -34,7 +38,6 @@ public sealed class PropertyRepository : IPropertyRepository
         return res.DeletedCount == 1;
     }
 
-    // SELECT * FROM properties WHERE brokerId = ? ORDER BY createdAt DESC LIMIT ?
     public async Task<IReadOnlyList<Property>> FindByBrokerIdAsync(Guid brokerId, int limit, CancellationToken ct)
     {
         var items = await _collection.Find(x => x.BrokerId == brokerId)
@@ -45,51 +48,53 @@ public sealed class PropertyRepository : IPropertyRepository
         return items;
     }
 
-    public async Task<PagedResult<Property>> FindPagedAsync(
-        string? city,
-        PropertyType? type,
-        PropertyStatus? status,
-        decimal? minPrice,
-        decimal? maxPrice,
-        int page,
-        int pageSize,
+    public async Task<(IReadOnlyList<Property> Items, long Total)> GetListAsync(
+        PropertyListQuery query,
         CancellationToken ct)
     {
-        page = page <= 0 ? 1 : page;
-        pageSize = pageSize <= 0 ? 20 : pageSize;
+        var builder = Builders<Property>.Filter;
+        var filters = new List<FilterDefinition<Property>>();
 
-        var filter = Builders<Property>.Filter.Empty;
+        if (!string.IsNullOrWhiteSpace(query.City))
+            filters.Add(builder.Eq(x => x.City, query.City));
 
-        if (!string.IsNullOrWhiteSpace(city))
-            filter &= Builders<Property>.Filter.Eq(x => x.City, city);
+        if (!string.IsNullOrWhiteSpace(query.Type) &&
+            Enum.TryParse<PropertyType>(query.Type, true, out var type))
+            filters.Add(builder.Eq(x => x.Type, type));
 
-        if (type is not null)
-            filter &= Builders<Property>.Filter.Eq(x => x.Type, type.Value);
+        if (!string.IsNullOrWhiteSpace(query.Status) &&
+            Enum.TryParse<PropertyStatus>(query.Status, true, out var status))
+            filters.Add(builder.Eq(x => x.Status, status));
 
-        if (status is not null)
-            filter &= Builders<Property>.Filter.Eq(x => x.Status, status.Value);
+        if (query.MinPrice.HasValue)
+            filters.Add(builder.Gte(x => x.Price, query.MinPrice.Value));
 
-        if (minPrice is not null)
-            filter &= Builders<Property>.Filter.Gte(x => x.Price, minPrice.Value);
+        if (query.MaxPrice.HasValue)
+            filters.Add(builder.Lte(x => x.Price, query.MaxPrice.Value));
 
-        if (maxPrice is not null)
-            filter &= Builders<Property>.Filter.Lte(x => x.Price, maxPrice.Value);
+        var filter = filters.Count == 0 ? builder.Empty : builder.And(filters);
+
+        var sort = query.Sort?.ToLowerInvariant() switch
+        {
+            "priceasc" => Builders<Property>.Sort.Ascending(x => x.Price),
+            "pricedesc" => Builders<Property>.Sort.Descending(x => x.Price),
+            "createdatdesc" => Builders<Property>.Sort.Descending(x => x.CreatedAt),
+            null or "" => Builders<Property>.Sort.Descending(x => x.CreatedAt),
+            _ => Builders<Property>.Sort.Descending(x => x.CreatedAt)
+        };
+
+        var page = query.Page < 1 ? 1 : query.Page;
+        var pageSize = query.PageSize < 1 ? 20 : query.PageSize;
+        var skip = (page - 1) * pageSize;
 
         var total = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
 
-        // SELECT * FROM properties WHERE ... ORDER BY createdAt DESC OFFSET (page-1)*pageSize LIMIT pageSize
         var items = await _collection.Find(filter)
-            .SortByDescending(x => x.CreatedAt)
-            .Skip((page - 1) * pageSize)
+            .Sort(sort)
+            .Skip(skip)
             .Limit(pageSize)
             .ToListAsync(ct);
 
-        return new PagedResult<Property>
-        {
-            Items = items,
-            Total = total,
-            Page = page,
-            PageSize = pageSize
-        };
+        return (items, total);
     }
 }
