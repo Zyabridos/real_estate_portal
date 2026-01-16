@@ -1,13 +1,11 @@
 namespace RealEstate.Application.DTOs.Brokers;
 
-public sealed record BrokerDetailsDto(
-    Guid Id,
+// It is server`s job to assign BrokerId and CreatedAt
+public sealed record CreateBrokerRequest(
     Guid AgencyId,
     string FirstName,
     string LastName,
     string Email,
     string PhoneNumber,
-    string? PhotoUrl,
-    DateTime CreatedAt,
-    DateTime UpdatedAt
+    string? PhotoUrl = null
 );

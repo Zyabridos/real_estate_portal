@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Interfaces.Services;
 using RealEstate.Application.Interfaces.Repositories;
+using RealEstate.Application.Services;
 using RealEstate.Infrastructure.Mongo;
 using RealEstate.Infrastructure.Repositories;
 using RealEstate.Infrastructure.Mongo.Indexes;
@@ -62,13 +63,13 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
 // Repos
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 // - not critical, connect when at least properties will work
-// builder.Services.AddScoped<IBrokerRepository, BrokerRepository>();
+builder.Services.AddScoped<IBrokerRepository, BrokerRepository>();
 // builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 
 // Services
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 // - not critical, connect when at least properties will work
-// builder.Services.AddScoped<IBrokerService, BrokerService>();
+builder.Services.AddScoped<IBrokerService, BrokerService>();
 // builder.Services.AddScoped<ILeadService, LeadService>();
 
 // Index initialization

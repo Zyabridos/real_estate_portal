@@ -1,0 +1,19 @@
+using FluentValidation;
+using RealEstate.Application.Queries.Brokers;
+
+namespace RealEstate.Application.Validation.Brokers;
+
+public sealed class BrokerListQueryValidator : AbstractValidator<BrokerListQuery>
+{
+    private const int MaxPageSize = 100; // protect API
+
+    public BrokerListQueryValidator()
+    {
+        RuleFor(x => x.Page)
+            .GreaterThanOrEqualTo(1);
+
+        RuleFor(x => x.PageSize)
+            .GreaterThanOrEqualTo(1)
+            .LessThanOrEqualTo(MaxPageSize);
+    }
+}

@@ -114,6 +114,7 @@ public sealed class PropertyListQueryValidatorTests
             City: null,
             Type: null,
             Status: null,
+            BrokerId: null,
             MinPrice: null,
             MaxPrice: null,
             Page: 1,

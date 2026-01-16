@@ -71,7 +71,12 @@ public sealed class PropertyRepository : IPropertyRepository
 
         if (query.MaxPrice.HasValue)
             filters.Add(builder.Lte(x => x.Price, query.MaxPrice.Value));
-
+        
+        if (query.BrokerId.HasValue)
+        {
+            filters.Add(builder.Eq(x => x.BrokerId, query.BrokerId.Value));
+        }
+        
         var filter = filters.Count == 0 ? builder.Empty : builder.And(filters);
 
         var sort = query.Sort?.ToLowerInvariant() switch

@@ -1,6 +1,7 @@
 namespace RealEstate.Application.Queries.Properties;
 
 public sealed record PropertyListQuery(
+    Guid? BrokerId,
     string? City,
     string? Type,
     string? Status,

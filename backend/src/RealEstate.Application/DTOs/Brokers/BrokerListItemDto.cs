@@ -1,10 +1,14 @@
+using RealEstate.Domain.Enums.Brokers;
+
 namespace RealEstate.Application.DTOs.Brokers;
 
 public sealed record BrokerListItemDto(
-    string Id,
+    Guid Id,
     string FirstName,
     string LastName,
     string Email,
-    string Phone,
-    string? PhotoUrl
+    string PhoneNumber,
+    string? PhotoUrl,
+    DateTime CreatedAt,
+    DateTime UpdatedAt
 );

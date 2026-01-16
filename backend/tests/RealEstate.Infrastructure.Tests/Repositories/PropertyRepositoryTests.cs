@@ -126,6 +126,7 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
             Status: null,
             MinPrice: null,
             MaxPrice: null,
+            BrokerId: null,
             Page: 1,
             PageSize: 10,
             Sort: "createdAtDesc"

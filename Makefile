@@ -62,7 +62,13 @@ ping-properties:
 ping-property:
 	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_property_by_id.sh "$(ID)"
 
-smoke-api: ping-api ping-properties
+ping-brokers:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_brokers.sh
+
+ping-broker:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_broker_by_id.sh "$(ID)"
+
+smoke-api: ping-api ping-properties ping-brokers
 
 # Docker
 build:

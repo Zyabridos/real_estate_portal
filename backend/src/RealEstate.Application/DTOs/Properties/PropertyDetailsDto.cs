@@ -17,4 +17,5 @@ public sealed record PropertyDetailsDto(
     string? MainImageUrl,
     Guid BrokerId,
     DateTime CreatedAt
+    // TODO: add UpdatedAt
 );
