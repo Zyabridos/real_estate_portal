@@ -30,11 +30,16 @@ public sealed class BrokerRepository : IBrokerRepository
             .ThenBy(x => x.FirstName)
             .ToListAsync(ct);
 
-    public Task CreateAsync(Broker entity, CancellationToken ct) =>
-        _collection.InsertOneAsync(entity, cancellationToken: ct);
+    public Task CreateAsync(Broker entity, CancellationToken ct)
+    {
+        NormalizeForPersistence(entity);
+        return _collection.InsertOneAsync(entity, cancellationToken: ct);
+    }
 
     public async Task<bool> UpdateAsync(Broker entity, CancellationToken ct)
     {
+        NormalizeForPersistence(entity);
+
         var res = await _collection.ReplaceOneAsync(
             x => x.Id == entity.Id,
             entity,
@@ -58,7 +63,6 @@ public sealed class BrokerRepository : IBrokerRepository
         var filters = new List<FilterDefinition<Broker>>();
 
         // Equality filters
-
         if (query.BrokerId.HasValue)
             filters.Add(builder.Eq(x => x.Id, query.BrokerId.Value));
 
@@ -83,26 +87,20 @@ public sealed class BrokerRepository : IBrokerRepository
             filters.Add(builder.Eq(x => x.PhoneNumber, phone));
         }
 
-        // return an empty list if no results were found
         var filter = filters.Count == 0 ? builder.Empty : builder.And(filters);
 
-        // Sorting (SortBy and SortDirection)
-
+        // Sorting
         var sortBy = query.SortBy ?? SortBy.CreatedAt;
         var direction = query.SortDirection ?? DomainSortDirection.Desc;
-
         var sort = BuildSort(sortBy, direction);
 
         // Paging
-
         var page = query.Page < 1 ? 1 : query.Page;
 
         var pageSize = query.PageSize < 1 ? DefaultPageSize : query.PageSize;
         if (pageSize > MaxPageSize) pageSize = MaxPageSize;
 
         var skip = (page - 1) * pageSize;
-
-        // Query
 
         var totalCount = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
 
@@ -134,6 +132,12 @@ public sealed class BrokerRepository : IBrokerRepository
             SortBy.CreatedAt   => Apply(x => x.CreatedAt),
             _                  => Apply(x => x.CreatedAt)
         };
+    }
+
+    private static void NormalizeForPersistence(Broker entity)
+    {
+        entity.Email = NormalizeEmail(entity.Email);
+        entity.PhoneNumber = NormalizePhone(entity.PhoneNumber);
     }
 
     private static string NormalizeEmail(string email) =>

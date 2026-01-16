@@ -42,7 +42,7 @@ public sealed class BrokerRepositoryTests : MongoDbTestBase
         found.FirstName.Should().Be("Ola");
         found.LastName.Should().Be("Nordmann");
         found.Email.Should().Be("ola.nordmann@realestate.no");
-        found.PhoneNumber.Should().Be("+47 111 11 111");
+        found.PhoneNumber.Should().Be("+4711111111");
     }
 
     [Fact]
@@ -184,6 +184,6 @@ public sealed class BrokerRepositoryTests : MongoDbTestBase
         items.Should().HaveCount(1);
         items[0].Id.Should().Be(matching.Id);
         items[0].Email.Should().Be("kari.hansen@realestate.no");
-        items[0].PhoneNumber.Should().Be("+47 999 99 999");
+        items[0].PhoneNumber.Should().Be("+4799999999");
     }
 }
