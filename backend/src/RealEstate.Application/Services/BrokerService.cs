@@ -47,10 +47,16 @@ public sealed class BrokerService : IBrokerService
         entity.Id = Guid.NewGuid();
         entity.CreatedAt = DateTime.UtcNow;
 
-        await _brokerRepository.CreateAsync(entity, ct);
+        entity.Email = entity.Email.Trim().ToLowerInvariant();
+        entity.PhoneNumber = new string(entity.PhoneNumber
+            .Trim()
+            .Where(c => char.IsDigit(c) || c == '+')
+            .ToArray());
 
+        await _brokerRepository.CreateAsync(entity, ct);
         return _mapper.Map<BrokerDetailsDto>(entity);
     }
+
 
     public async Task<BrokerDetailsDto?> UpdateAsync(Guid id, UpdateBrokerRequest request, CancellationToken ct)
     {
@@ -58,6 +64,9 @@ public sealed class BrokerService : IBrokerService
         if (entity is null) return null;
         
         _mapper.Map(request, entity);
+
+        entity.Email = entity.Email.Trim().ToLowerInvariant();
+        entity.PhoneNumber = new string(entity.PhoneNumber.Trim().Where(c => char.IsDigit(c) || c == '+').ToArray());
 
         var updated = await _brokerRepository.UpdateAsync(entity, ct);
 

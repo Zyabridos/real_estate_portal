@@ -73,7 +73,7 @@ public sealed class BrokersController : ControllerBase
 
         return CreatedAtAction(
             nameof(GetById),
-            new { id = created.BrokerId.ToString() },
+            new { id = created.Id.ToString() },
             created);
     }
 

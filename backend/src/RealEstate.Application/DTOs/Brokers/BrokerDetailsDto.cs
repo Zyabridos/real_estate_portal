@@ -1,12 +1,13 @@
 namespace RealEstate.Application.DTOs.Brokers;
 
 public sealed record BrokerDetailsDto(
-    Guid BrokerId,
+    Guid Id,
     Guid AgencyId,
     string FirstName,
     string LastName,
     string Email,
     string PhoneNumber,
     string? PhotoUrl,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    DateTime UpdatedAt
 );

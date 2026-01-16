@@ -12,4 +12,5 @@ public sealed class Broker
     public string? PhotoUrl { get; set; }
     public string? MainImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
