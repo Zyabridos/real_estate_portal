@@ -1,9 +1,10 @@
 using MongoDB.Driver;
+using System.Linq.Expressions;
 using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Application.Queries.Brokers;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums.Brokers;
-using RealEstate.Domain.Enums.Common;
+using DomainSortDirection = RealEstate.Domain.Enums.Common.SortDirection;
 using RealEstate.Infrastructure.Mongo;
 
 namespace RealEstate.Infrastructure.Repositories;
@@ -88,7 +89,7 @@ public sealed class BrokerRepository : IBrokerRepository
         // Sorting (SortBy and SortDirection)
 
         var sortBy = query.SortBy ?? SortBy.CreatedAt;
-        var direction = query.SortDirection ?? SortDirection.Desc;
+        var direction = query.SortDirection ?? DomainSortDirection.Desc;
 
         var sort = BuildSort(sortBy, direction);
 
@@ -114,12 +115,12 @@ public sealed class BrokerRepository : IBrokerRepository
         return (items, totalCount);
     }
 
-    private static SortDefinition<Broker> BuildSort(SortBy sortBy, SortDirection direction)
+    private static SortDefinition<Broker> BuildSort(SortBy sortBy, DomainSortDirection direction)
     {
         var sortBuilder = Builders<Broker>.Sort;
-        
-        SortDefinition<Broker> Apply<TField>(System.Linq.Expressions.Expression<Func<Broker, TField>> field) =>
-            direction == SortDirection.Asc
+
+        SortDefinition<Broker> Apply(Expression<Func<Broker, object>> field) =>
+            direction == DomainSortDirection.Asc
                 ? sortBuilder.Ascending(field)
                 : sortBuilder.Descending(field);
 

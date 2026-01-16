@@ -8,7 +8,10 @@ public sealed class BrokersMappingProfile : Profile
 {
     public BrokersMappingProfile()
     {
-        CreateMap<Broker, BrokerListItemDto>();
-        CreateMap<Broker, BrokerDetailsDto>();
+        CreateMap<Broker, BrokerListItemDto>()
+            .ForMember(d => d.BrokerId, o => o.MapFrom(s => s.Id));
+
+        CreateMap<Broker, BrokerDetailsDto>()
+            .ForMember(d => d.BrokerId, o => o.MapFrom(s => s.Id));
     }
 }
