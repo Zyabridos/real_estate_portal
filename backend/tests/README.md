@@ -20,22 +20,21 @@ Integration tests for HTTP API endpoints.
 -   real MongoDB behavior via Testcontainers
 
 
-**Examples:**
+**List of tested endpoints:**
 
--   list endpoints (empty, filtered, paged)
-
--   `GET /{id}`  returning 404
-
--   correct response DTOs and metadata
+-   `GET /` returning list of entities
+-   `GET /{id}` 200 and entity
+-   `GET /{non_existing_id}`  returning 404
+-   `GET /{invalid_id}`  returning 400
+-   `PUT /{id}`  returning 200 and updates entitiy
+-   `DELETE  /{id}` returning 204 and then 404 on `GET /{id}`
 
 
 These tests use:
 
--   `Microsoft.AspNetCore.Mvc.Testing`
-
--   real MongoDB container
-
--   shared fixtures from  `RealEstate.Testing`
+- `Microsoft.AspNetCore.Mvc.Testing`
+- real MongoDB container
+- shared fixtures from  `RealEstate.Testing`
 
 
 ----------
@@ -52,6 +51,8 @@ Tests for  infrastructure layer  (repositories, Mongo queries).
 -   sorting and paging logic
 
 -   update / delete behavior
+
+-   links between entities (for example, broker and property)
 
 -   mapping between Mongo documents and domain entities
 ----------
