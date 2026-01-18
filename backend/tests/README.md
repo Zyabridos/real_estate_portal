@@ -18,17 +18,24 @@ Integration tests for HTTP API endpoints.
 -   routing and HTTP status codes
 
 -   real MongoDB behavior via Testcontainers
+## List of tested API scenarios
 
+- **`GET /api/{entities}`** returns a paged contract  
+  _(items + totals + paging metadata)_
 
-**List of tested endpoints:**
+- **`GET /api/{entities}/{id}`** returns:
+    - **`200`** for an existing entity
+    - **`404`** for a missing entity
+    - **`400`** for an invalid GUID in route
 
--   `GET /` returning list of entities
--   `GET /{id}` 200 and entity
--   `GET /{non_existing_id}`  returning 404
--   `GET /{invalid_id}`  returning 400
--   `PUT /{id}`  returning 200 and updates entitiy
--   `DELETE  /{id}` returning 204 and then 404 on `GET /{id}`
+- **`POST /api/{entity}`** returns:
+    - **`201`** for a valid payload
+    - **`400`** for an invalid payload (validation)
+    - **`404`** when the referenced `propertyId` does not exist
 
+- **Link checks**
+    - A created lead is linked to an existing property  
+      _(response DTO + persisted Mongo document)_
 
 These tests use:
 
@@ -45,16 +52,12 @@ These tests use:
 Tests for  infrastructure layer  (repositories, Mongo queries).
 
 **What is tested:**
-
--   MongoDB queries and filters
-
--   sorting and paging logic
-
--   update / delete behavior
-
--   links between entities (for example, broker and property)
-
--   mapping between Mongo documents and domain entities
+- MongoDB queries and filters
+- Sorting and paging logic
+- Update / delete behavior
+- Links between entities (e.g. broker ↔ property, lead ↔ property)
+- Mongo index initialization expectations (where applicable)
+- Mapping-related persistence assumptions (document shape ↔ domain entity)
 ----------
 
 ### RealEstate.Validation.Tests

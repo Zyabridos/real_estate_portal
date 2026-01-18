@@ -44,6 +44,8 @@ TestResults
 *.log
 *.log*
 /coverage
+scripts/.seed/
+personal_notes.*
 
 # Typescript
 *.tsbuildinfo

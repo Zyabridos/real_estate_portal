@@ -17,7 +17,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
-builder.Services.AddAutoMapper(typeof(PropertiesMappingProfile).Assembly);
 
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
@@ -62,15 +61,13 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
 
 // Repos
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
-// - not critical, connect when at least properties will work
 builder.Services.AddScoped<IBrokerRepository, BrokerRepository>();
-// builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 
 // Services
 builder.Services.AddScoped<IPropertyService, PropertyService>();
-// - not critical, connect when at least properties will work
 builder.Services.AddScoped<IBrokerService, BrokerService>();
-// builder.Services.AddScoped<ILeadService, LeadService>();
+builder.Services.AddScoped<ILeadService, LeadService>();
 
 // Index initialization
 builder.Services.AddHostedService<MongoIndexInitializer>();
