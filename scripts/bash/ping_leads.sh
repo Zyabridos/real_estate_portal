@@ -6,7 +6,7 @@ source "${SCRIPT_DIR}/../lib/config.sh"
 source "${SCRIPT_DIR}/../lib/log.sh"
 
 echo ""
-info "Fetching properties list..."
-curl -i "${BACKEND_URL}/api/properties?page=1&pageSize=10"
+info "Fetching leads list..."
+curl -i "${BACKEND_URL}/api/leads?page=1&pageSize=10"
 
 

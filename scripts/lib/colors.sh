@@ -14,24 +14,4 @@ YELLOW="\033[1;33m"
 BLUE="\033[1;34m"
 PURPLE="\033[1;35m"
 LIGHT_BLUE="\033[1;36m"
-
-# Helpers
-info() {
-  echo -e "${LIGHT_BLUE}$*${RESET}"
-}
-
-success() {
-  echo -e "${GREEN}$*${RESET}"
-}
-
-warn() {
-  echo -e "${YELLOW}$*${RESET}"
-}
-
-error() {
-  echo -e "${RED}$*${RESET}" >&2
-}
-
-highlight() {
-  echo -e "${PURPLE}$*${RESET}"
-}
+WHITE="\033[1;37m"

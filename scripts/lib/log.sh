@@ -23,3 +23,7 @@ error() {
 highlight() {
   echo -e "${PURPLE}→ $*${RESET}"
 }
+
+neutral() {
+  echo -e "${WHITE}[seed] $*${RESET}"
+}

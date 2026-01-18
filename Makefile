@@ -68,7 +68,25 @@ ping-brokers:
 ping-broker:
 	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_broker_by_id.sh "$(ID)"
 
-smoke-api: ping-api ping-properties ping-brokers
+ping-leads:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_leads.sh
+
+ping-lead:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_lead_by_id.sh "$(ID)"
+
+smoke-api: ping-api ping-properties ping-brokers ping-leads
+
+# Seeds
+seed-brokers:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/seed/seed_brokers.sh
+
+seed-properties:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/seed/seed_properties.sh
+
+seed-leads:
+	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/seed/seed_leads.sh
+
+seed: seed-brokers seed-properties seed-leads
 
 # Docker
 build:
