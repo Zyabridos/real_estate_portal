@@ -8,23 +8,31 @@ public sealed class CreateLeadRequestValidator : AbstractValidator<CreateLeadReq
     public CreateLeadRequestValidator()
     {
         RuleFor(x => x.PropertyId)
-            .NotEmpty()
-            .MaximumLength(64);
+            .NotEmpty();
 
-        RuleFor(x => x.Name)
+        RuleFor(x => x.FullName)
             .NotEmpty()
             .MinimumLength(2)
             .MaximumLength(50);
-        
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .MaximumLength(20);
 
-        RuleFor(x => x.Email)
-            .EmailAddress()
-            .MaximumLength(100);
-        
-        RuleFor(x => x.Message)
+        When(x => !string.IsNullOrWhiteSpace(x.Email), () =>
+        {
+            RuleFor(x => x.Email!)
+                .EmailAddress()
+                .MaximumLength(100);
+        });
+
+        When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
+        {
+            RuleFor(x => x.PhoneNumber!)
+                .MaximumLength(20);
+        });
+
+        RuleFor(x => x)
+            .Must(x => !string.IsNullOrWhiteSpace(x.Email) || !string.IsNullOrWhiteSpace(x.PhoneNumber))
+            .WithMessage("Either Email or PhoneNumber must be provided.");
+		
+		RuleFor(x => x.Message)
             .MaximumLength(2000);
     }
 }
