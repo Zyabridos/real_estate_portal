@@ -1,3 +1,8 @@
+include make/dev.mk
+include make/pings.mk
+include make/seeds.mk
+include make/docker.mk
+
 # Project services
 BACKEND   		= backend
 FRONTEND  		= frontend
@@ -22,124 +27,6 @@ BLUE		= \033[1;34m
 PURPLE		= \033[1;35m
 LIGHT_BLUE  = \033[1;36m
 
-# Local development
-dev-frontend:
-	cd frontend && npm run dev
-
-dev-backend:
-	cd backend/src/RealEstate.Api && dotnet watch run
-
-dev-cms:
-	cd cms && npm run dev
-
-dev:
-	make dev-backend && make dev-frontend && make dev-cms
-
-backend-full-rebuild:
-	cd backend && \
-    dotnet nuget locals all --clear && \
-    rm -rf src/**/bin src/**/obj && \
-    dotnet restore --disable-parallel && \
-    dotnet build && \
-    dotnet run --project src/RealEstate.Api/RealEstate.Api.csproj
-
-frontend-clean-install:
-	cd frontend && \
-	rm -rf node_modules package-lock.json && \
-	npm install
-
-test-back:
-	@echo "$(LIGHT_BLUE)Starting tests for backend...$(RESET)"
-	cd backend && dotnet test RealEstate.slnx
-
-# Pings
-ping-api:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_api.sh
-
-ping-properties:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_properties.sh
-
-ping-property:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_property_by_id.sh "$(ID)"
-
-ping-brokers:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_brokers.sh
-
-ping-broker:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_broker_by_id.sh "$(ID)"
-
-ping-leads:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_leads.sh
-
-ping-lead:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/ping_lead_by_id.sh "$(ID)"
-
-smoke-api: ping-api ping-properties ping-brokers ping-leads
-
-# Seeds
-seed-brokers:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/seed/seed_brokers.sh
-
-seed-properties:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/seed/seed_properties.sh
-
-seed-leads:
-	@BACKEND_PORT=$(BACKEND_PORT) BACKEND_URL=$(BACKEND_URL) ./scripts/bash/seed/seed_leads.sh
-
-seed: seed-brokers seed-properties seed-leads
-
-# Docker
-build:
-	@echo "$(LIGHT_BLUE)Building Docker images...$(RESET)"
-	docker compose build
-
-up:
-	@echo "$(LIGHT_BLUE)Starting all services...$(RESET)"
-	docker compose up
-
-up-d:
-	@echo "$(LIGHT_BLUE)Starting all services in background...$(RESET)"
-	docker compose up -d
-
-down:
-	@echo "$(YELLOW)Stopping and removing all containers...$(RESET)"
-	docker compose down
-
-restart:
-	@echo "$(YELLOW)Restarting core Docker services (no cms)...$(RESET)"
-	docker compose restart $(CORE_SERVICES)
-
-restart-frontend:
-	@echo "$(YELLOW)Restarting frontend...$(RESET)"
-	docker compose restart frontend
-
-restart-backend:
-	@echo "$(YELLOW)Restarting backend...$(RESET)"
-	docker compose restart backend
-
-restart-db:
-	@echo "$(YELLOW)Restarting mongodb...$(RESET)"
-	docker compose restart mongodb
-
-restart-with-cms:
-	@echo "$(YELLOW)Restarting core services + cms...$(RESET)"
-	docker compose restart $(CORE_SERVICES) $(CMS_SERVICE)
-
-rebuild:
-	@echo "$(PURPLE)Rebuilding Docker services...$(RESET)"
-	docker compose down
-	docker compose build
-	docker compose up -d
-
-# Docker Shell
-sh-backend:
-	@echo "$(GREEN)Opening shell in backend...$(RESET)"
-	docker compose exec $(BACKEND) sh
-
-sh-frontend:
-	@echo "$(GREEN)Opening shell in frontend...$(RESET)"
-	docker compose exec $(FRONTEND) sh
-
 # Help
 help:
 	@echo ""
@@ -156,10 +43,11 @@ help:
 	@echo ""
 
 	@echo "$(YELLOW)API / Ports:$(RESET)"
-	@echo "  $(GREEN)ping-api$(RESET)              - Check backend health endpoint"
-	@echo "  $(GREEN)ping-properties$(RESET)       - Fetch properties list"
-	@echo "  $(GREEN)ping-property ID=<guid>$(RESET)- Fetch property by id"
-	@echo "  $(GREEN)smoke-api$(RESET)             - Run basic API smoke checks"
+	@echo "  $(GREEN)ping-api$(RESET)                              - Check backend health endpoint"
+	@echo "  $(GREEN)ping-entities ENTITY=<name>$(RESET)           - Fetch list (properties | brokers | leads)"
+	@echo "  $(GREEN)ping-entity ENTITY=<name> ID=<guid>$(RESET)   - Fetch by id"
+	@echo "  $(GREEN)smoke-api$(RESET)                             - Run basic API smoke checks"
+	@echo "  $(GREEN)Aliases:$(RESET) ping-properties/ping-property, ping-brokers/ping-broker, ping-leads/ping-lead"
 	@echo ""
 
 	@echo "$(YELLOW)Reset / bootstrap (local):$(RESET)"
