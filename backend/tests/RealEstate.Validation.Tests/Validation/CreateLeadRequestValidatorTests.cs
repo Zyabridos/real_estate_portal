@@ -19,64 +19,70 @@ public sealed class CreateLeadRequestValidatorTests
         Assert.Empty(result.Errors);
     }
 
-    [Theory]
-    [InlineData("")]
-
-// ReSharper disable once xUnit1006
-    [InlineData(null)]
-    public void PropertyId_is_required(string? propertyId)
-    {
-        var dto = Valid() with { PropertyId = propertyId! };
-
-        var result = _validator.Validate(dto);
-
-        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.PropertyId));
-    }
-
     [Fact]
-    public void PropertyId_max_length_64()
+    public void PropertyId_is_required()
     {
-        var dto = Valid() with { PropertyId = new string('a', 65) };
+        var dto = Valid() with { PropertyId = Guid.Empty };
 
         var result = _validator.Validate(dto);
 
+        Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.PropertyId));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("A")]
-    public void Name_must_have_min_length_2(string name)
+    public void FullName_must_have_min_length_2(string fullName)
     {
-        var dto = Valid() with { Name = name };
+        var dto = Valid() with { FullName = fullName };
 
         var result = _validator.Validate(dto);
 
-        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Name));
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.FullName));
     }
 
     [Fact]
-    public void Name_max_length_50()
+    public void FullName_max_length_50()
     {
-        var dto = Valid() with { Name = new string('a', 51) };
+        var dto = Valid() with { FullName = new string('a', 51) };
 
         var result = _validator.Validate(dto);
 
-        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Name));
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.FullName));
     }
 
-    [Theory]
-    [InlineData("")]
-
-// ReSharper disable once xUnit1006
-    [InlineData(null)]
-    public void Email_is_required(string? email)
+    [Fact]
+    public void Valid_when_email_present_and_phone_missing()
     {
-        var dto = Valid() with { Email = email! };
+        var dto = Valid() with { PhoneNumber = null };
 
         var result = _validator.Validate(dto);
 
-        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Email));
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Valid_when_phone_present_and_email_missing()
+    {
+        var dto = Valid() with { Email = null };
+
+        var result = _validator.Validate(dto);
+
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Invalid_when_email_and_phone_missing()
+    {
+        var dto = Valid() with { Email = null, PhoneNumber = null };
+
+        var result = _validator.Validate(dto);
+
+        Assert.False(result.IsValid);
+        Assert.NotEmpty(result.Errors);
     }
 
     [Theory]
@@ -89,6 +95,7 @@ public sealed class CreateLeadRequestValidatorTests
 
         var result = _validator.Validate(dto);
 
+        Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Email));
     }
 
@@ -100,17 +107,19 @@ public sealed class CreateLeadRequestValidatorTests
 
         var result = _validator.Validate(dto);
 
+        Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Email));
     }
 
     [Fact]
-    public void Phone_max_length_20()
+    public void PhoneNumber_max_length_20()
     {
-        var dto = Valid() with { Phone = new string('1', 21) };
+        var dto = Valid() with { PhoneNumber = new string('1', 21) };
 
         var result = _validator.Validate(dto);
 
-        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Phone));
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.PhoneNumber));
     }
 
     [Fact]
@@ -120,15 +129,16 @@ public sealed class CreateLeadRequestValidatorTests
 
         var result = _validator.Validate(dto);
 
+        Assert.False(result.IsValid);
         Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateLeadRequest.Message));
     }
 
     private static CreateLeadRequest Valid() =>
         new(
-            PropertyId: "property_123",
-            Name: "John Snow",
+            PropertyId: Guid.Parse("22222222-2222-2222-2222-222222222222"),
+            FullName: "John Snow",
             Email: "johnsnow@winterfell.com",
-            Phone: "+47 999 99 999",
+            PhoneNumber: "+47 999 99 999",
             Message: "Hello World!"
         );
 }
