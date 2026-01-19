@@ -1,24 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
+import AppLayout from "@/shared/ui/layout/AppLayout.vue";
 
 const status = ref("loading...");
-
-onMounted(async () => {
-  try {
-    // TODO: use axios?
-    // TODO: remove hardcoded routes
-    const res = await fetch("/api/health");
-    const text = await res.text();
-    status.value = `HTTP ${res.status}: ${text || "(empty body)"}`;
-  } catch (e) {
-    status.value = `error: ${String(e)}`;
-  }
-});
+const globalLoading = false; // evnt will be in Pinia
+const globalErrorMessage: string | null = null; // evnt will be in Pinia
 </script>
 
 <template>
-  <div class="p-6">
-    <h1 class="text-xl font-bold">Frontend OK</h1>
-    <p class="mt-2">Backend health: {{ status }}</p>
-  </div>
+  <AppLayout :is-loading="globalLoading" :error-message="globalErrorMessage">
+    <RouterView />
+  </AppLayout>
 </template>
