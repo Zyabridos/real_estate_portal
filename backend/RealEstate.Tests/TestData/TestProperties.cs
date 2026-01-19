@@ -1,5 +1,5 @@
 using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 
 namespace RealEstate.TestData;
 

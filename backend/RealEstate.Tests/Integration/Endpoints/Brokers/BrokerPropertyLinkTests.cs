@@ -5,7 +5,7 @@ using MongoDB.Driver;
 using RealEstate.Application.Common;
 using RealEstate.Application.DTOs.Properties;
 using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 using RealEstate.TestData;
 using RealEstate.TestData.Mongo;
 using RealEstate.Tests.Integration.Infrastructure;

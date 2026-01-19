@@ -2,7 +2,7 @@ using Xunit;
 using FluentAssertions;
 
 using RealEstate.Application.Queries.Properties;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 using RealEstate.Domain.Entities;
 
 using RealEstate.Infrastructure.Repositories;

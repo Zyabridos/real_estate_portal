@@ -4,7 +4,7 @@ using FluentAssertions;
 using MongoDB.Driver;
 using RealEstate.Application.DTOs.Leads;
 using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 using RealEstate.TestData;
 using RealEstate.TestData.Mongo;
 using RealEstate.TestData.Requests;
