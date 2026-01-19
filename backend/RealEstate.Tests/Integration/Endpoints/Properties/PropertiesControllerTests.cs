@@ -11,7 +11,7 @@ using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
 using Xunit;
 
-namespace RealEstate.Api.Tests.Integration;
+namespace Integration.Controllers;
 
 [Collection("MongoDb")]
 public sealed class PropertiesControllerTests : MongoDbTestBase

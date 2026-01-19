@@ -10,7 +10,7 @@ using RealEstate.Testing.Fixtures;
 using RealEstate.Testing.Mongo;
 using Xunit;
 
-namespace RealEstate.Api.Tests.Integration;
+namespace Integration.Controllers;
 
 [Collection("MongoDb")]
 public sealed class LeadsControllerTests : MongoDbTestBase
