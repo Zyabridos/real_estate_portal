@@ -1,7 +1,7 @@
 using RealEstate.Infrastructure.Mongo.Conventions;
 using Xunit;
 
-namespace RealEstate.Testing.Mongo;
+namespace RealEstate.TestData.Mongo;
 
 public abstract class MongoDbTestBase : IAsyncLifetime
 {
@@ -14,5 +14,6 @@ public abstract class MongoDbTestBase : IAsyncLifetime
     }
 
     public Task InitializeAsync() => Fixture.ClearDatabaseAsync();
+
     public Task DisposeAsync() => Task.CompletedTask;
 }
