@@ -1,13 +1,21 @@
 <Solution>
+  <Folder Name="/RealEstate.Tests/" />
+  <Folder Name="/RealEstate.Tests/Infrastructure/">
+    <Project Path="RealEstate.Tests/Infrastructure/RealEstate.Infrastructure.Tests.csproj" />
+  </Folder>
+  <Folder Name="/RealEstate.Tests/Integration/">
+    <Project Path="RealEstate.Tests/Integration/Integration.Tests.csproj" />
+  </Folder>
+  <Folder Name="/RealEstate.Tests/TestData/">
+    <Project Path="RealEstate.Tests/TestData/RealEstate.TestData.csproj" />
+  </Folder>
+  <Folder Name="/RealEstate.Tests/Validation/">
+    <Project Path="RealEstate.Tests/Validation/RealEstate.Validation.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/RealEstate.Api/RealEstate.Api.csproj" />
     <Project Path="src/RealEstate.Application/RealEstate.Application.csproj" />
     <Project Path="src/RealEstate.Domain/RealEstate.Domain.csproj" />
     <Project Path="src/RealEstate.Infrastructure/RealEstate.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/RealEstate.Api.Tests/RealEstate.Api.Tests.csproj" />
-    <Project Path="tests/RealEstate.Infrastructure.Tests/RealEstate.Infrastructure.Tests.csproj" />
-    <Project Path="tests/RealEstate.Validation.Tests/RealEstate.Validation.Tests.csproj" />
   </Folder>
 </Solution>

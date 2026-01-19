@@ -1,8 +1,9 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Bson;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Interfaces.Services;
 using RealEstate.Application.Interfaces.Repositories;
@@ -30,6 +31,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
 	c.ExampleFilters(); // turn on filters
+	c.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
     // Optional but nice to have: show full type names less often, keep schemas clean
     c.SupportNonNullableReferenceTypes();
 });
