@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import RealEstatePortal from "@/assets/RealEstateProtal.png";
+import GuestNavbar from "@/components/Navbar/GuestNavbar.vue";
 
 // TODO: remove hardcoded text
 // TODO: move Navbar to a separate component?
 type Props = {
-  title?: string;
   isLoading?: boolean;
   errorMessage?: string | null;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  title: "RealEstate Portal",
   isLoading: false,
   errorMessage: null,
 });
@@ -19,44 +19,18 @@ const hasError = computed(() => Boolean(props.errorMessage));
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-900">
-    <!-- Header -->
+  <div class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+  <!-- Header -->
     <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex w-full items-center justify-between px-6 py-3">
         <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-xl bg-slate-900" />
-          <div class="leading-tight">
-            <div class="text-sm font-semibold">{{ title }}</div>
-            <div class="text-xs text-slate-500">Vue 3 + Pinia</div>
-          </div>
+          <img
+            :src="RealEstatePortal"
+            alt="RealEstate Portal"
+            class="h-20 w-40 rounded-xl object-contain"
+          />
         </div>
-
-        <!-- Nav -->
-        <nav class="flex items-center gap-2 text-sm">
-          <RouterLink
-            to="/properties"
-            class="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-            active-class="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
-          >
-            Properties
-          </RouterLink>
-
-          <RouterLink
-            to="/brokers"
-            class="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-            active-class="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
-          >
-            Brokers
-          </RouterLink>
-
-          <RouterLink
-            to="/blog"
-            class="rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-            active-class="bg-slate-900 text-white hover:bg-slate-900 hover:text-white"
-          >
-            Blog
-          </RouterLink>
-        </nav>
+        <GuestNavbar />
       </div>
 
       <!-- Loading placeholder -->
@@ -66,8 +40,8 @@ const hasError = computed(() => Boolean(props.errorMessage));
 
       <!-- Error placeholder -->
       <div v-if="hasError" class="border-t border-rose-200 bg-rose-50">
-        <div class="mx-auto max-w-6xl px-4 py-3">
-          <div class="text-sm font-medium text-rose-900">Something went wrong</div>
+        <div class="w-full px-6 py-3">
+        <div class="text-sm font-medium text-rose-900">Something went wrong</div>
           <div class="mt-1 text-sm text-rose-800">
             {{ errorMessage }}
           </div>
@@ -76,13 +50,13 @@ const hasError = computed(() => Boolean(props.errorMessage));
     </header>
 
     <!-- Main -->
-    <main class="mx-auto max-w-6xl px-4 py-6">
-      <slot />
+    <main class="w-full flex-1 px-6 py-6">
+    <slot />
     </main>
 
     <!-- Footer -->
     <footer class="border-t border-slate-200 bg-white">
-      <div class="mx-auto max-w-6xl px-4 py-4 text-xs text-slate-500">
+      <div class="w-full px-4 py-4 text-xs text-slate-500">
         © {{ new Date().getFullYear() }} RealEstate Portal • Demo project
       </div>
     </footer>
