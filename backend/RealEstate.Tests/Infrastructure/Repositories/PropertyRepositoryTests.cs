@@ -1,10 +1,14 @@
-using FluentAssertions;
-using RealEstate.Application.Queries.Properties;
-using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
-using RealEstate.Infrastructure.Repositories;
-using RealEstate.Testing.Mongo;
 using Xunit;
+using FluentAssertions;
+
+using RealEstate.Application.Queries.Properties;
+using RealEstate.Domain.Enums;
+using RealEstate.Domain.Entities;
+
+using RealEstate.Infrastructure.Repositories;
+
+using RealEstate.TestData;
+using RealEstate.TestData.Mongo;
 
 namespace RealEstate.Infrastructure.Tests.Repositories;
 
@@ -15,29 +19,26 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
     {
     }
 
+    private PropertyRepository CreateRepo() => new(Fixture.Database);
+
     [Fact]
     public async Task Create_then_GetById_returns_entity()
     {
-        var repo = new PropertyRepository(Fixture.Database);
+        var repo = CreateRepo();
 
         var id = Guid.NewGuid();
         var brokerId = Guid.NewGuid();
 
-        var entity = new Property
-        {
-            Id = id,
-            Title = "Nice apartment",
-            Address = "Street 1",
-            City = "Trondheim",
-            Price = 4_500_000m,
-            Type = PropertyType.Apartment,
-            Bedrooms = 2,
-            Bathrooms = 1,
-            Area = 66_6,
-            BrokerId = brokerId,
-            Status = PropertyStatus.Active,
-            CreatedAt = DateTime.UtcNow
-        };
+        var entity = TestProperties.Create(
+            id: id,
+            title: "Nice apartment",
+            city: "Trondheim",
+            price: 4_500_000m,
+            type: PropertyType.Apartment,
+            status: PropertyStatus.Active,
+            createdAt: DateTime.UtcNow,
+            brokerId: brokerId
+        );
 
         await repo.CreateAsync(entity, CancellationToken.None);
 
@@ -52,23 +53,17 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
     [Fact]
     public async Task Update_then_GetById_returns_updated_entity()
     {
-        var repo = new PropertyRepository(Fixture.Database);
+        var repo = CreateRepo();
 
-        var entity = new Property
-        {
-            Id = Guid.NewGuid(),
-            Title = "Old title",
-            Address = "Street 1",
-            City = "Oslo",
-            Price = 12_000_000m,
-            Type = PropertyType.House,
-            Bedrooms = 3,
-            Bathrooms = 2,
-            Area = 120,
-            BrokerId = Guid.NewGuid(),
-            Status = PropertyStatus.Active,
-            CreatedAt = DateTime.UtcNow
-        };
+        var entity = TestProperties.Create(
+            title: "Old title",
+            city: "Oslo",
+            price: 12_000_000m,
+            type: PropertyType.House,
+            status: PropertyStatus.Active,
+            createdAt: DateTime.UtcNow,
+            brokerId: Guid.NewGuid()
+        );
 
         await repo.CreateAsync(entity, CancellationToken.None);
 
@@ -77,48 +72,37 @@ public sealed class PropertyRepositoryTests : MongoDbTestBase
         updated.Should().BeTrue();
 
         var found = await repo.GetByIdAsync(entity.Id, CancellationToken.None);
+        found.Should().NotBeNull();
         found!.Title.Should().Be("New title");
     }
 
     [Fact]
     public async Task GetList_filters_by_city_and_type()
     {
-        var repo = new PropertyRepository(Fixture.Database);
+        var repo = CreateRepo();
 
-        var broker = Guid.NewGuid();
+        var brokerId = Guid.NewGuid();
         var now = DateTime.UtcNow;
 
-        await repo.CreateAsync(new Property
-        {
-            Id = Guid.NewGuid(),
-            Title = "A",
-            Address = "1",
-            City = "Trondheim",
-            Price = 3_000_000m,
-            Type = PropertyType.Apartment,
-            Bedrooms = 1,
-            Bathrooms = 1,
-            Area = 40m,
-            BrokerId = broker,
-            Status = PropertyStatus.Active,
-            CreatedAt = now.AddMinutes(-1)
-        }, CancellationToken.None);
+        await repo.CreateAsync(TestProperties.Create(
+            title: "A",
+            city: "Trondheim",
+            price: 3_000_000m,
+            type: PropertyType.Apartment,
+            status: PropertyStatus.Active,
+            createdAt: now.AddMinutes(-1),
+            brokerId: brokerId
+        ), CancellationToken.None);
 
-        await repo.CreateAsync(new Property
-        {
-            Id = Guid.NewGuid(),
-            Title = "B",
-            Address = "2",
-            City = "Trondheim",
-            Price = 6_000_000m,
-            Type = PropertyType.House,
-            Bedrooms = 3,
-            Bathrooms = 2,
-            Area = 120m,
-            BrokerId = broker,
-            Status = PropertyStatus.Active,
-            CreatedAt = now.AddMinutes(-2)
-        }, CancellationToken.None);
+        await repo.CreateAsync(TestProperties.Create(
+            title: "B",
+            city: "Trondheim",
+            price: 6_000_000m,
+            type: PropertyType.House,
+            status: PropertyStatus.Active,
+            createdAt: now.AddMinutes(-2),
+            brokerId: brokerId
+        ), CancellationToken.None);
 
         var query = new PropertyListQuery(
             City: "Trondheim",
