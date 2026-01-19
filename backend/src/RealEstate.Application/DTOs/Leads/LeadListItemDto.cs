@@ -1,4 +1,4 @@
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Leads;
 
 namespace RealEstate.Application.DTOs.Leads;
 

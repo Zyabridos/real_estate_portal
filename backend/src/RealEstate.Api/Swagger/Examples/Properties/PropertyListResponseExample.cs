@@ -1,6 +1,6 @@
 using RealEstate.Application.Common;
 using RealEstate.Application.DTOs.Properties;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace RealEstate.Api.Swagger.Examples.Properties;

@@ -2,7 +2,7 @@ using MongoDB.Driver;
 using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Application.Queries.Properties;
 using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 using RealEstate.Infrastructure.Mongo;
 
 namespace RealEstate.Infrastructure.Repositories;

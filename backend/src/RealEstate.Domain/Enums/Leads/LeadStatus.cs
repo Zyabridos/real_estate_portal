@@ -1,4 +1,4 @@
-namespace RealEstate.Domain.Enums;
+namespace RealEstate.Domain.Enums.Leads;
 
 public enum LeadStatus
 {

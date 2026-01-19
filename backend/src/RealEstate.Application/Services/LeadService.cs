@@ -5,7 +5,7 @@ using RealEstate.Application.Interfaces.Repositories;
 using RealEstate.Application.Interfaces.Services;
 using RealEstate.Application.Queries.Leads;
 using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Leads;
  
 namespace RealEstate.Application.Services;
  

@@ -1,4 +1,4 @@
-using RealEstate.Domain.Enums;
+using RealEstate.Domain.Enums.Properties;
 
 namespace RealEstate.Application.DTOs.Properties;
 
