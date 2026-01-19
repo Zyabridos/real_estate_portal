@@ -1,5 +1,5 @@
 import './assets/main.css'
-import { createHttpClient } from "@/shared/api/http";
+import { createHttpClient } from "@/shared/api/client/createHttpClient.ts";
 import { env } from "./env.ts";
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

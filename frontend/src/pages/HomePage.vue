@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import routes from "../routes";
+import routes from "@/shared/routes";
 
 const status = ref("loading...");
 
