@@ -4,32 +4,25 @@ using FluentAssertions;
 using MongoDB.Driver;
 using RealEstate.Application.Common;
 using RealEstate.Application.DTOs.Properties;
-using RealEstate.Testing.Fixtures; 
-using RealEstate.Testing.Mongo;
-using RealEstate.Testing.TestData;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums;
+using RealEstate.TestData;
+using RealEstate.TestData.Mongo;
+using RealEstate.Tests.Integration.Infrastructure;
 using Xunit;
 
-namespace Integration.Controllers;
+namespace RealEstate.Tests.Integration.Endpoints.Properties;
 
 [Collection("MongoDb")]
-public sealed class PropertiesControllerTests : MongoDbTestBase
+public sealed class PropertiesControllerTests : IntegrationTestBase
 {
     private readonly HttpClient _client;
     private readonly IMongoCollection<Property> _properties;
 
     public PropertiesControllerTests(MongoDbFixture fixture) : base(fixture)
     {
-        var factory = new CustomWebApplicationFactory(
-            fixture.Database,
-            fixture.ConnectionString,
-            fixture.DatabaseName
-        );
-
-        _client = factory.CreateClient();
-
-        _properties = Fixture.Database.GetCollection<Property>("properties");
+        _client = Ctx.Client;
+        _properties = Ctx.Collection<Property>("properties");
     }
 
     [Fact]
@@ -65,12 +58,6 @@ public sealed class PropertiesControllerTests : MongoDbTestBase
 
         await _properties.InsertManyAsync(seed);
 
-        // Match:
-        // city=Trondheim
-        // type=Apartment
-        // status=Active
-        // minPrice=4_000_000
-        // maxPrice=5_000_000
         var url =
             "/api/properties" +
             "?city=Trondheim" +

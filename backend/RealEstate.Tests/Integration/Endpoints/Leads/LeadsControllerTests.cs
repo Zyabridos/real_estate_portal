@@ -5,50 +5,44 @@ using MongoDB.Driver;
 using RealEstate.Application.Common;
 using RealEstate.Application.DTOs.Leads;
 using RealEstate.Domain.Entities;
-using RealEstate.Domain.Enums;
-using RealEstate.Testing.Fixtures;
-using RealEstate.Testing.Mongo;
+using RealEstate.TestData;
+using RealEstate.TestData.Fixtures;
+using RealEstate.TestData.Mongo;
+using RealEstate.Api.Tests.Integration;
+using RealEstate.Tests.Integration.Infrastructure;
 using Xunit;
 
-namespace Integration.Controllers;
+namespace RealEstate.Api.Tests.Integration.Endpoints.Leads;
 
 [Collection("MongoDb")]
-public sealed class LeadsControllerTests : MongoDbTestBase
+public sealed class LeadsControllerTests : IntegrationTestBase
 {
-    private readonly HttpClient _client;
     private readonly IMongoCollection<Lead> _leads;
 
     public LeadsControllerTests(MongoDbFixture fixture) : base(fixture)
     {
-        var factory = new CustomWebApplicationFactory(
-            fixture.Database,
-            fixture.ConnectionString,
-            fixture.DatabaseName
-        );
-
-        _client = factory.CreateClient();
-        _leads = Fixture.Database.GetCollection<Lead>("leads");
+        _leads = Ctx.Collection<Lead>("leads");
     }
 
     [Fact]
     public async Task GetList_returns_200_and_paged_contract()
     {
-        // Arrange
-        await SeedLeadsAsync();
+        var propertyId = Guid.NewGuid();
 
-        // Act
-        var response = await _client.GetAsync("/api/leads?page=1&pageSize=10");
+        await _leads.InsertManyAsync(new[]
+        {
+            TestLeads.Create(propertyId, fullName: "Cercei Lannister", email: "cercei@example.com"),
+            TestLeads.Create(propertyId, fullName: "Jane Roe", email: "jane.roe@example.com"),
+        });
 
-        // Assert
+        var response = await Ctx.Client.GetAsync("/api/leads?page=1&pageSize=10");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var payload = await response.Content.ReadFromJsonAsync<PagedResult<LeadListItemDto>>();
         payload.Should().NotBeNull();
-
         payload!.Items.Should().NotBeNull();
         payload.Page.Should().Be(1);
         payload.PageSize.Should().Be(10);
-
         payload.TotalCount.Should().BeGreaterThan(1);
         payload.Items.Count.Should().BeGreaterThan(0);
     }
@@ -56,32 +50,22 @@ public sealed class LeadsControllerTests : MongoDbTestBase
     [Fact]
     public async Task GetById_existing_returns_200()
     {
-        // Arrange
-        var leadId = await SeedLeadAsync(fullName: "Anna Test");
+        var lead = TestLeads.Create(Guid.NewGuid(), fullName: "Anna Test", email: "anna.test@example.com");
+        await _leads.InsertOneAsync(lead);
 
-        // Act
-        var response = await _client.GetAsync($"/api/leads/{leadId}");
-
-        // Assert
+        var response = await Ctx.Client.GetAsync($"/api/leads/{lead.Id}");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var dto = await response.Content.ReadFromJsonAsync<LeadDetailsDto>();
         dto.Should().NotBeNull();
-
-        dto!.Id.Should().Be(leadId);
+        dto!.Id.Should().Be(lead.Id);
         dto.FullName.Should().Be("Anna Test");
     }
 
     [Fact]
     public async Task GetById_missing_returns_404()
     {
-        // Arrange
-        var missingId = Guid.NewGuid();
-
-        // Act
-        var response = await _client.GetAsync($"/api/leads/{missingId}");
-
-        // Assert
+        var response = await Ctx.Client.GetAsync($"/api/leads/{Guid.NewGuid()}");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -89,67 +73,7 @@ public sealed class LeadsControllerTests : MongoDbTestBase
     [InlineData("not-a-guid")]
     public async Task GetById_invalid_guid_returns_400(string rawId)
     {
-        // Act
-        var response = await _client.GetAsync($"/api/leads/{rawId}");
-
-        // Assert
+        var response = await Ctx.Client.GetAsync($"/api/leads/{rawId}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    private async Task SeedLeadsAsync()
-    {
-        var now = DateTime.UtcNow;
-        var propertyId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-
-        var leads = new[]
-        {
-            new Lead
-            {
-                Id = Guid.NewGuid(),
-                PropertyId = propertyId,
-                FullName = "Cercei Lannister",
-                Email = "cercei.lannister@greatlannisters.com",
-                PhoneNumber = "+4711111111",
-                Message = "Interested",
-                Status = LeadStatus.New,
-                CreatedAt = now,
-                UpdatedAt = now,
-            },
-            new Lead
-            {
-                Id = Guid.NewGuid(),
-                PropertyId = propertyId,
-                FullName = "Jane Roe",
-                Email = "jane.roe@example.com",
-                PhoneNumber = "+4722222222",
-                Message = null,
-                Status = LeadStatus.New,
-                CreatedAt = now,
-                UpdatedAt = now,
-            }
-        };
-
-        await _leads.InsertManyAsync(leads);
-    }
-
-    private async Task<Guid> SeedLeadAsync(string fullName)
-    {
-        var now = DateTime.UtcNow;
-
-        var lead = new Lead
-        {
-            Id = Guid.NewGuid(),
-            PropertyId = Guid.NewGuid(),
-            FullName = fullName,
-            Email = $"{fullName.ToLowerInvariant().Replace(" ", ".")}@example.com",
-            PhoneNumber = "+4733333333",
-            Message = "Hello",
-            Status = LeadStatus.New,
-            CreatedAt = now,
-            UpdatedAt = now,
-        };
-
-        await _leads.InsertOneAsync(lead);
-        return lead.Id;
     }
 }
