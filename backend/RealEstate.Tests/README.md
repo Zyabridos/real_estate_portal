@@ -6,7 +6,7 @@ Tests are structured  by application layer.
 
 ## Test Projects Overview
 
-### RealEstate.Api.Tests
+### Integration/Endpoints
 
 **Purpose:**  
 Integration tests for HTTP API endpoints.
@@ -46,7 +46,7 @@ These tests use:
 
 ----------
 
-###  RealEstate.Infrastructure.Tests
+###  Infrastructure
 
 **Purpose:**  
 Tests for  infrastructure layer  (repositories, Mongo queries).
@@ -60,7 +60,7 @@ Tests for  infrastructure layer  (repositories, Mongo queries).
 - Mapping-related persistence assumptions (document shape ↔ domain entity)
 ----------
 
-### RealEstate.Validation.Tests
+### Validation
 
 **Purpose:**  
 Unit tests for validation logic.
@@ -77,7 +77,7 @@ Unit tests for validation logic.
 
 ----------
 
-### RealEstate.Testing (Shared Test Infrastructure)
+### TestData (Shared Test Infrastructure)
 
 **Purpose:**  
 Shared testing utilities used by all test projects.

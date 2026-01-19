@@ -1,7 +1,7 @@
 using RealEstate.Application.Common.Normalizers;
 using Xunit;
 
-namespace RealEstate.Validation.Tests.Common;
+namespace RealEstate.Validation.Normalizers;
 
 public sealed class PhoneNumberNormalizerTests
 {
