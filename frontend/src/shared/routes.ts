@@ -14,6 +14,8 @@ const apiRoutes = {
 
 const pagesRoutes = {
   home: (): string => "/",
+  brokers: (): string => "/brokers",
+  properties: (): string => "properties",
 };
 
 const routes = {

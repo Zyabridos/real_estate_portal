@@ -3,8 +3,8 @@ export type PropertyListItemDto = {
   title: string
   city: string
   price: number
-  propertyType: string
-  propertyStatus: string
+  type: string
+  status: string
   mainImageUrl?: string
   createdAt?: string
   // TODO: add brokerID(?) and updatedAt at backend and here

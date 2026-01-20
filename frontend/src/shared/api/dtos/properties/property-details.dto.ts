@@ -5,11 +5,11 @@ export type PropertyDetailsDto = {
   address: string
   city: string
   price: number
-  propertyType: string
+  type: string
+  status: string
   bedrooms: number
   bathrooms: number
   area: number
-  propertyStatus: string
   mainImageUrl?: string
   brokerId: string
   createdAt?: string
