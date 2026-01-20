@@ -1,0 +1,9 @@
+{
+  "list": {
+    "empty": "Пока нет статей.",
+    "filterLabel": "Категория"
+  },
+  "details": {
+    "relatedTitle": "Похожие статьи"
+  }
+}

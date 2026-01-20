@@ -1,0 +1,15 @@
+{
+  "loading": {
+    "genericTitle": "Loading…",
+    "propertyDetailsTitle": "Loading property…",
+    "brokerDetailsTitle": "Loading broker…"
+  },
+  "empty": {
+    "title": "Nothing here yet",
+    "message": "No items were found for the current selection."
+  },
+  "error": {
+    "title": "Something went wrong",
+    "message": "Please try again."
+  }
+}

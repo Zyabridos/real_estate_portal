@@ -1,0 +1,57 @@
+{
+  "home": {
+    "title": "Frontend OK",
+    "backendHealthLabel": "Backend health",
+    "loading": "Loading…",
+    "health": {
+      "emptyBody": "(empty body)",
+      "errorPrefix": "error"
+    }
+  },
+  "properties": {
+    "list": {
+      "title": "Properties",
+      "subtitle": "Browse properties from the backend. Filtering and paging will be added next."
+    },
+    "details": {
+      "titleFallback": "Property details",
+      "subtitle": "Property details loaded from the backend."
+    }
+  },
+  "brokers": {
+    "list": {
+      "title": "Brokers",
+      "subtitle": "Browse brokers from the backend. Filtering and paging will be added next."
+    },
+    "details": {
+      "titleFallback": "Broker details",
+      "subtitle": "Broker details loaded from the backend."
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Blog",
+      "subtitle": "Articles are loaded from Sanity CMS."
+    },
+    "details": {
+      "titleFallback": "Article",
+      "subtitle": "Article content is loaded from Sanity CMS."
+    }
+  },
+  "system": {
+    "notFound": {
+      "badge": "404 • Page not found",
+      "title": "We couldn’t find that page",
+      "description": "The page you’re looking for doesn’t exist or may have been moved. Check the URL or use the navigation below.",
+      "requestedPathLabel": "Requested path",
+      "requestedPathUnknown": "(unknown)",
+      "whatYouCanDoTitle": "What you can do",
+      "tips": {
+        "checkUrl": "Double-check the URL for typos.",
+        "useNavigation": "Use the main navigation at the top.",
+        "startFromProperties": "Start from Properties and refine filters."
+      },
+      "note": "If you believe this is a bug, you will be able to send us a report eventually."
+    }
+  }
+}

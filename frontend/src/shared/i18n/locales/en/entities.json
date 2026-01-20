@@ -1,0 +1,18 @@
+{
+  "common": {
+    "createdLabel": "Created",
+    "updatedLabel": "Updated"
+  },
+  "broker": {
+    "contactNotAvailable": "Contact details are not available.",
+    "agencyIdLabel": "Agency ID",
+    "brokerIdLabel": "Broker ID"
+  },
+  "property": {
+    "typeLabel": "Type",
+    "statusLabel": "Status",
+    "cityLabel": "City",
+    "propertyIdLabel": "Property ID",
+    "descriptionTitle": "Description"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "list": {
+    "empty": "Ingen artikler ennå.",
+    "filterLabel": "Kategori"
+  },
+  "details": {
+    "relatedTitle": "Relaterte artikler"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "loading": {
+    "genericTitle": "Загрузка…",
+    "propertyDetailsTitle": "Загрузка объекта…",
+    "brokerDetailsTitle": "Загрузка брокера…"
+  },
+  "empty": {
+    "title": "Пока пусто",
+    "message": "По текущим параметрам ничего не найдено."
+  },
+  "error": {
+    "title": "Произошла ошибка",
+    "message": "Попробуйте ещё раз."
+  }
+}

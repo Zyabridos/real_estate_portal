@@ -1,0 +1,9 @@
+{
+  "list": {
+    "empty": "No articles yet.",
+    "filterLabel": "Category"
+  },
+  "details": {
+    "relatedTitle": "Related articles"
+  }
+}

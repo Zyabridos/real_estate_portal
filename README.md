@@ -26,6 +26,7 @@ The project is inspired by data-driven listing systems used for managing propert
 - .NET 10 (ASP.NET Core Web API)
 - Entity Framework Core
 - MongoDB
+- XUnit
 
 ### CMS
 - Sanity v3
