@@ -57,11 +57,13 @@ const pageText = computed(() =>
 <template>
   <nav
     class="mt-8 flex flex-wrap items-center justify-between gap-3"
+    data-testid="pagination"
     :aria-label="label"
     role="navigation"
   >
     <button
       type="button"
+      data-testid="pagination-prev"
       class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="!canGoPrev"
       @click="goPrev"
@@ -79,6 +81,7 @@ const pageText = computed(() =>
 
     <button
       type="button"
+      data-testid="pagination-next"
       class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="!canGoNext"
       @click="goNext"

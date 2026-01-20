@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import {useRoute} from "vue-router";
 
 import i18n from "@/shared/i18n";
 import { propertiesApi } from "@/shared/api/properties";
@@ -16,15 +17,14 @@ import type { PagedResultDto } from "@/shared/api/dtos/common/paged-result.dto";
 import type { UIStatus } from "@/shared/types/ui";
 
 // TODO: the component is getting too big. Refactor to smaller
-// TODO: consider filtration on frontend (?), so it will load as we write without hitting "apply"
+// TODO: consider filtration on frontend (?), so will be dynamic
+const route = useRoute();
 
 const state = ref<UIStatus>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PagedResultDto<PropertyListItemDto> | null>(null);
 
-const { page, pageSize, setPage } = usePagedQueryParams({ defaultPage: 1, defaultPageSize: 20 });
-
-// ---------- filters state (applied) ----------
+// ----- filters state
 const filters = ref<PropertyFiltersValue>({});
 
 function normalizeFilters(input: PropertyFiltersValue): PropertyFiltersValue {
@@ -40,7 +40,7 @@ function normalizeFilters(input: PropertyFiltersValue): PropertyFiltersValue {
   return out;
 }
 
-// ---------- derived ----------
+// ----- derived
 const paging = computed(() => ({
   page: data.value?.page ?? page.value,
   pageSize: data.value?.pageSize ?? pageSize.value,
@@ -51,18 +51,32 @@ const paging = computed(() => ({
 const items = computed(() => data.value?.items ?? []);
 const listAriaLabel = computed(() => i18n.t("pages:properties.list.ariaLabel"));
 
-// ---------- actions ----------
+// ----- actions
+const { page, pageSize, setPage, setQuery } = usePagedQueryParams({ defaultPage: 1, defaultPageSize: 20 });
+
 async function onGoToPage(nextPage: number): Promise<void> {
-  await setPage(nextPage, paging.value.totalPages);
+  await setPage(nextPage);
+}
+
+function filtersToQuery(f: PropertyFiltersValue): Record<string, string> {
+  const q: Record<string, string> = {};
+  if (f.city?.trim()) q.city = f.city.trim();
+  if (f.type) q.type = f.type;
+  if (f.status) q.status = f.status;
+  if (typeof f.minPrice === "number") q.minPrice = String(f.minPrice);
+  if (typeof f.maxPrice === "number") q.maxPrice = String(f.maxPrice);
+  return q;
 }
 
 async function onApplyFilters(next: PropertyFiltersValue): Promise<void> {
   filters.value = normalizeFilters(next);
 
-  // apply всегда сбрасывает на page=1
-  await setPage(1);
+  await setQuery({
+    ...filtersToQuery(filters.value),
+    page: 1,
+    // pageSize: pageSize.value,
+  });
 
-  // если и так на 1 — watch не сработает
   if (page.value === 1) {
     await load();
   }
@@ -71,14 +85,21 @@ async function onApplyFilters(next: PropertyFiltersValue): Promise<void> {
 async function onResetFilters(): Promise<void> {
   filters.value = {};
 
-  await setPage(1);
+  await setQuery({
+    city: undefined,
+    type: undefined,
+    status: undefined,
+    minPrice: undefined,
+    maxPrice: undefined,
+    page: 1,
+  });
 
   if (page.value === 1) {
     await load();
   }
 }
 
-// ---------- data ----------
+// ----- data
 async function load(): Promise<void> {
   state.value = "loading";
   error.value = null;
@@ -111,7 +132,7 @@ watch(
 </script>
 
 <template>
-  <section class="w-full" :aria-label="listAriaLabel">
+  <section class="w-full" :aria-label="listAriaLabel" data-testid="properties-page">
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
@@ -162,35 +183,37 @@ watch(
       </div>
 
       <!-- States -->
-      <LoadingState v-if="state === 'loading'" />
+      <LoadingState v-if="state === 'loading'" data-testid="properties-loading"/>
       <ErrorState
         v-else-if="state === 'error'"
+        data-testid="properties-error"
         :message="error?.message ?? $t('errors:messages.unexpected')"
         :onRetry="load"
       />
-      <EmptyState v-else-if="state === 'empty'" />
+      <EmptyState v-else-if="state === 'empty'" data-testid="properties-empty"/>
 
       <!-- List -->
       <div v-else class="mt-8">
         <div
           class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+          data-testid="properties-list"
           role="list"
           :aria-label="$t('pages:properties.list.cardsAriaLabel')"
         >
           <article
             v-for="p in items"
             :key="p.id"
+            data-testid="property-card"
             class="rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
             role="listitem"
-            :aria-label="$t('pages:properties.list.cardAriaLabel', { id: p.id })"
           >
-            <div class="p-5">
+            <div class="p-5" :data-testid="`property-card-${p.id}`">
               <div class="flex items-start justify-between gap-3">
                 <div>
                   <h2 class="text-base font-semibold text-slate-900">
                     {{ p.title }}
                   </h2>
-                  <p class="mt-1 text-sm text-slate-600">
+                  <p class="mt-1 text-sm text-slate-600" data-testid="property-card-meta">
                     {{ p.city }} • {{ p.type }} • {{ p.status }}
                   </p>
                 </div>

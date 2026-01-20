@@ -108,6 +108,7 @@ function onReset(): void {
           </label>
           <input
             id="property-city"
+            data-testid="filter-city"
             v-model="city"
             :disabled="disabled"
             type="text"
@@ -124,6 +125,7 @@ function onReset(): void {
           </label>
           <select
             id="property-type"
+            data-testid="filter-type"
             v-model="type"
             :disabled="disabled"
             class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:opacity-60"
@@ -141,6 +143,7 @@ function onReset(): void {
           </label>
           <select
             id="property-status"
+            data-testid="filter-status"
             v-model="status"
             :disabled="disabled"
             class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:opacity-60"
@@ -160,6 +163,7 @@ function onReset(): void {
           <div class="flex items-center gap-2">
             <input
               v-model="minPrice"
+              data-testid="filter-minPrice"
               :disabled="disabled"
               inputmode="numeric"
               type="text"
@@ -171,6 +175,7 @@ function onReset(): void {
             <input
               v-model="maxPrice"
               :disabled="disabled"
+              data-testid="filter-maxPrice"
               inputmode="numeric"
               type="text"
               class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:opacity-60"
@@ -185,6 +190,7 @@ function onReset(): void {
       <div class="flex flex-wrap items-center justify-end gap-2">
         <button
           type="button"
+          data-testid="filters-reset"
           class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 disabled:opacity-60"
           :disabled="disabled"
           @click="onReset"
@@ -194,6 +200,7 @@ function onReset(): void {
 
         <button
           type="button"
+          data-testid="filters-apply"
           class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
           :disabled="disabled"
           @click="onApply"
