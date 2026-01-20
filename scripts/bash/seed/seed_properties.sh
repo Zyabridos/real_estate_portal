@@ -8,6 +8,7 @@ source "${SCRIPT_DIR}/../../lib/log.sh"
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
 HEALTH_PATH="${HEALTH_PATH:-/api/health}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
+SEED_PROPERTIES_COUNT="${SEED_PROPERTIES_COUNT:-25}"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || { error "Missing required command: $1"; exit 1; }
@@ -26,17 +27,13 @@ fi
 
 source "${seed_env}"
 
-: "${BROKER1_ID:?BROKER1_ID missing}"
-: "${BROKER2_ID:?BROKER2_ID missing}"
-: "${BROKER3_ID:?BROKER3_ID missing}"
-
 assert_json() {
   local label="$1"
   local body="$2"
   if [[ -z "$body" ]]; then error "[seed] ERROR: ${label} returned empty response."; exit 1; fi
   if ! printf '%s' "$body" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
     error "[seed] ERROR: ${label} did not return JSON. Response was:"
-    printf '%s\n' "$body" | head -n 80
+    printf '%s\n' "$body" | head -n 120
     exit 1
   fi
 }
@@ -69,9 +66,11 @@ http_post_json() {
   fi
   error "[seed] POST failed: $url"
   warn "----- payload -----"
-  printf '%s\n' "$payload" | head -n 200
-  warn "----- response -----"
-  printf '%s\n' "$resp" | head -n 120
+  printf '%s\n' "$payload"
+  warn "----- response (headers) -----"
+  printf '%s\n' "$resp" | head -n 40
+  warn "----- response (body) -----"
+  printf '%s' "$resp" | awk 'BEGIN{p=0} /^\r?$/{p=1;next} {if(p) print}'
   return 22
 }
 
@@ -80,7 +79,23 @@ neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
-neutral "Clearing existing properties (best-effort)"
+neutral "Fetching brokers to distribute properties across"
+brokers_json="$(curl -fsS "${BACKEND_URL}/api/brokers?page=1&pageSize=${PAGE_SIZE}")"
+assert_json "GET /api/brokers" "${brokers_json}"
+
+broker_ids="$(printf '%s' "${brokers_json}" | extract_ids_from_paged || true)"
+broker_count="$(printf '%s\n' "${broker_ids}" | grep -c '.*' || true)"
+
+if [[ -z "${broker_ids}" ]]; then
+  error "[seed] No brokers found. Run seed-brokers first."
+  exit 1
+fi
+
+if [[ "${broker_count}" -lt 22 ]]; then
+  warn "[seed] Expected 22 brokers, got ${broker_count}. Will still proceed."
+fi
+
+neutral "Clearing existing properties"
 props_json="$(curl -fsS "${BACKEND_URL}/api/properties?page=1&pageSize=${PAGE_SIZE}" || true)"
 
 prop_ids=""
@@ -101,38 +116,78 @@ else
 fi
 
 create_property_payload() {
-  local title="$1" city="$2" price="$3" broker_id="$4"
-  python3 - <<PY
-import json
+  local title="$1" city="$2" price="$3" broker_id="$4" type="$5" status="$6"
+
+  python3 - "$title" "$city" "$price" "$broker_id" "$type" "$status" <<'PY'
+import json, sys
+
+title, city, price, broker_id, ptype, status = sys.argv[1:]
+
 print(json.dumps({
-  "title": "${title}",
+  "title": title,
   "description": "Seed property description",
   "address": "Seed Street 1",
-  "city": "${city}",
-  "price": ${price},
-  "type": 0,
+  "city": city,
+  "price": float(price),
+  "type": int(ptype),
   "bedrooms": 2,
   "bathrooms": 1,
   "area": 55.5,
-  "status": 0,
+  "status": int(status),
   "mainImageUrl": None,
-  "brokerId": "${broker_id}"
+  "brokerId": broker_id
 }))
 PY
 }
 
-neutral "Creating properties"
-p1="$(http_post_json "${BACKEND_URL}/api/properties" "$(create_property_payload "Seed Property #1" "Oslo" "3500000" "${BROKER1_ID}")")"
-assert_json "POST /api/properties #1" "$p1"
-property_id="$(printf '%s' "$p1" | json_field "id")"
+cities=("Oslo" "Bergen" "Stavanger" "Trondheim" "Drammen" "Elverum")
 
-# extra props - nice to have
-http_post_json "${BACKEND_URL}/api/properties" "$(create_property_payload "Seed Property #2" "Trondheim" "4900000" "${BROKER2_ID}")" >/dev/null
-http_post_json "${BACKEND_URL}/api/properties" "$(create_property_payload "Seed Property #3" "Bergen" "4200000" "${BROKER3_ID}")" >/dev/null
+# Note: must be ints for current backend JSON options
+types=(0 1 2)         # Apartment=0, House=1, Commercial=2
+statuses=(0 1)        # Active=0, Sold=1
 
-success "[seed] Properties created (propertyId for leads): ${property_id}"
+# Human-readable labels for title/UI
+type_labels=("Apartment" "House" "Commercial")
+status_labels=("Active" "Sold")
 
-# Append to seed.env (keep brokers too)
+neutral "Creating ${SEED_PROPERTIES_COUNT} properties distributed across brokers"
+
+property_id=""
+created=0
+i=1
+
+while [[ "${created}" -lt "${SEED_PROPERTIES_COUNT}" ]]; do
+  broker_index=$(( created % broker_count ))
+  broker_id="$(printf '%s\n' "${broker_ids}" | sed -n "$((broker_index+1))p")"
+
+  city="${cities[$((created % ${#cities[@]}))]}"
+  price=$(( 2500000 + (created * 150000) ))
+
+  type="${types[$((created % ${#types[@]}))]}"
+  status="${statuses[$((created % ${#statuses[@]}))]}"
+
+  type_label="${type_labels[$type]}"
+  status_label="${status_labels[$status]}"
+
+  resp="$(http_post_json "${BACKEND_URL}/api/properties" "$(
+    create_property_payload \
+      "Seed ${type_label} #${i} (${status_label})" \
+      "${city}" "${price}" "${broker_id}" "${type}" "${status}"
+  )")"
+  assert_json "POST /api/properties #${i}" "${resp}"
+
+  if [[ -z "${property_id}" ]]; then
+    property_id="$(printf '%s' "${resp}" | json_field "id")"
+  fi
+
+  created=$((created+1))
+  i=$((i+1))
+done
+
+success "[seed] Properties created: ${SEED_PROPERTIES_COUNT}"
+success "[seed] propertyId for leads: ${property_id}"
+
+# Save PROPERTY_ID to seed.env
 grep -v '^PROPERTY_ID=' "${seed_env}" > "${seed_env}.tmp" || true
 mv "${seed_env}.tmp" "${seed_env}"
 echo "PROPERTY_ID=${property_id}" >> "${seed_env}"
