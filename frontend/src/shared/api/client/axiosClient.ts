@@ -5,7 +5,7 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 import type { HttpClientOptions } from "@/shared/api/client/types";
-import { DEFAULT_HTTP_TIMEOUT_MS } from "@/defaults";
+import { DEFAULT_HTTP_TIMEOUT_MS } from "@/app/defaults";
 import { normalizeAxiosError } from "@/shared/api/errors/normalizeAxiosError";
 
 export const createAxiosClient = (opts: HttpClientOptions): AxiosInstance => {
