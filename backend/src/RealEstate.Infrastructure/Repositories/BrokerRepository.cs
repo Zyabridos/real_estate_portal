@@ -55,7 +55,7 @@ public sealed class BrokerRepository : IBrokerRepository
         return res.IsAcknowledged && res.DeletedCount == 1;
     }
 
-    public async Task<(IReadOnlyList<Broker> Items, long TotalCount)> GetListAsync(
+    public async Task<(IReadOnlyList<Broker> Items, long TotalItems)> GetListAsync(
         BrokerListQuery query,
         CancellationToken ct)
     {
@@ -102,7 +102,7 @@ public sealed class BrokerRepository : IBrokerRepository
 
         var skip = (page - 1) * pageSize;
 
-        var totalCount = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
+        var totalItems = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
 
         var items = await _collection.Find(filter)
             .Sort(sort)
@@ -110,7 +110,7 @@ public sealed class BrokerRepository : IBrokerRepository
             .Limit(pageSize)
             .ToListAsync(ct);
 
-        return (items, totalCount);
+        return (items, totalItems);
     }
 
     private static SortDefinition<Broker> BuildSort(SortBy sortBy, DomainSortDirection direction)

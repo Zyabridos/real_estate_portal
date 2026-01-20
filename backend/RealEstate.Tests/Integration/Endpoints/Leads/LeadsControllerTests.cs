@@ -43,7 +43,7 @@ public sealed class LeadsControllerTests : IntegrationTestBase
         payload!.Items.Should().NotBeNull();
         payload.Page.Should().Be(1);
         payload.PageSize.Should().Be(10);
-        payload.TotalCount.Should().BeGreaterThan(1);
+        payload.TotalItems.Should().BeGreaterThan(1);
         payload.Items.Count.Should().BeGreaterThan(0);
     }
 

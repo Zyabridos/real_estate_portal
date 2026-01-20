@@ -21,14 +21,14 @@ public sealed class LeadService : ILeadService
      }
      public async Task<PagedResult<LeadListItemDto>> GetListAsync(LeadListQuery query, CancellationToken ct)
      {
-         var (items, totalCount) = await _leadRepository.GetListAsync(query, ct);
+         var (items, totalItems) = await _leadRepository.GetListAsync(query, ct);
  
          var dtoItems = _mapper.Map<IReadOnlyList<LeadListItemDto>>(items);
  
          return new PagedResult<LeadListItemDto>
          {
              Items = dtoItems,
-             TotalCount = totalCount,
+             TotalItems = totalItems,
              Page = query.Page,
              PageSize = query.PageSize
          };
@@ -36,8 +36,6 @@ public sealed class LeadService : ILeadService
  
      public async Task<LeadDetailsDto?> GetByIdAsync(Guid id, CancellationToken ct)
      {
-         // Важно: используй одно имя метода в репозитории везде.
-         // Если в репо сейчас GetByIdAsync — приведи к нему и здесь, и в Update.
          var entity = await _leadRepository.GetByIdAsync(id, ct);
  
          return entity is null

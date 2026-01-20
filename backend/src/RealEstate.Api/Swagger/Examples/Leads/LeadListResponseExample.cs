@@ -34,7 +34,7 @@ public sealed class LeadListResponseExample : IExamplesProvider<PagedResult<Lead
                     UpdatedAt: DateTime.Parse("2026-01-11T15:00:00Z")
                 )
             ],
-            TotalCount = 2,
+            TotalItems = 2,
             Page = 1,
             PageSize = 20
         };

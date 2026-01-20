@@ -38,11 +38,11 @@ public sealed class LeadRepository : ILeadRepository
         return result.ModifiedCount == 1;
     }
 
-    public async Task<(IReadOnlyList<Lead> Items, long TotalCount)> GetListAsync(LeadListQuery query, CancellationToken ct)
+    public async Task<(IReadOnlyList<Lead> Items, long TotalItems)> GetListAsync(LeadListQuery query, CancellationToken ct)
     {
         var filter = BuildFilter(query);
 
-        var totalCount = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
+        var totalItems = await _collection.CountDocumentsAsync(filter, cancellationToken: ct);
 
         var find = _collection.Find(filter);
         find = ApplySorting(find);
@@ -50,7 +50,7 @@ public sealed class LeadRepository : ILeadRepository
 
         var items = await find.ToListAsync(ct);
 
-        return (items, totalCount);
+        return (items, totalItems);
     }
 
     private static FilterDefinition<Lead> BuildFilter(LeadListQuery query)
@@ -85,12 +85,9 @@ public sealed class LeadRepository : ILeadRepository
 
         return filter;
     }
-
+	 
     private static IFindFluent<Lead, Lead> ApplySorting(IFindFluent<Lead, Lead> find)
-    {
-        // Default: newest first
-        return find.Sort(Builders<Lead>.Sort.Descending(x => x.CreatedAt));
-    }
+        => find.Sort(Builders<Lead>.Sort.Descending(x => x.CreatedAt));
 
     private static IFindFluent<Lead, Lead> ApplyPaging(IFindFluent<Lead, Lead> find, LeadListQuery query)
     {

@@ -5,7 +5,7 @@ namespace RealEstate.Application.Interfaces.Repositories;
 
 public interface ILeadRepository
 {
-    Task<(IReadOnlyList<Lead> Items, long TotalCount)> GetListAsync(LeadListQuery query, CancellationToken ct);
+    Task<(IReadOnlyList<Lead> Items, long TotalItems)> GetListAsync(LeadListQuery query, CancellationToken ct);
 
     Task<Lead?> GetByIdAsync(Guid id, CancellationToken ct);
 

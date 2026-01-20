@@ -37,7 +37,7 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
 
         body!.Items.Should().NotBeNull();
         body.Items.Should().BeEmpty();
-        body.TotalCount.Should().Be(0);
+        body.TotalItems.Should().Be(0);
         body.Page.Should().Be(1);
         body.PageSize.Should().Be(10);
     }
@@ -73,7 +73,7 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
         var body = await resp.Content.ReadFromJsonAsync<PagedResult<PropertyListItemDto>>();
         body.Should().NotBeNull();
 
-        body!.TotalCount.Should().BeGreaterThan(0);
+        body!.TotalItems.Should().BeGreaterThan(0);
         body.Items.Should().NotBeEmpty();
 
         body.Items.Should().OnlyContain(x =>
@@ -105,7 +105,7 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
         body.Should().NotBeNull();
 
         body!.Items.Should().HaveCount(10);
-        body.TotalCount.Should().Be(25);
+        body.TotalItems.Should().Be(25);
         body.Page.Should().Be(2);
         body.PageSize.Should().Be(10);
     }
