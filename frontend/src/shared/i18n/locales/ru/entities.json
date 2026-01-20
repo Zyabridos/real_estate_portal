@@ -1,0 +1,18 @@
+{
+  "common": {
+    "createdLabel": "Создано",
+    "updatedLabel": "Обновлено"
+  },
+  "broker": {
+    "contactNotAvailable": "Контактные данные недоступны.",
+    "agencyIdLabel": "ID агентства",
+    "brokerIdLabel": "ID брокера"
+  },
+  "property": {
+    "typeLabel": "Тип",
+    "statusLabel": "Статус",
+    "cityLabel": "Город",
+    "propertyIdLabel": "ID объекта",
+    "descriptionTitle": "Описание"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "lead": {
+    "title": "Send forespørsel",
+    "subtitle": "Legg igjen kontaktinfo, så tar vi kontakt.",
+    "fields": {
+      "fullName": "Fullt navn",
+      "email": "E-post",
+      "phone": "Telefon",
+      "message": "Melding"
+    },
+    "actions": {
+      "submit": "Send",
+      "submitting": "Sender…"
+    },
+    "messages": {
+      "success": "Forespørselen er sendt.",
+      "error": "Kunne ikke sende forespørselen. Prøv igjen."
+    },
+    "validation": {
+      "required": "Dette feltet er påkrevd.",
+      "email": "Skriv inn en gyldig e-postadresse.",
+      "phone": "Skriv inn et gyldig telefonnummer."
+    }
+  }
+}

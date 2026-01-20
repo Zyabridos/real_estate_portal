@@ -1,0 +1,28 @@
+{
+  "title": {
+    "network": "Nettverksfeil",
+    "timeout": "Forespørselen tok for lang tid",
+    "generic": "Noe gikk galt",
+    "badRequest": "Ugyldig forespørsel",
+    "notFound": {
+      "property": "Fant ikke boligen",
+      "broker": "Fant ikke megleren",
+      "page": "Fant ikke siden"
+    },
+    "loadFailed": {
+      "property": "Kunne ikke laste boligen",
+      "broker": "Kunne ikke laste megleren",
+      "brokers": "Kunne ikke laste meglere",
+      "properties": "Kunne ikke laste boliger"
+    }
+  },
+  "message": {
+    "unexpected": "Uventet feil.",
+    "invalidPropertyId": "Ugyldig bolig-id.",
+    "invalidBrokerId": "Ugyldig megler-id.",
+    "notFound": {
+      "property": "Vi fant ikke denne boligen. Den kan være fjernet eller lenken er feil.",
+      "broker": "Vi fant ikke denne megleren. Den kan være fjernet eller lenken er feil."
+    }
+  }
+}

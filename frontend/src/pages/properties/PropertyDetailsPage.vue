@@ -2,8 +2,9 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import i18n from "@/shared/i18n";
 import { propertiesApi } from "@/shared/api/properties";
-import routes from "@/shared/routes"
+import routes from "@/shared/routes";
 
 import { ErrorState, LoadingState } from "@/shared/ui/states";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
@@ -21,22 +22,28 @@ const data = ref<PropertyDetailsDto | null>(null);
 
 const id = computed(() => String(route.params.id ?? "").trim());
 
-const pageTitle = computed(() =>
-  data.value?.title?.trim() ? data.value.title : "Property details"
-);
+const pageTitle = computed(() => {
+  const fallback = i18n.t("pages:properties.details.titleFallback");
+  const title = data.value?.title?.trim();
+  return title ? title : fallback;
+});
 
 const errorTitle = computed(() => {
-  if (error.value?.kind === "NotFound") return "Property not found";
-  if (error.value?.kind === "Network") return "Network error";
-  if (error.value?.kind === "Timeout") return "Request timed out";
-  return "Failed to load property";
+  if (error.value?.kind === "NotFound") return i18n.t("errors:titles.propertyNotFound");
+  if (error.value?.kind === "Network") return i18n.t("errors:titles.network");
+  if (error.value?.kind === "Timeout") return i18n.t("errors:titles.timeout");
+  if (error.value?.kind === "BadRequest") return i18n.t("errors:titles.badRequest");
+  return i18n.t("errors:titles.genericLoadFailed");
 });
 
 const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") {
-    return "We couldn't find this property. It may have been removed or the link is incorrect.";
+    return i18n.t("errors:messages.propertyNotFoundLong");
   }
-  return error.value?.message ?? "Unexpected error.";
+  if (error.value?.kind === "BadRequest") {
+    return i18n.t("errors:messages.invalidPropertyId");
+  }
+  return error.value?.message ?? i18n.t("errors:messages.unexpected");
 });
 
 async function load(): Promise<void> {
@@ -46,10 +53,7 @@ async function load(): Promise<void> {
 
   if (!id.value) {
     state.value = "error";
-    error.value = {
-      kind: "BadRequest",
-      message: "Invalid property id.",
-    } as ApiError;
+    error.value = { kind: "BadRequest", message: i18n.t("errors:messages.invalidPropertyId") } as ApiError;
     return;
   }
 
@@ -69,20 +73,18 @@ async function load(): Promise<void> {
 }
 
 function goBack(): void {
-  router.push({ path: routes.app.brokers(), query: route.query });
+  router.push({ path: routes.app.properties(), query: route.query });
 }
 
 onMounted(load);
 
-// TODO: remove hardcoded texts
-// If the user navigates between property detail pages (e.g. via links), reload data when the id changes
 watch(id, () => {
   load();
 });
 </script>
 
 <template>
-  <section class="w-full" data-testid="property-details-page">
+  <section class="w-full" data-testid="property-details-page" :aria-label="$t('pages:properties.details.ariaLabel')">
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
@@ -90,18 +92,19 @@ watch(id, () => {
             {{ pageTitle }}
           </h1>
           <p class="mt-1 text-sm text-slate-600">
-            Property details loaded from the backend.
+            {{ $t('pages:properties.details.subtitle') }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
             @click="goBack"
+            :aria-label="$t('common:actions.backToListAria')"
           >
-            Back to list
+            {{ $t('common:actions.backToList') }}
           </button>
 
           <button
@@ -109,17 +112,18 @@ watch(id, () => {
             class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             data-testid="refresh-button"
             @click="load"
+            :aria-label="$t('common:actions.refreshAria')"
           >
-            Refresh
+            {{ $t('common:actions.refresh') }}
           </button>
         </div>
       </div>
 
-      <div class="mt-8">
+      <div class="mt-8" aria-live="polite">
         <LoadingState
           v-if="state === 'loading'"
           data-testid="loading-state"
-          title="Loading property…"
+          :title="$t('states:loading.propertyDetailsTitle')"
         />
 
         <ErrorState

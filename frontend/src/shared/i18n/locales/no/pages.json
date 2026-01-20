@@ -1,0 +1,57 @@
+{
+  "home": {
+    "title": "Frontend OK",
+    "backendHealthLabel": "Backend-status",
+    "loading": "Laster…",
+    "health": {
+      "emptyBody": "(tomt svar)",
+      "errorPrefix": "feil"
+    }
+  },
+  "properties": {
+    "list": {
+      "title": "Boliger",
+      "subtitle": "Bla gjennom boliger fra backend. Filtrering og paginering kommer senere."
+    },
+    "details": {
+      "titleFallback": "Boligdetaljer",
+      "subtitle": "Boligdetaljer lastet fra backend."
+    }
+  },
+  "brokers": {
+    "list": {
+      "title": "Meglere",
+      "subtitle": "Bla gjennom meglere fra backend. Filtrering og paginering kommer senere."
+    },
+    "details": {
+      "titleFallback": "Meglerdetaljer",
+      "subtitle": "Meglerdetaljer lastet fra backend."
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Blogg",
+      "subtitle": "Artikler lastes fra Sanity CMS."
+    },
+    "details": {
+      "titleFallback": "Artikkel",
+      "subtitle": "Artikkelinnhold lastes fra Sanity CMS."
+    }
+  },
+  "system": {
+    "notFound": {
+      "badge": "404 • Siden finnes ikke",
+      "title": "Vi fant ikke siden",
+      "description": "Siden du leter etter finnes ikke eller kan ha blitt flyttet. Sjekk URL-en eller bruk navigasjonen nedenfor.",
+      "requestedPathLabel": "Forespurt sti",
+      "requestedPathUnknown": "(ukjent)",
+      "whatYouCanDoTitle": "Hva du kan gjøre",
+      "tips": {
+        "checkUrl": "Sjekk URL-en for skrivefeil.",
+        "useNavigation": "Bruk hovednavigasjonen øverst.",
+        "startFromProperties": "Start fra Boliger og juster filtrene."
+      },
+      "note": "Hvis du tror dette er en feil, vil du senere kunne sende oss en rapport."
+    }
+  }
+}

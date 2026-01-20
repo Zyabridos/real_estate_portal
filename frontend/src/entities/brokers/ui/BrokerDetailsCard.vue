@@ -8,7 +8,7 @@ type Props = {
 
 const { broker } = defineProps<Props>();
 
-const fullName = computed(() => `${broker.firstName} ${broker.lastName}`.trim());
+const fullName = computed(() => `${broker.firstName ?? ""} ${broker.lastName ?? ""}`.trim());
 
 const initials = computed(() => {
   const f = broker.firstName?.trim()?.[0] ?? "";
@@ -16,23 +16,30 @@ const initials = computed(() => {
   return (f + l).toUpperCase() || "B";
 });
 
-const contactParts = computed(() => {
-  const parts: string[] = [];
-  if (broker.email) parts.push(broker.email);
-  if (broker.phoneNumber) parts.push(broker.phoneNumber);
-  return parts;
+const hasEmail = computed(() => !!broker.email?.trim());
+const hasPhone = computed(() => !!broker.phoneNumber?.trim());
+
+const emailHref = computed(() => (hasEmail.value ? `mailto:${broker.email!.trim()}` : ""));
+const phoneHref = computed(() => {
+  if (!hasPhone.value) return "";
+  // minimal localozation of phone number: (evnt move to separate func?)
+  const digits = broker.phoneNumber!.replace(/[^\d+]/g, "");
+  return `tel:${digits}`;
 });
 
-const contactInfo = computed(() => contactParts.value.join(" • "));
+const hasAnyContact = computed(() => hasEmail.value || hasPhone.value);
+
+const createdAtText = computed(() => broker.createdAt ?? "");
+const updatedAtText = computed(() => broker.updatedAt ?? "");
 </script>
 
 <template>
   <article
     class="rounded-2xl border border-slate-200 bg-white shadow-sm"
     data-testid="broker-details-card"
+    :aria-label="$t('entities:broker.detailsCardAriaLabel')"
   >
     <div class="p-6 space-y-6">
-      <!-- Header -->
       <header class="flex items-start gap-4">
         <!-- Photo / Avatar -->
         <div class="shrink-0">
@@ -43,15 +50,19 @@ const contactInfo = computed(() => contactParts.value.join(" • "));
             <img
               v-if="broker.photoUrl"
               :src="broker.photoUrl"
-              :alt="fullName"
+              :alt="fullName ? $t('entities:broker.photoAlt', { name: fullName }) : $t('entities:broker.photoAltFallback')"
               class="h-full w-full object-cover"
               referrerpolicy="no-referrer"
+              loading="lazy"
             />
+
+            <!-- initials -->
             <div
               v-else
               class="flex h-full w-full items-center justify-center text-lg font-semibold text-slate-700"
               data-testid="broker-photo-fallback"
-              aria-hidden="true"
+              :aria-label="fullName ? $t('entities:broker.initialsAriaLabel', { initials, name: fullName }) : $t('entities:broker.initialsAriaLabelFallback', { initials })"
+              role="img"
             >
               {{ initials }}
             </div>
@@ -66,55 +77,83 @@ const contactInfo = computed(() => contactParts.value.join(" • "));
             {{ fullName }}
           </h1>
 
-          <p
-            v-if="contactInfo"
+          <!-- Contact -->
+          <div
             class="mt-1 text-sm text-slate-600"
             data-testid="broker-contactInfo"
+            aria-live="polite"
           >
-            {{ contactInfo }}
-          </p>
+            <p v-if="hasAnyContact" class="flex flex-wrap gap-x-3 gap-y-1">
+              <a
+                v-if="hasEmail"
+                class="underline underline-offset-2 hover:text-slate-900"
+                :href="emailHref"
+                :aria-label="$t('entities:broker.emailAriaLabel', { email: broker.email })"
+                data-testid="broker-email"
+              >
+                {{ broker.email }}
+              </a>
 
-          <p
-            v-else
-            class="mt-1 text-sm text-slate-500"
-            data-testid="broker-contactInfo-empty"
-          >
-            Contact details are not available.
-          </p>
+              <a
+                v-if="hasPhone"
+                class="underline underline-offset-2 hover:text-slate-900"
+                :href="phoneHref"
+                :aria-label="$t('entities:broker.phoneAriaLabel', { phone: broker.phoneNumber })"
+                data-testid="broker-phone"
+              >
+                {{ broker.phoneNumber }}
+              </a>
+            </p>
+
+            <p
+              v-else
+              class="text-slate-500"
+              data-testid="broker-contactInfo-empty"
+            >
+              {{ $t('entities:broker.contactNotAvailable') }}
+            </p>
+          </div>
         </div>
       </header>
 
       <!-- Meta -->
-      <section class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2" data-testid="broker-meta">
-        <div>
-          <div class="text-slate-500">Agency ID</div>
-          <div class="font-medium text-slate-900" data-testid="broker-agencyId">
-            {{ broker.agencyId }}
+      <section data-testid="broker-meta" aria-label="$t('entities:broker.metaSectionAriaLabel')">
+        <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:broker.agencyIdLabel') }}</dt>
+            <dd class="font-medium text-slate-900" data-testid="broker-agencyId">
+              {{ broker.agencyId }}
+            </dd>
           </div>
-        </div>
 
-        <div>
-          <div class="text-slate-500">Broker ID</div>
-          <div class="font-mono text-xs text-slate-700" data-testid="broker-id">
-            {{ broker.id }}
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:broker.brokerIdLabel') }}</dt>
+            <dd class="font-mono text-xs text-slate-700" data-testid="broker-id">
+              {{ broker.id }}
+            </dd>
           </div>
-        </div>
+        </dl>
       </section>
 
-      <!-- Optional timestamps (если хочешь оставить для dev/MVP) -->
-      <section class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2" data-testid="broker-dates">
-        <div>
-          <div class="text-slate-500">Created</div>
-          <div class="font-medium text-slate-900" data-testid="broker-createdAt">
-            {{ broker.createdAt }}
+      <!-- Dates -->
+      <section data-testid="broker-dates" aria-label="$t('entities:common.datesSectionAriaLabel')">
+        <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:common.createdLabel') }}</dt>
+            <dd class="font-medium text-slate-900" data-testid="broker-createdAt">
+              <time v-if="createdAtText" :datetime="createdAtText">{{ createdAtText }}</time>
+              <span v-else class="text-slate-500">{{ $t('common:notAvailableShort') }}</span>
+            </dd>
           </div>
-        </div>
-        <div>
-          <div class="text-slate-500">Updated</div>
-          <div class="font-medium text-slate-900" data-testid="broker-updatedAt">
-            {{ broker.updatedAt }}
+
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:common.updatedLabel') }}</dt>
+            <dd class="font-medium text-slate-900" data-testid="broker-updatedAt">
+              <time v-if="updatedAtText" :datetime="updatedAtText">{{ updatedAtText }}</time>
+              <span v-else class="text-slate-500">{{ $t('common:notAvailableShort') }}</span>
+            </dd>
           </div>
-        </div>
+        </dl>
       </section>
     </div>
   </article>

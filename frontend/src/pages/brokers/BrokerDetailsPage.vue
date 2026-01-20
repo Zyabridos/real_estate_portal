@@ -2,8 +2,9 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import i18n from "@/shared/i18n";
 import { brokersApi } from "@/shared/api/brokers";
-import routes from "@/shared/routes"
+import routes from "@/shared/routes";
 
 import BrokerDetailsCard from "@/entities/brokers/ui/BrokerDetailsCard.vue";
 import { ErrorState, LoadingState } from "@/shared/ui/states";
@@ -21,22 +22,29 @@ const data = ref<BrokerDetailsDto | null>(null);
 
 const id = computed(() => String(route.params.id ?? "").trim());
 
-const pageTitle = computed(() =>
-  data.value?.title?.trim() ? data.value.title : "Broker details"
-);
+const pageTitle = computed(() => {
+  // TODO: fix it later... (I am tired not)
+  const fallback = i18n.t("pages:brokers.details.titleFallback");
+  const name = data.value?.title?.trim();
+  return name ? name : fallback;
+});
 
 const errorTitle = computed(() => {
-  if (error.value?.kind === "NotFound") return "Broker not found";
-  if (error.value?.kind === "Network") return "Network error";
-  if (error.value?.kind === "Timeout") return "Request timed out";
-  return "Failed to load broker";
+  if (error.value?.kind === "NotFound") return i18n.t("errors:titles.brokerNotFound");
+  if (error.value?.kind === "Network") return i18n.t("errors:titles.network");
+  if (error.value?.kind === "Timeout") return i18n.t("errors:titles.timeout");
+  if (error.value?.kind === "BadRequest") return i18n.t("errors:titles.badRequest");
+  return i18n.t("errors:titles.genericLoadFailed");
 });
 
 const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") {
-    return "We couldn't find this broker. It may have been removed or the link is incorrect.";
+    return i18n.t("errors:messages.brokerNotFoundLong");
   }
-  return error.value?.message ?? "Unexpected error.";
+  if (error.value?.kind === "BadRequest") {
+    return i18n.t("errors:messages.invalidBrokerId");
+  }
+  return error.value?.message ?? i18n.t("errors:messages.unexpected");
 });
 
 async function load(): Promise<void> {
@@ -46,16 +54,13 @@ async function load(): Promise<void> {
 
   if (!id.value) {
     state.value = "error";
-    error.value = {
-      kind: "BadRequest",
-      message: "Invalid broker id.",
-    } as ApiError;
+    error.value = { kind: "BadRequest", message: i18n.t("errors:messages.invalidBrokerId") } as ApiError;
     return;
   }
 
   try {
-    const res = await brokersApi.getById(id.value);
-    data.value = res;
+    const response = await brokersApi.getById(id.value);
+    data.value = response;
     state.value = "success";
   } catch (e) {
     error.value = e as ApiError;
@@ -74,34 +79,37 @@ function goBack(): void {
 
 onMounted(load);
 
-// TODO: remove hardcoded texts
-// If the user navigates between broker detail pages (e.g. via links), reload data when the id changes
 watch(id, () => {
   load();
 });
 </script>
 
 <template>
-  <section class="w-full" data-testid="broker-details-page">
+  <section class="w-full" data-testid="broker-details-page" :aria-label="$t('pages:brokers.details.ariaLabel')">
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="page-title">
+          <h1
+            class="text-2xl font-semibold tracking-tight text-slate-900"
+            data-testid="page-title"
+          >
             {{ pageTitle }}
           </h1>
+
           <p class="mt-1 text-sm text-slate-600">
-            Broker details loaded from the backend.
+            {{ $t('pages:brokers.details.subtitle') }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
             @click="goBack"
+            :aria-label="$t('common:actions.backToListAria')"
           >
-            Back to list
+            {{ $t('common:actions.backToList') }}
           </button>
 
           <button
@@ -109,17 +117,18 @@ watch(id, () => {
             class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             data-testid="refresh-button"
             @click="load"
+            :aria-label="$t('common:actions.refreshAria')"
           >
-            Refresh
+            {{ $t('common:actions.refresh') }}
           </button>
         </div>
       </div>
 
-      <div class="mt-8">
+      <div class="mt-8" aria-live="polite">
         <LoadingState
           v-if="state === 'loading'"
           data-testid="loading-state"
-          title="Loading broker…"
+          :title="$t('states:loading.brokerDetailsTitle')"
         />
 
         <ErrorState

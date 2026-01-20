@@ -1,13 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RealEstate Portal</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/app/main.ts"></script>
-  </body>
+<!-- Fallback. "Real" language change via Vue + i18n -->
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+        <!-- Fallback. Will be overridden by Vue + i18n -->
+        <title>RealEstate Portal</title>
+        <meta
+                name="description"
+                content="RealEstate Portal demo application"
+        />
+    
+        <!-- Prevent content jumping before Vue mounts -->
+        <style>
+            body {
+                margin: 0;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div 
+                id="app"
+                role="application"
+                aria-label="RealEstate Portal application">
+        </div>
+        <script type="module" src="/src/app/main.ts"></script>
+    </body>
 </html>

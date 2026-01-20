@@ -1,0 +1,18 @@
+{
+  "common": {
+    "createdLabel": "Opprettet",
+    "updatedLabel": "Oppdatert"
+  },
+  "broker": {
+    "contactNotAvailable": "Kontaktinformasjon er ikke tilgjengelig.",
+    "agencyIdLabel": "Byrå-ID",
+    "brokerIdLabel": "Megler-ID"
+  },
+  "property": {
+    "typeLabel": "Type",
+    "statusLabel": "Status",
+    "cityLabel": "By",
+    "propertyIdLabel": "Bolig-ID",
+    "descriptionTitle": "Beskrivelse"
+  }
+}

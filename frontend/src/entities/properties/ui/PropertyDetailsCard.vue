@@ -8,15 +8,18 @@ type Props = {
 
 const { property } = defineProps<Props>();
 
-const formattedPrice = computed(() =>
-  property.price.toLocaleString("nb-NO")
-);
+const formattedPrice = computed(() => property.price.toLocaleString("nb-NO"));
+
+const hasDescription = computed(() => !!property.description?.trim());
+
+const titleText = computed(() => property.title?.trim() ?? "");
 </script>
 
 <template>
   <article
     class="rounded-2xl border border-slate-200 bg-white shadow-sm"
     data-testid="property-details-card"
+    :aria-label="$t('entities:property.detailsCardAriaLabel')"
   >
     <div class="p-6 space-y-6">
       <!-- Header -->
@@ -25,13 +28,11 @@ const formattedPrice = computed(() =>
           class="text-2xl font-semibold text-slate-900"
           data-testid="property-title"
         >
-          {{ property.title }}
+          {{ titleText }}
         </h1>
 
-        <p
-          class="text-sm text-slate-600"
-          data-testid="property-subtitle"
-        >
+        <p class="text-sm text-slate-600" data-testid="property-subtitle">
+          <span class="sr-only">{{ $t('entities:property.subtitleAriaLabel') }}</span>
           {{ property.city }} • {{ property.type }} • {{ property.status }}
         </p>
       </header>
@@ -40,54 +41,53 @@ const formattedPrice = computed(() =>
       <section
         class="flex items-baseline justify-between"
         data-testid="property-price"
+        :aria-label="$t('entities:property.priceSectionAriaLabel')"
       >
-        <div class="text-2xl font-bold text-slate-900">
+        <div class="text-2xl font-bold text-slate-900" :aria-label="$t('entities:property.priceValueAriaLabel', { value: formattedPrice })">
           {{ formattedPrice }}
         </div>
-        <div class="text-sm text-slate-500">NOK</div>
+        <div class="text-sm text-slate-500">
+          {{ $t('common:currency.nok') }}
+        </div>
       </section>
 
-      <!-- Meta -->
-      <section
-        class="grid grid-cols-2 gap-4 text-sm"
-        data-testid="property-meta"
-      >
-        <div>
-          <div class="text-slate-500">Type</div>
-          <div class="font-medium text-slate-900">
-            {{ property.type }}
+      <!-- Meta (dl) -->
+      <section data-testid="property-meta" aria-label="$t('entities:property.metaSectionAriaLabel')">
+        <dl class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:property.typeLabel') }}</dt>
+            <dd class="font-medium text-slate-900">
+              {{ property.type }}
+            </dd>
           </div>
-        </div>
 
-        <div>
-          <div class="text-slate-500">Status</div>
-          <div class="font-medium text-slate-900">
-            {{ property.status }}
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:property.statusLabel') }}</dt>
+            <dd class="font-medium text-slate-900">
+              {{ property.status }}
+            </dd>
           </div>
-        </div>
 
-        <div>
-          <div class="text-slate-500">City</div>
-          <div class="font-medium text-slate-900">
-            {{ property.city }}
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:property.cityLabel') }}</dt>
+            <dd class="font-medium text-slate-900">
+              {{ property.city }}
+            </dd>
           </div>
-        </div>
 
-        <div>
-          <div class="text-slate-500">Property ID</div>
-          <div class="font-mono text-xs text-slate-700">
-            {{ property.id }}
+          <div>
+            <dt class="text-slate-500">{{ $t('entities:property.propertyIdLabel') }}</dt>
+            <dd class="font-mono text-xs text-slate-700">
+              {{ property.id }}
+            </dd>
           </div>
-        </div>
+        </dl>
       </section>
 
       <!-- Description -->
-      <section
-        v-if="property.description"
-        data-testid="property-description"
-      >
+      <section v-if="hasDescription" data-testid="property-description" aria-label="$t('entities:property.descriptionSectionAriaLabel')">
         <h2 class="mb-2 text-sm font-semibold text-slate-900">
-          Description
+          {{ $t('entities:property.descriptionTitle') }}
         </h2>
         <p class="text-sm leading-relaxed text-slate-700">
           {{ property.description }}
@@ -96,4 +96,3 @@ const formattedPrice = computed(() =>
     </div>
   </article>
 </template>
-

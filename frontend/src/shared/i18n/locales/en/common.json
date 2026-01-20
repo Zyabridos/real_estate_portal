@@ -1,0 +1,21 @@
+{
+  "appTitle": "Real Estate Portal",
+  "language": "Language",
+  "currency": {
+    "nok": "NOK"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "backToList": "Back to list",
+    "viewDetails": "View details",
+    "goHome": "Go to Home",
+    "retry": "Try again"
+  },
+  "meta": {
+    "page": "Page",
+    "pageSize": "Page size",
+    "total": "Total",
+    "id": "ID",
+    "idShort": "ID"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "appTitle": "Портал недвижимости",
+  "language": "Язык",
+  "currency": {
+    "nok": "NOK"
+  },
+  "actions": {
+    "refresh": "Обновить",
+    "backToList": "Назад к списку",
+    "viewDetails": "Подробнее",
+    "goHome": "На главную",
+    "retry": "Повторить"
+  },
+  "meta": {
+    "page": "Страница",
+    "pageSize": "Размер страницы",
+    "total": "Всего",
+    "id": "ID",
+    "idShort": "ID"
+  }
+}

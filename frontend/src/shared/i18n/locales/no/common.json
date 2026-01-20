@@ -1,0 +1,21 @@
+{
+  "appTitle": "Eiendomsportal",
+  "language": "Språk",
+  "currency": {
+    "nok": "NOK"
+  },
+  "actions": {
+    "refresh": "Oppdater",
+    "backToList": "Tilbake til listen",
+    "viewDetails": "Vis detaljer",
+    "goHome": "Gå til forsiden",
+    "retry": "Prøv igjen"
+  },
+  "meta": {
+    "page": "Side",
+    "pageSize": "Sidestørrelse",
+    "total": "Totalt",
+    "id": "ID",
+    "idShort": "ID"
+  }
+}

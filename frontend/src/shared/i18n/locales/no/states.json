@@ -1,0 +1,15 @@
+{
+  "loading": {
+    "genericTitle": "Laster…",
+    "propertyDetailsTitle": "Laster bolig…",
+    "brokerDetailsTitle": "Laster megler…"
+  },
+  "empty": {
+    "title": "Ingen resultater",
+    "message": "Fant ingen elementer for gjeldende valg."
+  },
+  "error": {
+    "title": "Noe gikk galt",
+    "message": "Vennligst prøv igjen."
+  }
+}
