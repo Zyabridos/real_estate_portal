@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using System.Text.Json.Serialization;
 using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Interfaces.Services;
@@ -25,6 +26,16 @@ builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validat
 
 //Mapper
 builder.Services.AddAutoMapper(typeof(PropertyProfile).Assembly);
+
+// JSON-converter (Enum -> String in my case)
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: true)
+        );
+    });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

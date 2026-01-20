@@ -129,11 +129,11 @@ print(json.dumps({
   "address": "Seed Street 1",
   "city": city,
   "price": float(price),
-  "type": int(ptype),
+  "type": ptype,
+  "status": status,
   "bedrooms": 2,
   "bathrooms": 1,
   "area": 55.5,
-  "status": int(status),
   "mainImageUrl": None,
   "brokerId": broker_id
 }))
@@ -142,13 +142,8 @@ PY
 
 cities=("Oslo" "Bergen" "Stavanger" "Trondheim" "Drammen" "Elverum")
 
-# Note: must be ints for current backend JSON options
-types=(0 1 2)         # Apartment=0, House=1, Commercial=2
-statuses=(0 1)        # Active=0, Sold=1
-
-# Human-readable labels for title/UI
-type_labels=("Apartment" "House" "Commercial")
-status_labels=("Active" "Sold")
+types=("Apartment" "House" "Commercial")
+statuses=("Active" "Sold")
 
 neutral "Creating ${SEED_PROPERTIES_COUNT} properties distributed across brokers"
 
@@ -166,12 +161,9 @@ while [[ "${created}" -lt "${SEED_PROPERTIES_COUNT}" ]]; do
   type="${types[$((created % ${#types[@]}))]}"
   status="${statuses[$((created % ${#statuses[@]}))]}"
 
-  type_label="${type_labels[$type]}"
-  status_label="${status_labels[$status]}"
-
   resp="$(http_post_json "${BACKEND_URL}/api/properties" "$(
     create_property_payload \
-      "Seed ${type_label} #${i} (${status_label})" \
+      "Seed ${type} #${i} (${status})" \
       "${city}" "${price}" "${broker_id}" "${type}" "${status}"
   )")"
   assert_json "POST /api/properties #${i}" "${resp}"

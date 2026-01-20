@@ -2,7 +2,7 @@ namespace RealEstate.Domain.Enums.Properties;
 
 public enum PropertyType
 {
-    Apartment,
-    House,
-    Commercial
+    Apartment = 0,
+    House = 1,
+    Commercial = 2
 }
