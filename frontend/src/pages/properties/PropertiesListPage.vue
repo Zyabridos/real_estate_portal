@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useRoute } from "vue-router";
 
 import i18n from "@/shared/i18n";
 import { propertiesApi } from "@/shared/api/properties";
 import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/states";
+import { usePagedQueryParams } from "@/shared/composables/usePagedQueryParams";
+import Pagination from "@/shared/ui/pagination/Pagination.vue";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { PropertyListItemDto } from "@/shared/api/dtos/properties/property-list-item.dto";
@@ -15,27 +16,23 @@ const state = ref<UIStatus>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PagedResultDto<PropertyListItemDto> | null>(null);
 
-const route = useRoute();
+const { page, pageSize, setPage } = usePagedQueryParams({ defaultPage: 1, defaultPageSize: 20 });
 
-const page = computed(() => {
-  const p = Number(route.query.page);
-  return Number.isInteger(p) && p > 0 ? p : 1;
-});
-
-const pageSize = computed(() => {
-  const ps = Number(route.query.pageSize);
-  return Number.isInteger(ps) && ps > 0 ? ps : 20;
-});
-
-const items = computed(() => data.value?.items ?? []);
-const meta = computed(() => ({
+// Show data from query until we will get full response from backend, so we do not break UI
+const paging = computed(() => ({
   page: data.value?.page ?? page.value,
   pageSize: data.value?.pageSize ?? pageSize.value,
   totalItems: data.value?.totalItems ?? 0,
   totalPages: data.value?.totalPages ?? 0,
 }));
 
+const items = computed(() => data.value?.items ?? []);
+
 const listAriaLabel = computed(() => i18n.t("pages:properties.list.ariaLabel"));
+
+async function onGoToPage(nextPage: number): Promise<void> {
+  await setPage(nextPage, paging.value.totalPages);
+}
 
 async function load(): Promise<void> {
   state.value = "loading";
@@ -67,6 +64,7 @@ watch(
 );
 </script>
 
+
 <template>
   <section class="w-full" :aria-label="listAriaLabel">
     <div class="w-full px-6 py-2">
@@ -96,18 +94,18 @@ watch(
       <!-- Meta -->
       <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600" role="status" aria-live="polite">
         <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t('common:meta.page') }}:
-          <span class="font-medium text-slate-900">{{ meta.page }}</span>
+          {{ $t('common:pagination.page') }}:
+          <span class="font-medium text-slate-900">{{ paging.page }}</span>
         </span>
 
         <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t('common:meta.pageSize') }}:
-          <span class="font-medium text-slate-900">{{ meta.pageSize }}</span>
+          {{ $t('common:pagination.pageSize') }}:
+          <span class="font-medium text-slate-900">{{ paging.pageSize }}</span>
         </span>
 
         <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t('common:meta.total') }}:
-          <span class="font-medium text-slate-900">{{ meta.totalItems }}</span>
+          {{ $t('common:pagination.total') }}:
+          <span class="font-medium text-slate-900">{{ paging.totalItems }}</span>
         </span>
       </div>
 
@@ -168,7 +166,7 @@ watch(
                 </RouterLink>
 
                 <div class="text-xs text-slate-500">
-                  {{ $t('common:meta.idShort') }}:
+                  {{ $t('common:pagination.idShort') }}:
                   <span class="font-mono">{{ p.id }}</span>
                 </div>
               </div>
@@ -176,6 +174,12 @@ watch(
           </article>
         </div>
       </div>
+      <Pagination
+        v-if="state === 'success' && paging.totalPages > 1"
+        :page="paging.page"
+        :totalPages="paging.totalPages"
+        @goToPage="onGoToPage"
+      />
     </div>
   </section>
 </template>

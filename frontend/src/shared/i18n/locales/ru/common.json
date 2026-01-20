@@ -11,7 +11,11 @@
     "goHome": "На главную",
     "retry": "Повторить"
   },
-  "meta": {
+  "pagination": {
+    "ariaLabel": "Пагинация",
+    "prev": "Назад",
+    "next": "Вперёд",
+    "pageOf": "Страница {{page}} / {{total}}",
     "page": "Страница",
     "pageSize": "Размер страницы",
     "total": "Всего",

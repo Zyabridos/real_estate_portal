@@ -11,7 +11,11 @@
     "goHome": "Gå til forsiden",
     "retry": "Prøv igjen"
   },
-  "meta": {
+  "pagination": {
+    "ariaLabel": "Paginering",
+    "prev": "Forrige",
+    "next": "Neste",
+    "pageOf": "Side {{page}} / {{total}}",
     "page": "Side",
     "pageSize": "Sidestørrelse",
     "total": "Totalt",

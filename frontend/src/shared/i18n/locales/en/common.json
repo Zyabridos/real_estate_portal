@@ -11,7 +11,11 @@
     "goHome": "Go to Home",
     "retry": "Try again"
   },
-  "meta": {
+  "pagination": {
+    "ariaLabel": "Pagination",
+    "prev": "Prev",
+    "next": "Next",
+    "pageOf": "Page {{page}} / {{total}}",
     "page": "Page",
     "pageSize": "Page size",
     "total": "Total",
