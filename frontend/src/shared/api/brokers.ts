@@ -1,7 +1,7 @@
 import { http } from '@/shared/api/http';
 import type { PagedResultDto } from '@/shared/api/dtos/common/paged-result.dto';
-import type { BrokerDetailsDto } from "@/shared/api/dtos/brokers/brokers-details.dto";
-import type { BrokerListItemDto } from "@/shared/api/dtos/brokers/brokers-list-item.dto";
+import type { BrokerDetailsDto } from "@/shared/api/dtos/brokers/broker-details.dto";
+import type { BrokerListItemDto } from "@/shared/api/dtos/brokers/broker-list-item.dto";
 import type { BrokersListQuery } from "@/shared/types/queries"
 import { serializeQuery } from '@/shared/api/query';
 import routes from "@/shared/routes.ts"
