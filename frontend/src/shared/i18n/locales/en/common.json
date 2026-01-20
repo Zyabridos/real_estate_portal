@@ -5,6 +5,8 @@
     "nok": "NOK"
   },
   "actions": {
+    "apply": "Apply",
+    "reset": "Reset",
     "refresh": "Refresh",
     "backToList": "Back to list",
     "viewDetails": "View details",

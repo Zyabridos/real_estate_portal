@@ -1,5 +1,5 @@
-export type PropertyType = "Apartment" | "House" | "Commercial";
-export type PropertyStatus = "Active" | "Sold";
+import type { PropertyType} from "@/shared/types/properties.ts";
+import type { PropertyStatus } from "@/shared/types/properties.ts";
 
 export type PropertyListItemDto = {
   id: string;

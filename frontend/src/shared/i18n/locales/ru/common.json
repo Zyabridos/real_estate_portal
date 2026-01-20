@@ -5,6 +5,8 @@
     "nok": "NOK"
   },
   "actions": {
+    "apply": "Применить",
+    "reset": "Сбросить",
     "refresh": "Обновить",
     "backToList": "Назад к списку",
     "viewDetails": "Подробнее",

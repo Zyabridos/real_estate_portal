@@ -5,10 +5,13 @@ import i18n from "@/shared/i18n";
 import { propertiesApi } from "@/shared/api/properties";
 import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/states";
 import { usePagedQueryParams } from "@/shared/composables/usePagedQueryParams";
+
 import Pagination from "@/shared/ui/pagination/Pagination.vue";
+import PropertyFilters from "@/pages/properties/components/PropertyFilters.vue";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { PropertyListItemDto } from "@/shared/api/dtos/properties/property-list-item.dto";
+import type { PropertyFiltersValue } from "@/shared/types/properties";
 import type { PagedResultDto } from "@/shared/api/dtos/common/paged-result.dto";
 import type { UIStatus } from "@/shared/types/ui";
 
@@ -57,6 +60,17 @@ async function load(): Promise<void> {
   }
 }
 
+const appliedFilters = ref<PropertyFiltersValue>({});
+
+function onApplyFilters(v: PropertyFiltersValue): void {
+  appliedFilters.value = v;
+}
+
+function onResetFilters(): void {
+  appliedFilters.value = {};
+}
+
+
 watch(
   () => [page.value, pageSize.value],
   () => load(),
@@ -90,6 +104,13 @@ watch(
           </button>
         </div>
       </div>
+
+      <PropertyFilters
+        :initial="appliedFilters"
+        :disabled="state === 'loading'"
+        @apply="onApplyFilters"
+        @reset="onResetFilters"
+      />
 
       <!-- Meta -->
       <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600" role="status" aria-live="polite">

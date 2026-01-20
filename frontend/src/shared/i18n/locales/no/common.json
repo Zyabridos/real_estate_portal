@@ -5,6 +5,8 @@
     "nok": "NOK"
   },
   "actions": {
+    "apply": "Bruk",
+    "reset": "Nullstill",
     "refresh": "Oppdater",
     "backToList": "Tilbake til listen",
     "viewDetails": "Vis detaljer",
