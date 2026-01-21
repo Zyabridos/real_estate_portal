@@ -28,6 +28,15 @@ const pageTitle = computed(() => {
   return title ? title : fallback;
 });
 
+const canCreateLead = computed(() => state.value === "success" && !!data.value?.id?.trim());
+
+function goCreateLead(): void {
+  const propertyId = data.value?.id?.trim();
+  if (!propertyId) return;
+
+  router.push({ path: routes.app.leads.create(propertyId), query: route.query });
+}
+
 const errorTitle = computed(() => {
   if (error.value?.kind === "NotFound") return i18n.t("errors:titles.propertyNotFound");
   if (error.value?.kind === "Network") return i18n.t("errors:titles.network");
@@ -106,6 +115,18 @@ watch(id, () => {
           >
             {{ $t('common:actions.backToList') }}
           </button>
+
+          <button
+            type="button"
+            class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-300"
+            data-testid="create-lead-button"
+            @click="goCreateLead"
+            :disabled="!canCreateLead"
+            :aria-label="$t('pages:properties.details.actions.createLeadAria')"
+          >
+            {{ $t("pages:properties.details.actions.createLead") }}
+          </button>
+
 
           <button
             type="button"

@@ -8,6 +8,8 @@ import BlogDetailsPage from "@/pages/blog/BlogDetailsPage.vue";
 import BrokersListPage from "@/pages/brokers/BrokersListPage.vue";
 import BrokerDetailsPage from "@/pages/brokers/BrokerDetailsPage.vue";
 
+import PropertyLeadCreatePage from "@/pages/leads/PropertyLeadCreatePage.vue";
+
 import PropertiesListPage from "@/pages/properties/PropertiesListPage.vue";
 import PropertyDetailsPage from "@/pages/properties/PropertyDetailsPage.vue";
 
@@ -19,6 +21,8 @@ const routes: RouteRecordRaw[] = [
 
   { path: "/brokers", name: "brokers", component: BrokersListPage },
   { path: "/brokers/:id", name: "broker-details", component: BrokerDetailsPage },
+
+  { path: "/properties/:id/lead/", name: "leads-form", component: PropertyLeadCreatePage },
 
   { path: "/properties", name: "properties", component: PropertiesListPage },
   { path: "/properties/:id", name: "property-details", component: PropertyDetailsPage },
