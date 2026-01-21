@@ -32,7 +32,8 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
 
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var body = await resp.Content.ReadFromJsonAsync<PagedResult<PropertyListItemDto>>();
+        var body = await resp.Content.ReadFromJsonTestAsync<PagedResult<PropertyListItemDto>>();
+
         body.Should().NotBeNull();
 
         body!.Items.Should().NotBeNull();
@@ -70,7 +71,7 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
         var resp = await _client.GetAsync(url);
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var body = await resp.Content.ReadFromJsonAsync<PagedResult<PropertyListItemDto>>();
+        var body = await resp.Content.ReadFromJsonTestAsync<PagedResult<PropertyListItemDto>>();
         body.Should().NotBeNull();
 
         body!.TotalItems.Should().BeGreaterThan(0);
@@ -101,7 +102,7 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
         var resp = await _client.GetAsync("/api/properties?page=2&pageSize=10&sort=createdAtDesc");
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var body = await resp.Content.ReadFromJsonAsync<PagedResult<PropertyListItemDto>>();
+        var body = await resp.Content.ReadFromJsonTestAsync<PagedResult<PropertyListItemDto>>();
         body.Should().NotBeNull();
 
         body!.Items.Should().HaveCount(10);

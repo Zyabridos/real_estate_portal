@@ -45,7 +45,7 @@ public sealed class BrokerPropertyLinkTests : IntegrationTestBase
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var payload = await response.Content.ReadFromJsonAsync<PagedResult<PropertyListItemDto>>();
+        var payload = await response.Content.ReadFromJsonTestAsync<PagedResult<PropertyListItemDto>>();
         payload.Should().NotBeNull();
 
         var ids = payload!.Items.Select(x => x.Id).ToHashSet();

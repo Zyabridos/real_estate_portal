@@ -46,7 +46,7 @@ public sealed class LeadPropertyLinkTests : IntegrationTestBase
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        var created = await response.Content.ReadFromJsonAsync<LeadDetailsDto>();
+        var created = await response.Content.ReadFromJsonTestAsync<LeadDetailsDto>();
         created.Should().NotBeNull();
         created!.PropertyId.Should().Be(property.Id);
 

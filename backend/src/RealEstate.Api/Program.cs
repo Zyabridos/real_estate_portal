@@ -18,16 +18,6 @@ using RealEstate.Application.Mapping;
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
-builder.Services.AddControllers();
-
-// FluentValidation
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validation.Leads.CreateLeadRequestValidator).Assembly);
-
-//Mapper
-builder.Services.AddAutoMapper(typeof(PropertyProfile).Assembly);
-
-// JSON-converter (Enum -> String in my case)
 builder.Services
     .AddControllers()
     .AddJsonOptions(o =>
@@ -36,6 +26,14 @@ builder.Services
             new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: true)
         );
     });
+
+
+// FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validation.Leads.CreateLeadRequestValidator).Assembly);
+
+//Mapper
+builder.Services.AddAutoMapper(typeof(PropertyProfile).Assembly);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

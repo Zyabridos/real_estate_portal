@@ -11,7 +11,6 @@
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="MongoDB.Driver" />
     <PackageReference Include="Testcontainers.MongoDb" />
     <PackageReference Include="xunit" />
@@ -19,14 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RealEstate.Api\RealEstate.Api.csproj" />
-    <ProjectReference Include="..\..\src\RealEstate.Infrastructure\RealEstate.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\RealEstate.Domain\RealEstate.Domain.csproj" />
-    <ProjectReference Include="..\TestData\TestData.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="..\..\src\RealEstate.Application\RealEstate.Application.csproj" />
   </ItemGroup>
 
 </Project>

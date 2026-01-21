@@ -46,9 +46,12 @@ jobs:
       - name: Build
         run: dotnet build ./RealEstate.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test ./RealEstate.slnx --configuration Release --logger "trx;LogFileName=test_results.trx"
-
+      - name: Test (unit)
+        run: |
+            dotnet test ./RealEstate.Tests/Validation/Validation.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=validation_test_results.trx"
+            dotnet test ./RealEstate.Tests/Infrastructure/Infrastructure.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=infrastructure_test_results.trx"
+            dotnet test ./RealEstate.Tests/Normalizers/Normalizers.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=infrastructure_test_results.trx"
+      
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

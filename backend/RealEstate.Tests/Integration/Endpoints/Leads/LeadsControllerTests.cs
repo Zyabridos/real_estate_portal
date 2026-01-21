@@ -38,7 +38,7 @@ public sealed class LeadsControllerTests : IntegrationTestBase
         var response = await Ctx.Client.GetAsync("/api/leads?page=1&pageSize=10");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var payload = await response.Content.ReadFromJsonAsync<PagedResult<LeadListItemDto>>();
+        var payload = await response.Content.ReadFromJsonTestAsync<PagedResult<LeadListItemDto>>();
         payload.Should().NotBeNull();
         payload!.Items.Should().NotBeNull();
         payload.Page.Should().Be(1);
@@ -56,7 +56,7 @@ public sealed class LeadsControllerTests : IntegrationTestBase
         var response = await Ctx.Client.GetAsync($"/api/leads/{lead.Id}");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var dto = await response.Content.ReadFromJsonAsync<LeadDetailsDto>();
+        var dto = await response.Content.ReadFromJsonTestAsync<LeadDetailsDto>();
         dto.Should().NotBeNull();
         dto!.Id.Should().Be(lead.Id);
         dto.FullName.Should().Be("Anna Test");
