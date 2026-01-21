@@ -44,6 +44,14 @@ jobs:
       - name: Install frontend deps
         working-directory: frontend
         run: npm ci
+        
+      - name: Install e2e deps
+        working-directory: frontend/tests/e2e
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend/tests/e2e
+        run: npx playwright install --with-deps
 
       - name: Create .env for compose
         run: |
@@ -83,17 +91,13 @@ jobs:
           done
           echo "Frontend check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
 
-      - name: Install Playwright browsers
-        working-directory: frontend/tests/e2e
-        run: npm exec playwright install --with-deps
-
       - name: Run Playwright tests
-        working-directory: frontend/tests/e2e/
+        working-directory: frontend/tests/e2e
         env:
           E2E_BASE_URL: "http://localhost:3000"
           VITE_API_BASE_URL: "http://localhost:5055"
           CI: "true"
-        run: npm run test
+        run: npm test
 
       - name: Upload Playwright report
         if: always()
