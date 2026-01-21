@@ -45,10 +45,18 @@ jobs:
         working-directory: frontend
         run: npm install
 
-      - name: Start services (docker compose)
+      - name: Create .env for compose
         run: |
-          docker compose version
-          docker compose up -d --build
+          cat > .env.ci << 'EOF'
+          MONGO_DATABASE=${{ secrets.MONGO_DATABASE }}
+          MONGO_ROOT_USERNAME=${{ secrets.MONGO_ROOT_USERNAME }}
+          MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
+          MONGO_PORT=${{ secrets.MONGO_PORT }}
+          PING_PROPERTIES=${{ secrets.PING_PROPERTIES }}
+          EOF
+
+      - name: Start services (docker compose)
+        run: docker compose --env-file .env.ci up -d --build
 
       - name: Wait for backend health
         run: |
