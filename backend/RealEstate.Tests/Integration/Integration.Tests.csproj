@@ -22,7 +22,7 @@
     <ProjectReference Include="..\..\src\RealEstate.Api\RealEstate.Api.csproj" />
     <ProjectReference Include="..\..\src\RealEstate.Infrastructure\RealEstate.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\RealEstate.Domain\RealEstate.Domain.csproj" />
-    <ProjectReference Include="..\TestData\RealEstate.TestData.csproj" />
+    <ProjectReference Include="..\TestData\TestData.csproj" />
   </ItemGroup>
 
   <ItemGroup>

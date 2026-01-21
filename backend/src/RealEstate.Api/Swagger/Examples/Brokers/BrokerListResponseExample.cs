@@ -33,7 +33,7 @@ public sealed class BrokerListResponseExample : IExamplesProvider<PagedResult<Br
                     UpdatedAt: DateTime.Parse("2026-01-11T10:30:00Z")
                 )
             ],
-            TotalCount = 2,
+            TotalItems = 2,
             Page = 1,
             PageSize = 20
         };

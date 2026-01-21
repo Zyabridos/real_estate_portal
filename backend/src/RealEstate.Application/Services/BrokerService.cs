@@ -21,14 +21,14 @@ public sealed class BrokerService : IBrokerService
 
     public async Task<PagedResult<BrokerListItemDto>> GetListAsync(BrokerListQuery query, CancellationToken ct)
     {
-        var (items, totalCount) = await _brokerRepository.GetListAsync(query, ct);
+        var (items, totalItems) = await _brokerRepository.GetListAsync(query, ct);
 
         var dtoItems = _mapper.Map<IReadOnlyList<BrokerListItemDto>>(items);
 
         return new PagedResult<BrokerListItemDto>
         {
             Items = dtoItems,
-            TotalCount = totalCount,
+            TotalItems = totalItems,
             Page = query.Page,
             PageSize = query.PageSize
         };

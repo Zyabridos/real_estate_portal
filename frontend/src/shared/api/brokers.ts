@@ -5,6 +5,8 @@ import type { BrokerListItemDto } from "@/shared/api/dtos/brokers/broker-list-it
 import type { BrokersListQuery } from "@/shared/types/queries"
 import { serializeQuery } from '@/shared/api/query';
 import routes from "@/shared/routes.ts"
+import buildQuery from "@/shared/api/query/buildQuery.ts";
+import type {PropertyListItemDto} from "@/shared/api/dtos/properties/property-list-item.dto.ts";
 
 // Note to myself: Pages / stores MUST use this module instead of http directly
 export const brokersApi = {
@@ -12,11 +14,8 @@ export const brokersApi = {
   async list(
     query: BrokersListQuery = {},
   ): Promise<PagedResultDto<BrokerListItemDto>> {
-    const queryString = serializeQuery(query);
-
-    return http.get<PagedResultDto<BrokerListItemDto>>(
-      routes.api.brokers.list(queryString),
-    );
+    const params = buildQuery(query as Record<string, unknown>);
+    return http.get<PagedResultDto<BrokerListItemDto>>(routes.api.brokers.list(), { params });
   },
 
   // GET /api/brokers/{id}

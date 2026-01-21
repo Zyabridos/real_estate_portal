@@ -20,14 +20,14 @@ public sealed class PropertyService : IPropertyService
 
     public async Task<PagedResult<PropertyListItemDto>> GetListAsync(PropertyListQuery query, CancellationToken ct)
     {
-        var (items, totalCount) = await _propertyRepository.GetListAsync(query, ct);
+        var (items, totalItems) = await _propertyRepository.GetListAsync(query, ct);
 
         var dtoItems = _mapper.Map<IReadOnlyList<PropertyListItemDto>>(items);
 
         return new PagedResult<PropertyListItemDto>
         {
             Items = dtoItems,
-            TotalCount = totalCount,
+            TotalItems = totalItems,
             Page = query.Page,
             PageSize = query.PageSize
         };

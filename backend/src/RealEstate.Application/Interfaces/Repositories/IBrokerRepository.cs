@@ -12,8 +12,8 @@ public interface IBrokerRepository
     Task<bool> UpdateAsync(Broker entity, CancellationToken ct);
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
     
-    // Returns brokers matching the query filters: current page as Items and total matches as TotalCount
-    Task<(IReadOnlyList<Broker> Items, long TotalCount)> GetListAsync(
+    // Returns brokers matching the query filters: current page as Items and total matches as TotalItems
+    Task<(IReadOnlyList<Broker> Items, long TotalItems)> GetListAsync(
         BrokerListQuery query,
         CancellationToken ct);
 }

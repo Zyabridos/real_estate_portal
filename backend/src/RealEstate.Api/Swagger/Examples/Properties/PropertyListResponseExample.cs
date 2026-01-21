@@ -26,7 +26,7 @@ public sealed class PropertyListResponseExample : IExamplesProvider<PagedResult<
                         DateTimeKind.Utc)
                 )
             ],
-            TotalCount = 1,
+            TotalItems = 1,
             Page = 1,
             PageSize = 10
         };

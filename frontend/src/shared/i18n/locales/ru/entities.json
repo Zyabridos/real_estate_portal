@@ -13,6 +13,25 @@
     "statusLabel": "Статус",
     "cityLabel": "Город",
     "propertyIdLabel": "ID объекта",
-    "descriptionTitle": "Описание"
+    "descriptionTitle": "Описание",
+
+    "filtersTitle": "Фильтры",
+    "filtersAriaLabel": "Фильтры недвижимости",
+    "anyType": "Любой тип",
+    "anyStatus": "Любой статус",
+    "cityPlaceholder": "например, Oslo",
+    "priceRangeLabel": "Диапазон цен",
+    "minPriceLabel": "Мин",
+    "maxPriceLabel": "Макс",
+
+    "type": {
+      "apartment": "Квартира",
+      "house": "Дом",
+      "commercial": "Коммерция"
+    },
+    "status": {
+      "active": "Активно",
+      "sold": "Продано"
+    }
   }
 }

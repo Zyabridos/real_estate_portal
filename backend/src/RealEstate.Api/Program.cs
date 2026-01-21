@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using System.Text.Json.Serialization;
 using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Interfaces.Services;
@@ -17,7 +18,15 @@ using RealEstate.Application.Mapping;
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: true)
+        );
+    });
+
 
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();

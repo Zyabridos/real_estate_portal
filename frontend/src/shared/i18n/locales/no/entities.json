@@ -12,7 +12,26 @@
     "typeLabel": "Type",
     "statusLabel": "Status",
     "cityLabel": "By",
-    "propertyIdLabel": "Bolig-ID",
-    "descriptionTitle": "Beskrivelse"
+    "propertyIdLabel": "Eiendoms-ID",
+    "descriptionTitle": "Beskrivelse",
+
+    "filtersTitle": "Filtre",
+    "filtersAriaLabel": "Filtre for eiendommer",
+    "anyType": "Alle typer",
+    "anyStatus": "Alle statuser",
+    "cityPlaceholder": "f.eks. Oslo",
+    "priceRangeLabel": "Prisintervall",
+    "minPriceLabel": "Min",
+    "maxPriceLabel": "Maks",
+
+    "type": {
+      "apartment": "Leilighet",
+      "house": "Hus",
+      "commercial": "Næring"
+    },
+    "status": {
+      "active": "Aktiv",
+      "sold": "Solgt"
+    }
   }
 }

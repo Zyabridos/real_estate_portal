@@ -1,4 +1,4 @@
-name: backend-integration-testss
+name: backend-integration-tests
 
 on:
   pull_request:
@@ -46,8 +46,10 @@ jobs:
       - name: Build
         run: dotnet build ./RealEstate.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test ./RealEstate.slnx --configuration Release --logger "trx;LogFileName=test_results.trx"
+      - name: Test (integration)
+        run: |
+          dotnet test ./RealEstate.Tests/Integration/Integration.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=integration_test_results.trx"
+          dotnet test ./RealEstate.Tests/Infrastructure/Infrastructure.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=integration_test_results.trx"
 
       - name: Upload test results
         if: always()

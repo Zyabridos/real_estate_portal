@@ -3,11 +3,11 @@ const apiBase = "/api";
 const apiRoutes = {
   health: (): string => [apiBase, "health"].join("/"),
   properties: {
-    list: (queryString: string): string => [apiBase, "properties", queryString].join("/"),
+    list: (): string => [apiBase, "properties"].join("/"),
     getById: (id: string): string => [apiBase, "properties", id].join("/"),
   },
   brokers: {
-    list: (queryString: string): string => [apiBase, "brokers", queryString].join("/"),
+    list: (): string => [apiBase, "brokers"].join("/"),
     getById: (id: string): string => [apiBase, "brokers", id].join("/"),
   }
 };

@@ -13,6 +13,25 @@
     "statusLabel": "Status",
     "cityLabel": "City",
     "propertyIdLabel": "Property ID",
-    "descriptionTitle": "Description"
+    "descriptionTitle": "Description",
+
+    "filtersTitle": "Filters",
+    "filtersAriaLabel": "Property filters",
+    "anyType": "Any type",
+    "anyStatus": "Any status",
+    "cityPlaceholder": "e.g. Oslo",
+    "priceRangeLabel": "Price range",
+    "minPriceLabel": "Min",
+    "maxPriceLabel": "Max",
+
+    "type": {
+      "apartment": "Apartment",
+      "house": "House",
+      "commercial": "Commercial"
+    },
+    "status": {
+      "active": "Active",
+      "sold": "Sold"
+    }
   }
 }

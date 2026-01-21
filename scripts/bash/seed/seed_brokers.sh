@@ -8,7 +8,12 @@ source "${SCRIPT_DIR}/../../lib/log.sh"
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
 HEALTH_PATH="${HEALTH_PATH:-/api/health}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
-AGENCY_ID="${SEED_AGENCY_ID:-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa}"
+
+SEED_BROKERS_COUNT="${SEED_BROKERS_COUNT:-22}"
+
+AGENCY1_ID="${SEED_AGENCY1_ID:-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa}"
+AGENCY2_ID="${SEED_AGENCY2_ID:-bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb}"
+AGENCY3_ID="${SEED_AGENCY3_ID:-cccccccc-cccc-cccc-cccc-cccccccccccc}"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || { error "Missing required command: $1"; exit 1; }
@@ -66,7 +71,7 @@ http_post_json() {
   return 22
 }
 
-neutral "Seeding brokers"
+neutral "Seeding brokers (3 agencies)"
 neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
@@ -92,11 +97,11 @@ else
 fi
 
 create_broker_payload() {
-  local first="$1" last="$2" email="$3" phone="$4"
+  local agency_id="$1" first="$2" last="$3" email="$4" phone="$5"
   python3 - <<PY
 import json
 print(json.dumps({
-  "agencyId": "${AGENCY_ID}",
+  "agencyId": "${agency_id}",
   "firstName": "${first}",
   "lastName": "${last}",
   "email": "${email}",
@@ -106,28 +111,55 @@ print(json.dumps({
 PY
 }
 
-neutral "Creating brokers"
-b1="$(http_post_json "${BACKEND_URL}/api/brokers" "$(create_broker_payload "Ola" "Nordmann" "ola.seed@broker.no" "+47 900 00 001")")"
-assert_json "POST /api/brokers #1" "$b1"
-broker1_id="$(printf '%s' "$b1" | json_field "id")"
+first_names=("Ola" "Kari" "Anders" "Ingrid" "Erik" "Nora" "Jonas" "Maja" "Lars" "Emma" "Sindre" "Hanna")
+last_names=("Nordmann" "Hansen" "Johansen" "Olsen" "Larsen" "Andersen" "Nilsen" "Berg" "Haugen" "Moen" "Dahl" "Solberg")
+agencies=("${AGENCY1_ID}" "${AGENCY2_ID}" "${AGENCY3_ID}")
 
-b2="$(http_post_json "${BACKEND_URL}/api/brokers" "$(create_broker_payload "Kari" "Nordmann" "kari.seed@broker.no" "+47 900 00 002")")"
-assert_json "POST /api/brokers #2" "$b2"
-broker2_id="$(printf '%s' "$b2" | json_field "id")"
+neutral "Creating ${SEED_BROKERS_COUNT} brokers distributed across 3 agencies"
 
-b3="$(http_post_json "${BACKEND_URL}/api/brokers" "$(create_broker_payload "Arya" "Stark" "arya.seed@winterfell.no" "+47 900 00 003")")"
-assert_json "POST /api/brokers #3" "$b3"
-broker3_id="$(printf '%s' "$b3" | json_field "id")"
+created_ids=()
+i=1
 
-success "[seed] Brokers created:"
-success "  broker1=${broker1_id}"
-success "  broker2=${broker2_id}"
-success "  broker3=${broker3_id}"
+while [[ "${i}" -le "${SEED_BROKERS_COUNT}" ]]; do
+  first="${first_names[$(((i-1) % ${#first_names[@]}))]}"
+  last="${last_names[$(((i-1) % ${#last_names[@]}))]}"
+  email="broker${i}.seed@broker.no"
+  phone=$(printf "+47 900 %02d %03d" $(((i-1) / 100)) $(((i-1) % 1000)))
+
+  # distribute across agencies by round-robin: 1,2,3,1,2,3...
+  agency_id="${agencies[$(((i-1) % ${#agencies[@]}))]}"
+
+  resp="$(http_post_json "${BACKEND_URL}/api/brokers" "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${email}" "${phone}")")"
+  assert_json "POST /api/brokers #${i}" "${resp}"
+
+  id="$(printf '%s' "${resp}" | json_field "id")"
+  created_ids+=("${id}")
+
+  i=$((i+1))
+done
+
+success "[seed] Brokers created: ${#created_ids[@]}"
+
+broker1_id="${created_ids[0]}"
+broker2_id="${created_ids[1]}"
+broker3_id="${created_ids[2]}"
+
+all_ids_csv="$(IFS=,; echo "${created_ids[*]}")"
 
 {
+  echo "AGENCY1_ID=${AGENCY1_ID}"
+  echo "AGENCY2_ID=${AGENCY2_ID}"
+  echo "AGENCY3_ID=${AGENCY3_ID}"
   echo "BROKER1_ID=${broker1_id}"
   echo "BROKER2_ID=${broker2_id}"
   echo "BROKER3_ID=${broker3_id}"
+  echo "ALL_BROKER_IDS=${all_ids_csv}"
 } > "${seed_env}"
 
 success "[seed] Saved ids to ${seed_env}"
+success "  agency1=${AGENCY1_ID}"
+success "  agency2=${AGENCY2_ID}"
+success "  agency3=${AGENCY3_ID}"
+success "  broker1=${broker1_id}"
+success "  broker2=${broker2_id}"
+success "  broker3=${broker3_id}"
