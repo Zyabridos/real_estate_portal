@@ -1,6 +1,5 @@
-import { defineConfig, loadEnv } from "vite";
-import { fileURLToPath, URL } from "node:url";
-import vue from "@vitejs/plugin-vue";
+import { defineConfig, loadEnv, mergeConfig } from "vite";
+import { createViteSharedConfig } from "./vite.shared";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
@@ -9,13 +8,7 @@ export default defineConfig(({ mode }) => {
     env.VITE_API_PROXY_TARGET ||
     (process.env.DOCKER ? "http://backend:5000" : "http://localhost:5000");
 
-  return {
-    plugins: [vue()],
-    resolve: {
-      alias: {
-        "@": fileURLToPath(new URL("./src", import.meta.url)),
-      },
-    },
+  return mergeConfig(createViteSharedConfig(), {
     server: {
       port: Number(env.VITE_PORT) || 3000,
       host: true,
@@ -26,5 +19,5 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-  };
+  });
 });
