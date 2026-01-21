@@ -6,6 +6,12 @@ export const testIds = {
     list: "properties-list",
     card: "property-card",
     cardMeta: "property-card-meta",
+
+    detailsPage: "property-details-page",
+    detailsTitle: "page-title",
+    detailsGallery: "property-gallery",
+    detailsBrokerBlock: "property-broker-block",
+    createLeadButton: "create-lead-button",
   },
 
   filters: {
@@ -25,4 +31,23 @@ export const testIds = {
     next: "pagination-next",
     status: "pagination-status",
   },
+  leads: {
+    page: "lead-create-page",
+    form: "lead-form",
+    submit: "lead-submit",
+    validationBanner: "lead-validation-banner",
+
+    fullName: "lead-fullName",
+    email: "lead-email",
+    phoneNumber: "lead-phoneNumber",
+    message: "lead-message",
+
+    fullNameError: "lead-fullName-error",
+    emailError: "lead-email-error",
+    phoneNumberError: "lead-phoneNumber-error",
+    messageError: "lead-message-error",
+
+    success: "lead-success",
+    error: "lead-error",
+  }
 } as const;
