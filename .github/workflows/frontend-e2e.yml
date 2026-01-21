@@ -43,7 +43,7 @@ jobs:
 
       - name: Install frontend deps
         working-directory: frontend
-        run: npm install
+        run: npm ci
 
       - name: Create .env for compose
         run: |
@@ -54,7 +54,7 @@ jobs:
           MONGO_PORT=${{ secrets.MONGO_PORT }}
           PING_PROPERTIES=${{ secrets.PING_PROPERTIES }}
           EOF
-
+          
       - name: Start services (docker compose)
         run: docker compose --env-file .env.ci up -d --build
 
@@ -66,7 +66,12 @@ jobs:
             fi
             sleep 2
           done
-          echo "Backend health check failed"; docker compose logs; exit 1
+          echo "Backend health check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
+
+      - name: Seed database
+        run: |
+          chmod +x scripts/bash/seed/*.sh
+          BACKEND_PORT=5055 BACKEND_URL=http://localhost:5055 make seed
 
       - name: Wait for frontend
         run: |
@@ -76,7 +81,7 @@ jobs:
             fi
             sleep 2
           done
-          echo "Frontend check failed"; docker compose logs; exit 1
+          echo "Frontend check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
 
       - name: Install Playwright browsers
         working-directory: frontend/tests/e2e
@@ -102,8 +107,13 @@ jobs:
 
       - name: Docker compose logs (on failure)
         if: failure()
-        run: docker compose logs --no-color
-
+        run: |
+          docker compose --env-file .env.ci logs --no-color \
+            | sed -E 's/(MONGO_ROOT_PASSWORD=)[^ ]+/\1***REDACTED***/g' \
+            | sed -E 's/(MONGO_ROOT_USERNAME=)[^ ]+/\1***REDACTED***/g' \
+            | sed -E 's/(MONGO_DATABASE=)[^ ]+/\1***REDACTED***/g' \
+            | sed -E 's/(MONGO_PORT=)[^ ]+/\1***REDACTED***/g'
+      
       - name: Shutdown services
         if: always()
-        run: docker compose down -v
+        run: docker compose --env-file .env.ci down -v
