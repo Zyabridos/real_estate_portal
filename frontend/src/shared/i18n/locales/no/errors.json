@@ -36,9 +36,11 @@
       },
       "email": {
         "invalid": "Vennligst skriv inn en gyldig e-postadresse",
+        "min": "E-post må være minst {{min}} tegn",
         "max": "E-post kan være maks {{max}} tegn"
       },
       "phoneNumber": {
+        "min": "Telefonnummer må være minst {{min}} tegn",
         "max": "Telefonnummer kan være maks {{max}} tegn",
         "invalid": "Telefon kan kun inneholde sifre, mellomrom, '-' og '+' (pluss kun i starten)",
         "separatorsMax": "Telefonnummer kan ha maks {{max}} mellomrom og '-' totalt"

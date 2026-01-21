@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 // TODO: move to defaults?
-export const FULL_NAME_MIN = 2;
+export const FULL_NAME_MIN = 5;
 export const FULL_NAME_MAX = 50;
 
-export const EMAIL_MAX = 100
+export const EMAIL_MIN = 5;
+export const EMAIL_MAX = 100;
 export const PHONE_MIN = 7;
 export const PHONE_MAX = 20;
 export const MESSAGE_MAX = 2000;
@@ -55,6 +56,7 @@ export const leadSchema = z
       emptyToUndefined,
       z
         .string()
+        .min(EMAIL_MIN, { message: "min" })
         .max(EMAIL_MAX, { message: "max" })
         .refine((v) => emailRegex.test(v), { message: "invalid" })
         .optional()

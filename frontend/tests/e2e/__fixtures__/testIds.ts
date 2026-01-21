@@ -34,12 +34,20 @@ export const testIds = {
   leads: {
     page: "lead-create-page",
     form: "lead-form",
-    success: "lead-success",
-    error: "lead-error",
     submit: "lead-submit",
+    validationBanner: "lead-validation-banner",
+
     fullName: "lead-fullName",
     email: "lead-email",
     phoneNumber: "lead-phoneNumber",
-    message: "lead-message"
+    message: "lead-message",
+
+    fullNameError: "lead-fullName-error",
+    emailError: "lead-email-error",
+    phoneNumberError: "lead-phoneNumber-error",
+    messageError: "lead-message-error",
+
+    success: "lead-success",
+    error: "lead-error",
   }
 } as const;

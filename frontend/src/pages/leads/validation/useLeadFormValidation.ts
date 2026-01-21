@@ -5,7 +5,9 @@ import {
   leadSchema,
   FULL_NAME_MIN,
   FULL_NAME_MAX,
+  EMAIL_MIN,
   EMAIL_MAX,
+  PHONE_MIN,
   PHONE_MAX,
   MESSAGE_MAX,
   PHONE_SEPARATORS_MAX,
@@ -35,6 +37,12 @@ type UseLeadFormValidationArgs = {
 };
 
 const FIELDS: FieldKey[] = ["fullName", "email", "phoneNumber", "message"];
+
+const MIN_BY_FIELD: Partial<Record<FieldKey, number>> = {
+  fullName: FULL_NAME_MIN,
+  email: EMAIL_MIN,
+  phoneNumber: PHONE_MIN,
+};
 
 const MAX_BY_FIELD: Record<FieldKey, number> = {
   fullName: FULL_NAME_MAX,
@@ -136,7 +144,7 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
     const map: Record<string, () => FieldError> = {
       required: () => ({ key: `${base}required` }),
       invalid: () => ({ key: `${base}invalid` }),
-      min: () => ({ key: `${base}min`, params: { min: FULL_NAME_MIN } }),
+      min: () => ({ key: `${base}min`, params: { min: MIN_BY_FIELD[field] ?? 3 } }),
       max: () => ({ key: `${base}max`, params: { max: MAX_BY_FIELD[field] } }),
       tokenMin: () => ({ key: `errors:validation.lead.fullName.tokenMin`, params: { min: FULL_NAME_MIN } }),
       separatorsMax: () => ({

@@ -10,6 +10,7 @@ test.describe("Leads: positive cases", () => {
 
     let interceptedPayload: any | null = null;
 
+    // allow requests through, but do not "garbage" test DB
     await page.route(apiRoutes.leads.pattern(), async (route) => {
       const req = route.request();
       if (req.method() !== "POST") {
@@ -43,10 +44,10 @@ test.describe("Leads: positive cases", () => {
     await expect(page.getByTestId(testIds.leads.page)).toBeVisible();
     await expect(page.getByTestId(testIds.leads.form)).toBeVisible();
 
-    await page.getByTestId(testIds.leads.fullName).fill(testData.leads.fullName);
-    await page.getByTestId(testIds.leads.email).fill(testData.leads.email);
-    await page.getByTestId(testIds.leads.phoneNumber).fill(testData.leads.phoneNumber);
-    await page.getByTestId(testIds.leads.message).fill(testData.leads.message);
+    await page.getByTestId(testIds.leads.fullName).fill(testData.leads.fullName.valid);
+    await page.getByTestId(testIds.leads.email).fill(testData.leads.email.valid);
+    await page.getByTestId(testIds.leads.phoneNumber).fill(testData.leads.phoneNumber.valid);
+    await page.getByTestId(testIds.leads.message).fill(testData.leads.message.valid);
 
     const reqPromise = page.waitForRequest(
       (r) => r.url().includes(apiRoutes.leads.path()) && r.method() === "POST"
@@ -60,10 +61,10 @@ test.describe("Leads: positive cases", () => {
     expect(interceptedPayload).toBeTruthy();
     expect(interceptedPayload).toMatchObject({
       propertyId,
-      fullName: testData.leads.fullName,
-      email: testData.leads.email,
-      phoneNumber: testData.leads.phoneNumber,
-      message: testData.leads.message,
+      fullName: testData.leads.fullName.valid,
+      email: testData.leads.email.valid,
+      phoneNumber: testData.leads.phoneNumber.valid,
+      message: testData.leads.message.valid,
     });
 
     // UI shows success

@@ -23,9 +23,11 @@
       },
       "email": {
         "invalid": "Please enter a valid email address",
+        "min": "Email must be at least {{min}} characters",
         "max": "Email must be at most {{max}} characters"
       },
       "phoneNumber": {
+        "min": "Phone number must be at least {{min}} characters",
         "max": "Phone number must be at most {{max}} characters",
         "invalid": "Phone can contain only digits, spaces, '-' and '+' (plus only at the start)",
         "separatorsMax": "Phone number can contain at most {{max}} spaces and '-' in total"
