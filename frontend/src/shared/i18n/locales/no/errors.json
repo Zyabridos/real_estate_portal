@@ -27,6 +27,7 @@
   },
   "validation": {
     "lead": {
+      "server": "{{message}}",
       "fullName": {
         "required": "Navn er påkrevd",
         "min": "Navn må være minst {{min}} tegn",

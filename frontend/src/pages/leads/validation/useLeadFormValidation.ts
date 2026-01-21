@@ -1,5 +1,6 @@
 import { computed, reactive, ref, watch, type Ref } from "vue";
 import type { LeadFormStatus, LeadFormValues } from "@/shared/types/leads";
+import type { ProblemDetails } from "@/shared/types/errors";
 import {
   leadSchema,
   FULL_NAME_MIN,
@@ -12,7 +13,14 @@ import {
 
 // TODO: in React I normally would keep it in /hooks - find out where it is correct to keep "hooks" in Vue
 
-export type FieldKey = keyof LeadFormValues;
+type FieldKey = keyof LeadFormValues;
+
+const serverFieldMap: Record<string, FieldKey> = {
+  FullName: "fullName",
+  Email: "email",
+  PhoneNumber: "phoneNumber",
+  Message: "message",
+};
 
 export type FieldError = {
   key: string; // i18n key (e.g. errors:validation.lead.email.required)
@@ -75,6 +83,27 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
   });
 
   const showFormError = ref(false);
+
+  function applyServerErrors(pd?: ProblemDetails): void {
+    if (!pd?.errors || typeof pd.errors !== "object") return;
+
+    // reset existing field errors first (server-side)
+    (Object.keys(errors) as FieldKey[]).forEach((k) => (errors[k] = null));
+
+    for (const [key, val] of Object.entries(pd.errors)) {
+      const field = serverFieldMap[key];
+      const firstMsg =
+        Array.isArray(val) ? (val.find((x) => typeof x === "string" && x.trim()) ?? "") : "";
+
+      if (!field || !firstMsg) continue;
+
+      touched[field] = true;
+      errors[field] = {
+        key: "errors:validation.lead.server",
+        params: { message: firstMsg },
+      };
+    }
+  }
 
   const isLoading = computed(() => args.state.value === "loading");
   const isSuccess = computed(() => args.state.value === "success");
@@ -217,5 +246,6 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
     onInput,
     validateAll,
     submit,
+    applyServerErrors,
   };
 }

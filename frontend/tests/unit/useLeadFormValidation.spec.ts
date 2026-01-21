@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 import { effectScope, nextTick, ref } from "vue";
 import { useLeadFormValidation } from "../../src/pages/leads/validation/useLeadFormValidation";
 import type { LeadFormStatus, LeadFormValues } from "../../src/shared/types/leads";
+import type { ProblemDetails } from "../../src/shared/types/errors";
+
 
 function createVm(opts?: {
   initialValues?: Partial<LeadFormValues>;
@@ -258,6 +260,52 @@ describe("useLeadFormValidation", () => {
 
     state.value = "success";
     expect(vm.isSubmitDisabled.value).toBe(true);
+
+    scope.stop();
+  });
+});
+
+describe("useLeadFormValidation: server errors mapping", () => {
+  it("maps ProblemDetails.errors to field errors + touches fields", () => {
+    const { vm, scope } = createVm();
+
+    const pd: ProblemDetails = {
+      title: "Validation failed",
+      status: 400,
+      errors: {
+        FullName: ["FullName must be between 2 and 50 characters."],
+        Email: ["Email is not valid."],
+      },
+    };
+
+    vm.applyServerErrors(pd);
+
+    expect(vm.touched.fullName).toBe(true);
+    expect(vm.errors.fullName?.key).toBe("errors:validation.lead.server");
+
+    expect(vm.touched.email).toBe(true);
+    expect(vm.errors.email?.key).toBe("errors:validation.lead.server");
+
+    scope.stop();
+  });
+
+  it("ignores unknown fields", () => {
+    const { vm, scope } = createVm();
+
+    const pd: ProblemDetails = {
+      title: "Validation failed",
+      status: 400,
+      errors: {
+        SomeUnknownField: ["nope"],
+      },
+    };
+
+    vm.applyServerErrors(pd);
+
+    expect(vm.errors.fullName).toBeNull();
+    expect(vm.errors.email).toBeNull();
+    expect(vm.errors.phoneNumber).toBeNull();
+    expect(vm.errors.message).toBeNull();
 
     scope.stop();
   });

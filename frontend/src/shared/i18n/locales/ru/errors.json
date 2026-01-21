@@ -27,6 +27,7 @@
   },
   "validation": {
     "lead": {
+      "server": "{{message}}",
       "fullName": {
         "required": "Имя обязательно",
         "min": "Имя должно быть не короче {{min}} символов",

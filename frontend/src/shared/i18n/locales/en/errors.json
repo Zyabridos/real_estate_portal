@@ -14,6 +14,7 @@
   },
   "validation": {
     "lead": {
+      "server": "{{message}}",
       "fullName": {
         "required": "Name is required",
         "min": "Name must be at least {{min}} characters",

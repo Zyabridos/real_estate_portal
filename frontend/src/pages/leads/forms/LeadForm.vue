@@ -30,6 +30,9 @@ const vm = proxyRefs(
     onSubmit: (vals) => emit("submit", vals),
   })
 );
+defineExpose({
+  applyServerErrors: vm.applyServerErrors,
+});
 </script>
 
 <template>
