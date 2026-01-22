@@ -17,6 +17,7 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@sanity/client": "^7.14.0",
     "axios": "^1.13.2",
     "i18next": "^25.7.4",
     "i18next-browser-languagedetector": "^8.2.0",
