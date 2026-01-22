@@ -90,12 +90,17 @@ jobs:
             sleep 2
           done
           echo "Frontend check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
+          
+      - name: Debug - frontend can reach backend
+        run: |
+          docker compose --env-file .env.ci exec -T frontend sh -lc "wget -qO- http://backend:5000/api/health || true"
+
 
       - name: Run Playwright tests
         working-directory: frontend/tests/e2e
         env:
           E2E_BASE_URL: "http://localhost:3000"
-          VITE_API_BASE_URL: "http://localhost:5055"
+          VITE_API_BASE_URL: "http://backend:5000"
           CI: "true"
         run: npm test
 
