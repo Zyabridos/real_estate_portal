@@ -22,11 +22,11 @@ RUN dotnet publish ./src/RealEstate.Api/RealEstate.Api.csproj -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-# Official .NET images include a non-root user named `app`
-USER app
-
 # install curl
 RUN apt-get update && apt-get install -y --no-install-recommends curl
+
+# Official .NET images include a non-root user named `app`
+USER app
 
 COPY --from=build /app/publish ./
 
