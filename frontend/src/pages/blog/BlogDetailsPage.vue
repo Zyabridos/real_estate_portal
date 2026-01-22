@@ -1,76 +1,52 @@
-
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import type { ArticleListItemDto } from "@/shared/types/blog";
 
-const route = useRoute();
-const slug = computed(() => String(route.params.slug ?? ""));
+const props = defineProps<{ item: ArticleListItemDto }>();
+const to = computed(() => `/blog/${props.item.slug}`);
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-5xl px-4 py-8" data-testid="blog-details-page">
-    <header class="mb-6">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1
-            class="text-2xl font-semibold tracking-tight"
-            data-testid="blog-details-title"
-          >
-            Article
-          </h1>
+  <article class="group relative rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md">
+    <RouterLink
+      :to="to"
+      class="absolute inset-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      aria-label="Open article"
+    />
+    <div class="relative flex flex-col gap-3">
+      <h2 class="text-lg font-semibold leading-snug">
+        <span class="line-clamp-2 break-words">{{ item.title }}</span>
+      </h2>
 
-          <p class="mt-2 text-sm text-muted-foreground" data-testid="blog-details-subtitle">
-            Slug:
-            <code
-              class="ml-1 rounded-md border border-border bg-muted px-2 py-0.5 font-mono text-xs"
-              data-testid="blog-details-slug"
-            >
-              {{ slug }}
-            </code>
-          </p>
-        </div>
+      <p v-if="item.excerpt" class="text-sm opacity-80">
+        <span class="line-clamp-3 break-words">{{ item.excerpt }}</span>
+      </p>
 
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs opacity-70">
+        <span v-if="item.author?.name">By <span class="font-medium">{{ item.author.name }}</span></span>
+        <span v-if="item.publishedAt">• {{ item.publishedAt }}</span>
+      </div>
+
+      <div v-if="item.categories?.length" class="flex flex-wrap gap-1.5">
         <span
-          class="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground"
-          data-testid="blog-details-badge"
+          v-for="c in item.categories"
+          :key="c.id"
+          class="max-w-full truncate rounded-full bg-gray-100 px-2.5 py-1 text-xs"
         >
-          scaffold
+          {{ c.title }}
         </span>
       </div>
-    </header>
-
-    <main>
-      <!-- Stable container for future Playwright assertions -->
-      <article
-        class="rounded-2xl border border-border bg-card p-5 shadow-sm"
-        aria-label="Blog article"
-        data-testid="blog-article"
-      >
-        <div class="flex flex-col gap-3">
-          <h2 class="text-base font-semibold" data-testid="blog-article-placeholder-title">
-            Coming soon
-          </h2>
-
-          <p class="text-sm text-muted-foreground" data-testid="blog-article-placeholder-text">
-            Article content (Portable Text) will be rendered here in a future PR.
-          </p>
-
-          <div class="mt-2 flex flex-wrap gap-2" data-testid="blog-article-hints">
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-article-hint-1"
-            >
-              Next PR: GROQ by slug
-            </span>
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-article-hint-2"
-            >
-              Next PR: Portable Text renderer
-            </span>
-          </div>
-        </div>
-      </article>
-    </main>
-  </section>
+    </div>
+  </article>
 </template>
+
+<style scoped>
+.line-clamp-2,
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-2 { -webkit-line-clamp: 2; }
+.line-clamp-3 { -webkit-line-clamp: 3; }
+</style>
