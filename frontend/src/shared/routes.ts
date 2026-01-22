@@ -1,17 +1,15 @@
-const apiBase = "/api";
-
 const apiRoutes = {
-  health: (): string => [apiBase, "health"].join("/"),
+  health: (): string => ["health"].join("/"),
   properties: {
-    list: (): string => [apiBase, "properties"].join("/"),
-    getById: (id: string): string => [apiBase, "properties", id].join("/"),
+    list: (): string => ["properties"].join("/"),
+    getById: (id: string): string => ["properties", id].join("/"),
   },
   brokers: {
-    list: (): string => [apiBase, "brokers"].join("/"),
-    getById: (id: string): string => [apiBase, "brokers", id].join("/"),
+    list: (): string => ["brokers"].join("/"),
+    getById: (id: string): string => ["brokers", id].join("/"),
   },
   leads: {
-    create: (): string => [apiBase, "leads"].join("/"),
+    create: (): string => ["leads"].join("/"),
   },
 };
 

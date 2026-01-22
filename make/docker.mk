@@ -49,6 +49,23 @@ rebuild:
 	$(COMPOSE) build
 	$(COMPOSE) up -d
 
+# Rebuild and restart single services
+rebuild-frontend:
+	@echo "$(PURPLE)Rebuilding frontend...$(RESET)"
+	$(COMPOSE) up -d --build --force-recreate $(FRONTEND)
+
+rebuild-backend:
+	@echo "$(PURPLE)Rebuilding backend...$(RESET)"
+	$(COMPOSE) up -d --build --force-recreate $(BACKEND)
+
+rebuild-cms:
+	@echo "$(PURPLE)Rebuilding cms...$(RESET)"
+	$(COMPOSE) up -d --build --force-recreate $(CMS_SERVICE)
+
+rebuild-db:
+	@echo "$(PURPLE)Rebuilding mongodb...$(RESET)"
+	$(COMPOSE) up -d --build --force-recreate mongodb
+
 # Docker Shell
 sh-backend:
 	@echo "$(GREEN)Opening shell in backend...$(RESET)"

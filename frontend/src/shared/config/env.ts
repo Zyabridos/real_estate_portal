@@ -10,7 +10,7 @@ export type AppEnv = {
 };
 
 export const env: AppEnv = {
-  apiBaseUrl: readEnvString("VITE_API_BASE_URL") ?? "http://localhost:5000",
+  apiBaseUrl: readEnvString("VITE_API_BASE") ?? "/api",
 
   sanity: {
     projectId: readEnvString("VITE_SANITY_PROJECT_ID"),
