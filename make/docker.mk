@@ -1,52 +1,59 @@
+ENV_FILE ?= .env.dev
+
 # Requires variables: CORE_SERVICES, CMS_SERVICE, BACKEND, FRONTEND
+COMPOSE = docker compose --env-file $(ENV_FILE)
 
 build:
 	@echo "$(LIGHT_BLUE)Building Docker images...$(RESET)"
-	docker compose build
+	$(COMPOSE) build
 
 up:
 	@echo "$(LIGHT_BLUE)Starting all services...$(RESET)"
-	docker compose up
+	$(COMPOSE) up
 
 up-d:
 	@echo "$(LIGHT_BLUE)Starting all services in background...$(RESET)"
-	docker compose up -d
+	$(COMPOSE) up -d
 
 down:
 	@echo "$(YELLOW)Stopping and removing all containers...$(RESET)"
-	docker compose down
+	$(COMPOSE) down
+
+down-v:
+	@echo "$(YELLOW)Stopping and removing all containers + volumes...$(RESET)"
+	$(COMPOSE) down -v
 
 restart:
 	@echo "$(YELLOW)Restarting core Docker services (no cms)...$(RESET)"
-	docker compose restart $(CORE_SERVICES)
+	$(COMPOSE) restart $(CORE_SERVICES)
 
 restart-frontend:
 	@echo "$(YELLOW)Restarting frontend...$(RESET)"
-	docker compose restart frontend
+	$(COMPOSE) restart frontend
 
 restart-backend:
 	@echo "$(YELLOW)Restarting backend...$(RESET)"
-	docker compose restart backend
+	$(COMPOSE) restart backend
 
 restart-db:
 	@echo "$(YELLOW)Restarting mongodb...$(RESET)"
-	docker compose restart mongodb
+	$(COMPOSE) restart mongodb
 
 restart-with-cms:
 	@echo "$(YELLOW)Restarting core services + cms...$(RESET)"
-	docker compose restart $(CORE_SERVICES) $(CMS_SERVICE)
+	$(COMPOSE) restart $(CORE_SERVICES) $(CMS_SERVICE)
 
 rebuild:
 	@echo "$(PURPLE)Rebuilding Docker services...$(RESET)"
-	docker compose down
-	docker compose build
-	docker compose up -d
+	$(COMPOSE) down
+	$(COMPOSE) build
+	$(COMPOSE) up -d
 
 # Docker Shell
 sh-backend:
 	@echo "$(GREEN)Opening shell in backend...$(RESET)"
-	docker compose exec $(BACKEND) sh
+	$(COMPOSE) exec $(BACKEND) sh
 
 sh-frontend:
 	@echo "$(GREEN)Opening shell in frontend...$(RESET)"
-	docker compose exec $(FRONTEND) sh
+	$(COMPOSE) exec $(FRONTEND) sh
