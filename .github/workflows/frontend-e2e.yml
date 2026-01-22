@@ -61,6 +61,7 @@ jobs:
           MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
           MONGO_PORT=${{ secrets.MONGO_PORT }}
           PING_PROPERTIES=${{ secrets.PING_PROPERTIES }}
+          VITE_API_BASE_URL=http://backend:5000
           EOF
           
       - name: Start services (docker compose)
@@ -91,10 +92,19 @@ jobs:
           done
           echo "Frontend check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
           
-      - name: Debug - frontend can reach backend
+      - name: Debug - containers & connectivity
         run: |
-          docker compose --env-file .env.ci exec -T frontend sh -lc "wget -qO- http://backend:5000/api/health || true"
+          echo "============================== DOCKER PS =============================="
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
+          echo "============================== backend health from host (localhost:5055) =============================="
+          curl -fsS http://localhost:5055/api/health || (echo "Host->backend failed" && exit 1)
+
+          echo "============================== BACKEND HEALTH from frontend container (backend:5000) =============================="
+          docker compose --env-file .env.ci exec -T frontend sh -lc "wget -qO- http://backend:5000/api/health" || (echo "Frontend->backend failed" && exit 1)
+
+      - name: Debug - verify properties exist (after seed)
+        run: curl -fsS "http://localhost:5055/api/properties?page=1&pageSize=1" | head -c 300
 
       - name: Run Playwright tests
         working-directory: frontend/tests/e2e
