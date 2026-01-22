@@ -39,10 +39,7 @@ const ARTICLE_LIST_PROJECTION = `
     title,
     "slug": slug.current
   },
-  mainImage{
-    alt,
-    "url": asset->url
-  }
+  "mainImageUrl": mainImage.asset->url,
 }
 `.trim();
 
@@ -102,10 +99,7 @@ export const blogQueries = {
             title,
             "slug": slug.current
           },
-          mainImage{
-            alt,
-            "url": asset->url
-          },
+          "mainImageUrl": mainImage.asset->url,
           content
         }
       `.trim(),

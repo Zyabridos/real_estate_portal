@@ -82,7 +82,7 @@ const normalizeArticleListItem = (input: unknown): ArticleListItemDto | null => 
     ?.map(normalizeCategory)
     .filter((x): x is CategoryDto => x !== null);
 
-  const mainImage = normalizeMainImage(input["mainImage"]);
+  const mainImageUrl = readOptionalString(input, "mainImageUrl");
 
   return {
     id,
@@ -93,7 +93,7 @@ const normalizeArticleListItem = (input: unknown): ArticleListItemDto | null => 
     relatedPropertyType,
     author,
     categories,
-    mainImageUrl,
+    mainImageUrl
   };
 };
 

@@ -1,62 +1,110 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from "vue";
+import { blogService, BlogServiceError } from "@/shared/api/blogService";
+import type { ArticleListItemDto } from "@/shared/types/blog";
+import type { UIStatus } from "@/shared/types/ui";
+import { ErrorState, EmptyState, LoadingState } from "@/shared/ui/states";
+
+const state = ref<UIStatus>("idle");
+const errorMessage = ref<string | null>(null);
+const articles = ref<ArticleListItemDto[]>([]);
+
+const isLoading = computed(() => state.value === "loading");
+const isError = computed(() => state.value === "error");
+const isReady = computed(() => state.value === "success");
+const isEmpty = computed(() => isReady.value && articles.value.length === 0);
+
+function toErrorMessage(err: unknown): string {
+  if (err instanceof BlogServiceError) return err.message;
+  if (err instanceof Error) return err.message;
+  return "Unknown error while loading blog articles.";
+}
+
+async function loadArticles(): Promise<void> {
+  state.value = "loading";
+  errorMessage.value = null;
+
+  try {
+    const data = await blogService.getArticles(null);
+    articles.value = data;
+    state.value = "success";
+  } catch (err) {
+    errorMessage.value = toErrorMessage(err);
+    state.value = "error";
+  }
+}
+
+onMounted(() => {
+  void loadArticles();
+});
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-5xl px-4 py-8" data-testid="blog-page">
+  <main class="mx-auto w-full max-w-5xl px-4 py-6">
     <header class="mb-6">
-      <h1 class="text-2xl font-semibold tracking-tight" data-testid="blog-title">
-        Blog
-      </h1>
-      <p class="mt-2 text-sm text-muted-foreground" data-testid="blog-subtitle">
-        Editorial content will be loaded from Sanity CMS (scaffolded).
+      <h1 class="text-2xl font-semibold">Blog</h1>
+      <p class="mt-1 text-sm opacity-80">
+        Articles from Sanity CMS
       </p>
     </header>
 
-    <main>
-      <!-- Stable container for future Playwright assertions -->
-      <div
-        class="grid gap-4"
-        aria-label="Blog list"
-        data-testid="blog-list"
+    <!-- States -->
+    <LoadingState v-if="state === 'loading'" />
+    <ErrorState
+      v-else-if="state === 'error'"
+      :message="errorMessage ?? $t('errors:messages.unexpected')"
+      :onRetry="loadArticles"
+    />
+    <EmptyState v-else-if="state === 'empty'" />
+
+    <!-- LIST -->
+    <section v-else-if="isReady" class="space-y-3">
+      <article
+        v-for="item in articles"
+        :key="item.id"
+        class="rounded-lg border p-4 hover:bg-gray-50"
       >
-        <div
-          class="rounded-2xl border border-border bg-card p-5 shadow-sm"
-          data-testid="blog-empty-card"
+        <RouterLink
+          class="block"
+          :to="`/blog/${item.slug}`"
         >
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold" data-testid="blog-empty-title">
-                Coming soon
-              </h2>
-              <p class="mt-2 text-sm text-muted-foreground" data-testid="blog-empty-text">
-                This page is ready for Sanity integration. No GROQ queries are executed in this PR.
-              </p>
-            </div>
+          <h2 class="text-lg font-semibold">
+            {{ item.title }}
+          </h2>
 
-            <span
-              class="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-badge"
-            >
-              scaffold
+          <p v-if="item.excerpt" class="mt-2 text-sm opacity-80">
+            {{ item.excerpt }}
+          </p>
+
+          <div class="mt-3 flex flex-wrap gap-2 text-xs opacity-70">
+            <span v-if="item.author?.name">
+              By {{ item.author.name }}
+            </span>
+
+            <span v-if="item.publishedAt">
+              • {{ item.publishedAt }}
+            </span>
+
+            <span v-if="item.categories?.length">
+              •
+              <span class="inline-flex flex-wrap gap-1">
+                <span
+                  v-for="c in item.categories"
+                  :key="c.id"
+                  class="rounded bg-gray-200 px-2 py-0.5"
+                >
+                  {{ c.title }}
+                </span>
+              </span>
             </span>
           </div>
+        </RouterLink>
+      </article>
+    </section>
 
-          <div class="mt-4 flex flex-wrap gap-2" data-testid="blog-actions">
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-action-hint-1"
-            >
-              Next PR: GROQ list query
-            </span>
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-action-hint-2"
-            >
-              Next PR: category filter
-            </span>
-          </div>
-        </div>
-      </div>
-    </main>
-  </section>
+    <!-- fallback just in case - for now -->
+    <section v-else class="rounded-lg border p-4">
+      <p class="text-sm">Preparing…</p>
+    </section>
+  </main>
 </template>
