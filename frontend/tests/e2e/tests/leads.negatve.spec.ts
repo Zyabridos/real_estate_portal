@@ -5,6 +5,7 @@ import { testIds } from "../__fixtures__/testIds";
 import { testData } from "../__fixtures__/testData";
 import { leadValidationMessages, type Lang } from "../__fixtures__/leadValidationMessages";
 import setLanguage from "../helpers/setLanguage";
+import { getSeedPropertyId } from "../helpers/seedEnv";
 
 const languages: Lang[] = ["en", "ru", "no"];
 
@@ -25,7 +26,7 @@ test.describe("Leads: negative cases (client validation)", () => {
       test.describe("Invalid email / invalid phone", () => {
         test("invalid email shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {
@@ -49,7 +50,7 @@ test.describe("Leads: negative cases (client validation)", () => {
 
         test("invalid phone shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {
@@ -73,7 +74,7 @@ test.describe("Leads: negative cases (client validation)", () => {
 
         test("phone separators > 3 shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {
@@ -97,7 +98,7 @@ test.describe("Leads: negative cases (client validation)", () => {
 
         test("too short email shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {
@@ -123,7 +124,7 @@ test.describe("Leads: negative cases (client validation)", () => {
 
         test("too long email (>100) shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {
@@ -148,7 +149,7 @@ test.describe("Leads: negative cases (client validation)", () => {
 
         test("too short phone (<7) shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {
@@ -174,7 +175,7 @@ test.describe("Leads: negative cases (client validation)", () => {
 
         test("too long phone (>20) shows error and disables submit button", async ({ page }) => {
           const m = leadValidationMessages[lang];
-          const propertyId = testData.properties.id;
+          const propertyId = getSeedPropertyId();
 
           let postCount = 0;
           page.on("request", (req) => {

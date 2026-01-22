@@ -1,6 +1,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const parseEnvFile = (content: string): Record<string, string> => {
   const out: Record<string, string> = {};
 
