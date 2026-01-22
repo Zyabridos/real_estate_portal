@@ -9,8 +9,11 @@ The project is inspired by data-driven listing systems used for managing propert
 ---
 
 ## Badges
-[![Backend Integration Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml)
-[![Backend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml)
+[![Backend Integration Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml) \
+[![Backend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml) \
+[![Frontend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml) \
+[![Frontend E2E (Playwright) Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml)
+
 
 
 ## Tech Stack
@@ -21,12 +24,14 @@ The project is inspired by data-driven listing systems used for managing propert
 - Pinia
 - Tailwind CSS
 - TypeScript
+- Vitest (unit tests)
+- Playwright (E2E tests)
 
 ### Backend
 - .NET 10 (ASP.NET Core Web API)
-- Entity Framework Core
 - MongoDB
-- XUnit
+- xUnit
+- Testcontainers (integration tests)
 
 ### CMS
 - Sanity v3
@@ -42,18 +47,37 @@ The project is inspired by data-driven listing systems used for managing propert
   backend/    # .NET Web API (business logic, database)
   cms/        # Sanity Studio (editorial content)
   
+  make/              # Makefile modules (e.g., docker targets)
+  scripts/           # Utilities and automation (seed scripts, helpers)
+  docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
+  Makefile           # Entry point for common dev commands
+ 
   docker-compose.yml
   Makefile
   LICENSE
 ```
 ## Environment Variables
 
-Rename `.env` file:
-```bash  
-mv .env.example .env
-```  
-Then set correct values to keys.
+This repo uses separate env templates depending on the workflow.
 
+Rename one of the templates and adjust values:
+
+```bash
+mv .env.dev.example .env.dev     # default Docker dev environment
+```
+```bash
+mv .env.e2e.example .env.e2e     # local E2E environment (isolated DB)
+```
+```bash
+mv .env.local.example .env.local # optional: run apps on host (non-Docker). Recommended: run everything via Docker for consistency.
+```
+## Which one should I use?
+
+`.env.dev` — main local development with Docker Compose
+
+`.env.e2e` — isolated environment for E2E runs (safe to reseed/reset)
+
+`.env.local` — optional overrides when running frontend/backend on the host machine
 
 ## Development Commands
 
