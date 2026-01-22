@@ -22,10 +22,19 @@ RUN dotnet publish ./src/RealEstate.Api/RealEstate.Api.csproj -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
+# Official .NET images include a non-root user named `app`
+USER app
+
+# install curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+
 COPY --from=build /app/publish ./
 
 ENV ASPNETCORE_URLS=http://0.0.0.0:5000
 EXPOSE 5000
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=8 \
+  CMD curl -fsS http://localhost:5000/api/health || exit 1
 
 CMD ["dotnet", "RealEstate.Api.dll"]
 
