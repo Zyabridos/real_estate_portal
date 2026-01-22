@@ -3,10 +3,11 @@ import { routes } from "../__fixtures__/routes";
 import { testIds } from "../__fixtures__/testIds";
 import { testData } from "../__fixtures__/testData";
 import { apiRoutes } from "../__fixtures__/apiRoutes";
+import { getSeedPropertyId } from "../helpers/seedEnv";
 
 test.describe("Leads: positive cases", () => {
   test("request sent, success message shown ", async ({ page }) => {
-    const propertyId = testData.properties.id;
+    const propertyId = getSeedPropertyId();
 
     let interceptedPayload: any | null = null;
 
