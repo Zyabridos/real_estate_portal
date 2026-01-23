@@ -82,10 +82,11 @@ onMounted(async () => {
 watch(
   () => route.query.category,
   (v) => {
-    const fromUrl = typeof v === "string" ? v : null;
+    const fromUrl = typeof v === "string" && v.trim() !== "" ? v : null;
+
+    // sync select with URL
     if (fromUrl !== selectedCategory.value) {
       selectedCategory.value = fromUrl;
-      void loadArticles(selectedCategory.value);
     }
   }
 );
@@ -93,8 +94,13 @@ watch(
 watch(
   () => selectedCategory.value,
   (v) => {
+    void loadArticles(v);
+
+    // keep URL in sync
     const currentUrl = readCategoryFromUrl();
-    if (v !== currentUrl) writeCategoryToUrl(v);
+    if (v !== currentUrl) {
+      writeCategoryToUrl(v);
+    }
   }
 );
 </script>
