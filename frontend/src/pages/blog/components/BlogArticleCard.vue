@@ -10,10 +10,10 @@ const to = computed(() => `/blog/${props.item.slug}`);
   <article class="group relative rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md">
     <RouterLink
       :to="to"
-      class="absolute inset-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      class="absolute inset-0 z-10 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       aria-label="Open article"
     />
-    <div class="relative flex flex-col gap-3">
+    <div class="relative z-0 flex flex-col gap-3">
       <h2 class="text-lg font-semibold leading-snug">
         <span class="line-clamp-2 break-words">{{ item.title }}</span>
       </h2>
