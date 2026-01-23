@@ -16,6 +16,20 @@ export type ArticleListItemDto = {
   mainImageUrl?: string // TODO: consider { url?: string; alt?: string } structure
 }
 
-export interface ArticleDetailsDto extends ArticleListItemDto {
-  content: unknown;
-}
+
+export type ArticleDetailsDto = ArticleListItemDto & {
+  content?: PortableTextBlock[];
+};
+
+export type PortableTextSpan = {
+  _key?: string;
+  _type: "span";
+  text?: string;
+};
+
+export type PortableTextBlock = {
+  _key?: string;
+  _type: "block";
+  style?: string; // "bold", "h1", etc
+  children?: PortableTextSpan[];
+};

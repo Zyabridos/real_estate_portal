@@ -1,6 +1,8 @@
 import { sanityClient } from "@/shared/cms/sanityClient";
-import type { ArticleListItemDto, CategoryDto } from "@/shared/types/blog";
+import type { ArticleDetailsDto, ArticleListItemDto, CategoryDto } from "@/shared/types/blog";
 import { blogQueries } from "@/shared/api/query/blogQueries";
+
+// TODO: move normalizers to their own file/category
 
 export class BlogServiceError extends Error {
   public readonly code = "SANITY_FETCH_FAILED" as const;
@@ -26,11 +28,6 @@ const readOptionalString = (obj: Record<string, unknown>, key: string): string |
   return v == null ? undefined : typeof v === "string" ? v : undefined;
 };
 
-const readArray = (obj: Record<string, unknown>, key: string): unknown[] | undefined => {
-  const v = obj[key];
-  return Array.isArray(v) ? v : undefined;
-};
-
 const normalizeCategory = (input: unknown): CategoryDto | null => {
   if (!isRecord(input)) return null;
 
@@ -45,21 +42,11 @@ const normalizeCategory = (input: unknown): CategoryDto | null => {
 
 const normalizeAuthor = (input: unknown): { name: string } | undefined => {
   if (!isRecord(input)) return undefined;
+
   const name = readString(input, "name");
   if (!name) return undefined;
+
   return { name };
-};
-
-const normalizeMainImage = (
-  input: unknown,
-): { url?: string; alt?: string } | undefined => {
-  if (!isRecord(input)) return undefined;
-
-  const url = readOptionalString(input, "url");
-  const alt = readOptionalString(input, "alt");
-
-  if (!url && !alt) return undefined;
-  return { url, alt };
 };
 
 const normalizeArticleListItem = (input: unknown): ArticleListItemDto | null => {
@@ -93,14 +80,53 @@ const normalizeArticleListItem = (input: unknown): ArticleListItemDto | null => 
     relatedPropertyType,
     author,
     categories,
-    mainImageUrl
+    mainImageUrl,
+  };
+};
+
+const normalizePortableText = (input: unknown): ArticleDetailsDto["content"] => {
+  if (!Array.isArray(input)) return undefined;
+
+  return input
+    .filter((b) => isRecord(b) && readString(b, "_type") === "block")
+    .map((b) => {
+      const children = Array.isArray(b.children)
+        ? b.children
+          .filter((c) => isRecord(c) && readString(c, "_type") === "span")
+          .map((c) => ({
+            _key: readOptionalString(c, "_key"),
+            _type: "span" as const,
+            text: readOptionalString(c, "text"),
+          }))
+        : [];
+
+      return {
+        _key: readOptionalString(b, "_key"),
+        _type: "block" as const,
+        style: readOptionalString(b, "style"),
+        children,
+      };
+    });
+};
+
+const normalizeArticleDetails = (input: unknown): ArticleDetailsDto | null => {
+  if (!isRecord(input)) return null;
+
+  const base = normalizeArticleListItem(input);
+  if (!base) return null;
+
+  const content = normalizePortableText(input["content"]);
+
+  return {
+    ...base,
+    content,
   };
 };
 
 // --- Public API ---
 
-// Returns categories for /blog filter.
 export const blogService = {
+  // Returns categories for /blog filter.
   async getCategories(): Promise<CategoryDto[]> {
     const { query, params } = blogQueries.getCategories();
 
@@ -115,7 +141,6 @@ export const blogService = {
         .map(normalizeCategory)
         .filter((x): x is CategoryDto => x !== null);
     } catch (err) {
-      // Do NOT swallow errors — rethrow with context
       if (err instanceof BlogServiceError) throw err;
       throw new BlogServiceError("Failed to fetch categories from Sanity.", err);
     }
@@ -138,6 +163,21 @@ export const blogService = {
     } catch (err) {
       if (err instanceof BlogServiceError) throw err;
       throw new BlogServiceError("Failed to fetch articles from Sanity.", err);
+    }
+  },
+
+  // Single article for /blog/:slug (returns null if not found).
+  async getArticleBySlug(slug: string): Promise<ArticleDetailsDto | null> {
+    const { query, params } = blogQueries.getArticleBySlug(slug);
+
+    try {
+      const result = await sanityClient.fetch<unknown>(query, params);
+
+      // GROQ [0] returns null if not found
+      return normalizeArticleDetails(result);
+    } catch (err) {
+      if (err instanceof BlogServiceError) throw err;
+      throw new BlogServiceError("Failed to fetch article by slug from Sanity.", err);
     }
   },
 } as const;

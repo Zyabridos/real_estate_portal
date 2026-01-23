@@ -34,6 +34,25 @@ export const article = defineType({
             title: "Related property type",
             type: "string",
             description: "Used later for related articles on property details page",
+            options: {
+                list: [
+                    { title: "All", value: "all" },
+                    { title: "Apartment", value: "apartment" },
+                    { title: "House", value: "house" },
+                    { title: "Cabin", value: "cabin" },
+                ],
+                layout: "dropdown",
+            },
+            validation: (r) => r.required(),
+        }),
+        defineField({
+            name: "content",
+            title: "Content",
+            type: "array",
+            of: [
+                { type: "block" },
+                { type: "image", options: { hotspot: true } },
+            ],
         }),
     ],
 });
