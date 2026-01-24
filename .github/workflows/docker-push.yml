@@ -38,6 +38,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
+          context: ./backend
           file: ./backend/Dockerfile.production
           tags: zyabridos/real_estate_prod_backend:latest
           build-args: |
@@ -46,6 +47,7 @@ jobs:
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
         with:
+          context: ./frontend
           push: true
           file: ./frontend/Dockerfile.production
           tags: zyabridos/real_estate_prod_frontend:latest
