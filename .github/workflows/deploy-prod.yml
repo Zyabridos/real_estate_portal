@@ -1,0 +1,79 @@
+name: Deploy to production server
+
+on:
+  push:
+    branches:
+      - '**'
+
+env:
+  FRONTEND_URL: https://realestateproject.casa
+  BACKEND_HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+        # Note: .ssh key should be set in repo secrets fully, i. e.
+        # -----BEGIN OPENSSH PRIVATE KEY-----
+        # ...
+        # -----END OPENSSH PRIVATE KEY-----
+      - name: Configure SSH key for Ansible
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
+          chmod 600 ~/.ssh/hetzner_realestateproject
+
+      - name: Terraform init
+        working-directory: infrastructure/terraform
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_ssh_key_name: ${{ secrets.HETZNER_SSH_KEY }}
+        run: terraform init -input=false
+
+      - name: Terraform apply
+        working-directory: infrastructure/terraform
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_ssh_key_name: ${{ secrets.HETZNER_SSH_KEY }}
+        run: terraform apply -input=false -auto-approve
+
+      - name: Run Ansible deploy
+        working-directory: infrastructure/ansible
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "false"
+          ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/hetzner_realestateproject
+          ANSIBLE_REMOTE_USER: ${{ secrets.SSH_USER }}
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: |
+          echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
+          chmod 600 vault_pass.txt
+
+          ansible-playbook -i inventory.ini playbook.yml --vault-password-file vault_pass.txt
+
+      - name: Wait for services to start
+        run: sleep 60
+
+      - name: Health check frontend
+        run: |
+          echo "Checking frontend at $FRONTEND_URL"
+          curl -fsSL "$FRONTEND_URL" > /dev/null
+
+      - name: Health check backend
+        run: |
+          echo "Checking backend at $BACKEND_HEALTH_URL"
+          curl -fsSL "$BACKEND_HEALTH_URL" > /dev/null
+
+      # TODO: consider adding 2nd server in order to have no-downtime deploy»
+      # TODO: consider creation of telegram bot and separate chat for failed deployment
