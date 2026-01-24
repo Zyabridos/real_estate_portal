@@ -1,62 +1,153 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { blogService, BlogServiceError } from "@/shared/api/blogService";
+import type { ArticleListItemDto, CategoryDto } from "@/shared/types/blog";
+import type { UIStatus } from "@/shared/types/ui";
+import { ErrorState, EmptyState, LoadingState } from "@/shared/ui/states";
+import BlogArticleCard from "@/pages/blog/components/BlogArticleCard.vue";
+
+const route = useRoute();
+const router = useRouter();
+
+const state = ref<UIStatus>("idle");
+const errorMessage = ref<string | null>(null);
+
+const categoriesState = ref<UIStatus>("idle");
+const categoriesError = ref<string | null>(null);
+
+const articles = ref<ArticleListItemDto[]>([]);
+const categories = ref<CategoryDto[]>([]);
+
+const selectedCategory = ref<string | null>(null);
+
+const isReady = computed(() => state.value === "success");
+const isEmpty = computed(() => isReady.value && articles.value.length === 0);
+
+function toErrorMessage(err: unknown): string {
+  if (err instanceof BlogServiceError) return err.message;
+  if (err instanceof Error) return err.message;
+  return "Unknown error while loading blog data.";
+}
+
+async function loadCategories(): Promise<void> {
+  categoriesState.value = "loading";
+  categoriesError.value = null;
+
+  try {
+    const data = await blogService.getCategories();
+    categories.value = data;
+    categoriesState.value = "success";
+  } catch (err) {
+    categoriesError.value = toErrorMessage(err);
+    categoriesState.value = "error";
+  }
+}
+
+async function loadArticles(categorySlug?: string | null): Promise<void> {
+  state.value = "loading";
+  errorMessage.value = null;
+
+  try {
+    const data = await blogService.getArticles(categorySlug ?? null);
+    articles.value = data;
+    state.value = data.length === 0 ? "empty" : "success";
+  } catch (err) {
+    errorMessage.value = toErrorMessage(err);
+    state.value = "error";
+  }
+}
+
+function readCategoryFromUrl(): string | null {
+  const raw = route.query.category;
+  if (typeof raw !== "string" || raw.trim() === "") return null;
+  return raw;
+}
+
+function writeCategoryToUrl(category: string | null): void {
+  const nextQuery = { ...route.query };
+  if (!category) {
+    delete nextQuery.category;
+  } else {
+    nextQuery.category = category;
+  }
+  void router.replace({ query: nextQuery });
+}
+
+onMounted(async () => {
+  selectedCategory.value = readCategoryFromUrl();
+  await Promise.all([loadCategories(), loadArticles(selectedCategory.value)]);
+});
+
+watch(
+  () => route.query.category,
+  (v) => {
+    const fromUrl = typeof v === "string" && v.trim() !== "" ? v : null;
+
+    // sync select with URL
+    if (fromUrl !== selectedCategory.value) {
+      selectedCategory.value = fromUrl;
+    }
+  }
+);
+
+watch(
+  () => selectedCategory.value,
+  (v) => {
+    void loadArticles(v);
+
+    // keep URL in sync
+    const currentUrl = readCategoryFromUrl();
+    if (v !== currentUrl) {
+      writeCategoryToUrl(v);
+    }
+  }
+);
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-5xl px-4 py-8" data-testid="blog-page">
-    <header class="mb-6">
-      <h1 class="text-2xl font-semibold tracking-tight" data-testid="blog-title">
-        Blog
-      </h1>
-      <p class="mt-2 text-sm text-muted-foreground" data-testid="blog-subtitle">
-        Editorial content will be loaded from Sanity CMS (scaffolded).
-      </p>
+  <main class="mx-auto w-full max-w-5xl px-4 py-6">
+    <header class="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold">Blog</h1>
+        <p class="mt-1 text-sm opacity-80">Articles from Sanity CMS</p>
+      </div>
+
+      <div class="w-full md:w-72">
+        <label class="mb-1 block text-sm font-medium">Category</label>
+
+        <select
+          class="w-full rounded-lg border px-3 py-2 text-sm"
+          :disabled="categoriesState !== 'success'"
+          v-model="selectedCategory"
+          data-testid="blog-category-select"
+        >
+          <option :value="null">All</option>
+          <option v-for="c in categories" :key="c.id" :value="c.slug">
+            {{ c.title }}
+          </option>
+        </select>
+
+        <p v-if="categoriesState === 'error'" class="mt-1 text-xs text-red-600">
+          {{ categoriesError ?? "Failed to load categories." }}
+        </p>
+      </div>
     </header>
 
-    <main>
-      <!-- Stable container for future Playwright assertions -->
-      <div
-        class="grid gap-4"
-        aria-label="Blog list"
-        data-testid="blog-list"
-      >
-        <div
-          class="rounded-2xl border border-border bg-card p-5 shadow-sm"
-          data-testid="blog-empty-card"
-        >
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold" data-testid="blog-empty-title">
-                Coming soon
-              </h2>
-              <p class="mt-2 text-sm text-muted-foreground" data-testid="blog-empty-text">
-                This page is ready for Sanity integration. No GROQ queries are executed in this PR.
-              </p>
-            </div>
+    <LoadingState v-if="state === 'loading'" />
+    <ErrorState
+      v-else-if="state === 'error'"
+      :message="errorMessage ?? $t('errors:messages.unexpected')"
+      :onRetry="() => loadArticles(selectedCategory)"
+    />
+    <EmptyState v-else-if="state === 'empty'" />
 
-            <span
-              class="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-badge"
-            >
-              scaffold
-            </span>
-          </div>
+    <section v-else-if="isReady" class="grid gap-4 md:grid-cols-2" data-testid="blog-articles-list">
+      <BlogArticleCard v-for="item in articles" :key="item.id" :item="item" />
+    </section>
 
-          <div class="mt-4 flex flex-wrap gap-2" data-testid="blog-actions">
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-action-hint-1"
-            >
-              Next PR: GROQ list query
-            </span>
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-action-hint-2"
-            >
-              Next PR: category filter
-            </span>
-          </div>
-        </div>
-      </div>
-    </main>
-  </section>
+    <section v-else class="rounded-lg border p-4">
+      <p class="text-sm">Preparing…</p>
+    </section>
+  </main>
 </template>

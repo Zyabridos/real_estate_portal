@@ -1,76 +1,117 @@
-
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { blogService, BlogServiceError } from "@/shared/api/blogService";
+import type { ArticleDetailsDto } from "@/shared/types/blog";
+import type { UIStatus } from "@/shared/types/ui";
+import { ErrorState, LoadingState, EmptyState } from "@/shared/ui/states";
 
 const route = useRoute();
-const slug = computed(() => String(route.params.slug ?? ""));
+const slug = computed(() => String(route.params.slug ?? "").trim());
+
+const state = ref<UIStatus>("idle");
+const errorMessage = ref<string | null>(null);
+const article = ref<ArticleDetailsDto | null>(null);
+
+function toErrorMessage(err: unknown): string {
+  if (err instanceof BlogServiceError) return err.message;
+  if (err instanceof Error) return err.message;
+  return "Unknown error while loading article.";
+}
+
+// minimal render for now: Portable Text -> plain text
+const contentText = computed(() => {
+  const blocks = article.value?.content ?? [];
+  if (!blocks.length) return "";
+
+  return blocks
+    .map((b) => (b.children ?? []).map((c) => c.text ?? "").join(""))
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n\n");
+});
+
+async function load(): Promise<void> {
+  const s = slug.value;
+  if (!s) {
+    state.value = "empty";
+    article.value = null;
+    return;
+  }
+
+  state.value = "loading";
+  errorMessage.value = null;
+
+  try {
+    const data = await blogService.getArticleBySlug(s);
+    article.value = data;
+
+    state.value = data ? "success" : "empty";
+  } catch (err) {
+    errorMessage.value = toErrorMessage(err);
+    state.value = "error";
+  }
+}
+
+onMounted(() => void load());
+
+watch(
+  () => slug.value,
+  () => void load(),
+);
 </script>
 
 <template>
-  <section class="mx-auto w-full max-w-5xl px-4 py-8" data-testid="blog-details-page">
-    <header class="mb-6">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1
-            class="text-2xl font-semibold tracking-tight"
-            data-testid="blog-details-title"
+  <main class="mx-auto w-full max-w-3xl px-4 py-6">
+    <LoadingState v-if="state === 'loading'" />
+
+    <ErrorState
+      v-else-if="state === 'error'"
+      :message="errorMessage ?? $t('errors:messages.unexpected')"
+      :onRetry="load"
+    />
+
+    <EmptyState v-else-if="state === 'empty'" />
+
+    <section v-else class="space-y-6">
+      <header>
+        <h1 class="text-2xl font-semibold" data-testid="blog-details-title">
+          {{ article?.title ?? `Article: ${slug}` }}
+        </h1>
+
+        <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs opacity-70">
+          <span v-if="article?.author?.name">
+            By <span class="font-medium">{{ article.author.name }}</span>
+          </span>
+          <span v-if="article?.publishedAt">• {{ article.publishedAt }}</span>
+        </div>
+
+        <p v-if="article?.excerpt" class="mt-3 text-sm opacity-80">
+          {{ article.excerpt }}
+        </p>
+
+        <div v-if="article?.categories?.length" class="mt-4 flex flex-wrap gap-1.5">
+          <span
+            v-for="c in article.categories"
+            :key="c.id"
+            class="max-w-full truncate rounded-full bg-gray-100 px-2.5 py-1 text-xs"
           >
-            Article
-          </h1>
-
-          <p class="mt-2 text-sm text-muted-foreground" data-testid="blog-details-subtitle">
-            Slug:
-            <code
-              class="ml-1 rounded-md border border-border bg-muted px-2 py-0.5 font-mono text-xs"
-              data-testid="blog-details-slug"
-            >
-              {{ slug }}
-            </code>
-          </p>
+            {{ c.title }}
+          </span>
         </div>
+      </header>
 
-        <span
-          class="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-muted-foreground"
-          data-testid="blog-details-badge"
-        >
-          scaffold
-        </span>
-      </div>
-    </header>
+      <article class="prose max-w-none">
+        <p v-if="!contentText" class="text-sm opacity-70">
+          No content yet.
+        </p>
 
-    <main>
-      <!-- Stable container for future Playwright assertions -->
-      <article
-        class="rounded-2xl border border-border bg-card p-5 shadow-sm"
-        aria-label="Blog article"
-        data-testid="blog-article"
-      >
-        <div class="flex flex-col gap-3">
-          <h2 class="text-base font-semibold" data-testid="blog-article-placeholder-title">
-            Coming soon
-          </h2>
-
-          <p class="text-sm text-muted-foreground" data-testid="blog-article-placeholder-text">
-            Article content (Portable Text) will be rendered here in a future PR.
-          </p>
-
-          <div class="mt-2 flex flex-wrap gap-2" data-testid="blog-article-hints">
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-article-hint-1"
-            >
-              Next PR: GROQ by slug
-            </span>
-            <span
-              class="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-xs text-muted-foreground"
-              data-testid="blog-article-hint-2"
-            >
-              Next PR: Portable Text renderer
-            </span>
-          </div>
-        </div>
+        <pre
+          v-else
+          class="whitespace-pre-wrap break-words rounded-lg border bg-white p-4 text-sm leading-relaxed"
+          data-testid="blog-details-content"
+        >{{ contentText }}</pre>
       </article>
-    </main>
-  </section>
+    </section>
+  </main>
 </template>

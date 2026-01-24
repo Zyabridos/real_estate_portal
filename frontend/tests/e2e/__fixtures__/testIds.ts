@@ -31,6 +31,7 @@ export const testIds = {
     next: "pagination-next",
     status: "pagination-status",
   },
+
   leads: {
     page: "lead-create-page",
     form: "lead-form",
@@ -49,5 +50,12 @@ export const testIds = {
 
     success: "lead-success",
     error: "lead-error",
-  }
+  },
+
+  blog: {
+    list: "blog-articles-list",
+    categorySelect: "blog-category-select",
+    detailsTitle: "blog-details-title",
+    detailsContent: "blog-details-content",
+  },
 } as const;

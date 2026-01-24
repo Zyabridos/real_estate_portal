@@ -1,4 +1,21 @@
 export const testData = {
+  blog: {
+    article: {
+      knownSlug: "how-to-buy-an-apartment-in-norway-a-practical-checklist",
+    },
+
+    categories: {
+      buyingGuide: {
+        slug: "buying-guide",
+        title: "Buying Guide",
+      },
+    },
+
+    labels: {
+      allOption: "All"
+    },
+  },
+
   leads: {
     fullName: {
       valid: "La La",
@@ -24,7 +41,7 @@ export const testData = {
         separatorsOverMax: "12 3-4 5-6", // separators: space, -, space, - => 4
         tooShort: "123456",                 // 6 (< 7)
         tooLong: "1".repeat(21),
-        // forbiddenChars: "+47(123)456", // скобки запрещены по твоему правилу
+        forbiddenChars: "+47(123)456", // only '+', space and "-" are allowed
       },
     },
 
