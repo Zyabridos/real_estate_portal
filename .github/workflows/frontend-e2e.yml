@@ -96,9 +96,6 @@ jobs:
           done
           echo "Frontend check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
           
-      - name: Print frontend env (debug)
-        run: docker compose --env-file .env.ci exec -T frontend sh -lc 'env | sort | grep VITE_SANITY || true'
-
       - name: Run Playwright tests
         working-directory: frontend/tests/e2e
         env:
