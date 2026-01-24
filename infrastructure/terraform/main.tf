@@ -20,8 +20,9 @@ locals {
   }
 }
 
-data "hcloud_ssh_key" "main" {
-  name = var.ssh_key_name
+resource "hcloud_ssh_key" "main" {
+  name       = var.ssh_key_name
+  public_key = var.ssh_public_key
 }
 
 resource "hcloud_firewall" "real-estate_hub_fw" {
@@ -56,7 +57,7 @@ resource "hcloud_server" "real-estate_hub_prod" {
   location    = var.location
 
   labels   = local.common_labels
-  ssh_keys = [data.hcloud_ssh_key.main.id]
+  ssh_keys = [hcloud_ssh_key.main.id]
 
   public_net {
     ipv4_enabled = true

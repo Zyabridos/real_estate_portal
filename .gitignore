@@ -1,6 +1,7 @@
 # Ansible / Terraform secrets
 .terraform/
 .terraform.lock.hcl
+prod.*.tfvars
 *.tfstate
 *.tfstate.backup
 *.log

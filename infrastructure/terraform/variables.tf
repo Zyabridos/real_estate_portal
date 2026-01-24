@@ -32,3 +32,9 @@ variable "env" {
   type        = string
   default     = "prod"
 }
+
+variable "ssh_public_key" {
+  description = "Public SSH key in OpenSSH format (~/.ssh/id_of_public_key.pub)."
+  type        = string
+  sensitive   = true
+}
