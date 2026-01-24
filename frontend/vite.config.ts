@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   return mergeConfig(createViteSharedConfig(), {
     server: {
       port: Number(env.VITE_PORT) || 3000,
+      allowedHosts: ["realestateproject.casa", "www.realestateproject.casa"],
       host: true,
       proxy: {
         [env.VITE_API_PREFIX || "/api"]: {
