@@ -1,0 +1,17 @@
+realestateproject.casa {
+    tls zyabrina95@gmail.com
+    encode gzip
+
+    @api path /api/*
+    handle @api {
+        reverse_proxy backend:5000
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+}
+
+www.realestateproject.casa {
+    redir https://realestateproject.casa{uri}
+}
