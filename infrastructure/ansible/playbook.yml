@@ -1,0 +1,11 @@
+- name: Configure Real Estate prod
+  hosts: realestate_prod
+  become: true
+
+  vars_files:
+    - group_vars/realestate_prod.yml
+    - group_vars/realestate_prod/vault.yml
+
+  roles:
+    - docker
+    - app
