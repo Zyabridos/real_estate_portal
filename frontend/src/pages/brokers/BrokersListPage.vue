@@ -31,7 +31,7 @@ const items = computed(() => data.value?.items ?? []);
 const listAriaLabel = computed(() => i18n.t("pages:brokers.list.ariaLabel"));
 
 async function onGoToPage(nextPage: number): Promise<void> {
-  await setPage(nextPage, paging.value.totalPages);
+  await setPage(nextPage);
 }
 
 async function load(): Promise<void> {

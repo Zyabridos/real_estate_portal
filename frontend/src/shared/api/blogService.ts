@@ -92,8 +92,8 @@ const normalizePortableText = (input: unknown): ArticleDetailsDto["content"] => 
     .map((b) => {
       const children = Array.isArray(b.children)
         ? b.children
-          .filter((c) => isRecord(c) && readString(c, "_type") === "span")
-          .map((c) => ({
+          .filter((c: any) => isRecord(c) && readString(c, "_type") === "span")
+          .map((c: any) => ({
             _key: readOptionalString(c, "_key"),
             _type: "span" as const,
             text: readOptionalString(c, "text"),
