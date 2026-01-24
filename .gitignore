@@ -10,6 +10,7 @@ terraform.tfvars
 secrets.auto.tfvars
 secrets.backend.tfvars
 vault-password
+!.env.*.j2
 
 # Env/Config
 .env
