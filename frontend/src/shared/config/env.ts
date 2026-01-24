@@ -8,9 +8,12 @@ export type AppEnv = {
     useCdn: boolean;
   };
 };
+const isDocker = (import.meta.env.VITE_DOCKER as string | undefined) === "1"
+  || (import.meta.env.DOCKER as string | undefined) === "1"
+  || !!import.meta.env.VITE_API_PROXY_TARGET;
 
 export const env: AppEnv = {
-  apiBaseUrl: readEnvString("VITE_API_BASE") ?? "/api",
+  apiBaseUrl: readEnvString("VITE_API_BASE_URL") ?? (isDocker ? "/api" : "http://localhost:5000"),
 
   sanity: {
     projectId: readEnvString("VITE_SANITY_PROJECT_ID"),
