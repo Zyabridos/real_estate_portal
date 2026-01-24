@@ -2,6 +2,7 @@ include make/dev.mk
 include make/pings.mk
 include make/seeds.mk
 include make/docker.mk
+include make/infrastructure.mk
 
 # Project services
 BACKEND   		= backend
@@ -83,6 +84,22 @@ help:
 	@echo "$(YELLOW)Cleanup:$(RESET)"
 	@echo "  $(GREEN)prune$(RESET)                  - Remove unused Docker resources"
 	@echo "  $(GREEN)clean$(RESET)                  - Full Docker cleanup ($(RED)danger!$(RESET))"
+	@echo ""
+
+	@echo "$(YELLOW)Infrastructure (Terraform + Ansible):$(RESET)"
+	@echo "  $(GREEN)infra-init$(RESET)             - Terraform init"
+	@echo "  $(GREEN)infra-plan$(RESET)             - Terraform plan (workspace: $(TF_WORKSPACE))"
+	@echo "  $(GREEN)infra-apply$(RESET)            - Terraform apply"
+	@echo "  $(GREEN)infra-output$(RESET)           - Terraform outputs"
+	@echo "  $(GREEN)infra-fmt$(RESET)              - Terraform fmt"
+	@echo "  $(GREEN)infra-validate$(RESET)         - Terraform validate"
+	@echo "  $(GREEN)infra-destroy$(RESET)          - Terraform destroy ($(RED)danger!$(RESET))"
+	@echo ""
+	@echo "  $(GREEN)infra-ansible-ping$(RESET)     - Ansible ping (limit: $(ANSIBLE_LIMIT))"
+	@echo "  $(GREEN)infra-ansible-dry-run$(RESET)  - Ansible playbook --check --diff"
+	@echo "  $(GREEN)infra-ansible-playbook$(RESET) - Run full playbook"
+	@echo "  $(GREEN)infra-ansible-deploy$(RESET)   - Run deploy tasks (--tags deploy)"
+	@echo "  $(GREEN)infra-ssh$(RESET)              - SSH helper (INFRA_SSH_HOST=...)"
 	@echo ""
 
 	@echo "$(PURPLE)Usage:$(RESET)"

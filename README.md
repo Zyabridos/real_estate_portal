@@ -40,12 +40,27 @@ The project is inspired by data-driven listing systems used for managing propert
 
 ---
 
+
+## Prerequisites
+
+For local development:
+- Docker + Docker Compose
+
+For provisioning/deployment (infrastructure):
+- Terraform
+- Ansible
+- SSH access to provisioned hosts (SSH key)
+
+Optional but recommended:
+- `make`
+
 ## Project Structure
 
 ```
-  frontend/   # Vue application (UI, routing, state management)
-  backend/    # .NET Web API (business logic, database)
-  cms/        # Sanity Studio (editorial content)
+  frontend/          # Vue application (UI, routing, state management)
+  backend/           # .NET Web API (business logic, database)
+  cms/               # Sanity Studio (editorial content)
+  infrastructure /   # Terraform + Ansible (provisioning + deployment)
   
   make/              # Makefile modules (e.g., docker targets)
   scripts/           # Utilities and automation (seed scripts, helpers)
