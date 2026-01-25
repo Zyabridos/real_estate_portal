@@ -59,17 +59,5 @@ services:
       - ./cms:/app
       - /app/node_modules
 
-  caddy:
-    image: caddy:alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./caddyfile:/etc/caddy/Caddyfile:ro
-    depends_on:
-      - frontend
-      - backend
-
 volumes:
   mongodb_data:

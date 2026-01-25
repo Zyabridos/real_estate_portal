@@ -1,17 +1,23 @@
-realestateproject.casa {
-    tls zyabrina95@gmail.com
-    encode gzip
+realestateproject.casa www.realestateproject.casa {
+  tls zyabrina95@gmail.com
+  encode gzip
 
-    @api path /api/*
-    handle @api {
-        reverse_proxy backend:5000
-    }
-
-    handle {
-        reverse_proxy frontend:80
-    }
-}
-
-www.realestateproject.casa {
+  # redirect from www
+  @www host www.realestateproject.casa
+  handle @www {
     redir https://realestateproject.casa{uri}
+  }
+
+  handle /lb-health {
+    respond "ok" 200
+  }
+
+  handle /api/* {
+      reverse_proxy backend:5000
+   }
+
+  # everything else -> frontend (prod serves on 80)
+  handle {
+      reverse_proxy frontend:80
+   }
 }
