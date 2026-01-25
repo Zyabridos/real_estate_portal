@@ -12,7 +12,8 @@ secrets.backend.tfvars
 *.auto.tfvars
 *.auto.tfvars.json
 vault-password
-!.env.*.j2
+
+!infrastructure/ansible/roles/app/templates/.env.production.j2
 
 infrastructure/ansible/inventory.prod.*.ini
 infrastructure/ansible/inventory.prod-blue.*
