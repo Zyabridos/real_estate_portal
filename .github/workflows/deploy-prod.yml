@@ -2,7 +2,6 @@ name: Deploy to production (blue/green)
 
 on:
   push:
-    branches: ["**"]
   workflow_dispatch:
     inputs:
       stack:
@@ -12,12 +11,16 @@ on:
         options: [blue, green, both]
         default: both
 
+permissions:
+  contents: read
+
 env:
   ANSIBLE_DIR: infrastructure/ansible
-
+  
 jobs:
-  # just check that workflow works (smoke-test)
+  # Smoke-test on all branches
   smoke:
+    name: Smoke (non-main)
     if: github.event_name == 'push' && github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -29,22 +32,29 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update && sudo apt-get install -y jq curl
+
           lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
             "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
-          count="$(echo "$lbs" | jq '.load_balancers | length')"
-          echo "Found $count prod load balancers (project=real-estate-hub, env=prod)"
 
+          total="$(echo "$lbs" | jq '.load_balancers | length')"
+          blue="$(echo "$lbs" | jq '[.load_balancers[] | select(.labels.stack=="blue")] | length')"
+          green="$(echo "$lbs" | jq '[.load_balancers[] | select(.labels.stack=="green")] | length')"
+
+          echo "LB total=$total, blue=$blue, green=$green"
+          test "$total" -eq 2
+          test "$blue" -eq 1
+          test "$green" -eq 1
+
+  # Deploy on main or manual
   deploy:
-    # Autodeploy on main
-    #  if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    name: Deploy (main/manual) – ${{ matrix.stack }}
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         stack: [blue, green]
-
-    continue-on-error: false
 
     concurrency:
       group: prod-${{ matrix.stack }}
@@ -53,7 +63,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Ansible + rsync
+      - name: Decide if this stack should run (manual selection)
+        id: pick
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            req="${{ github.event.inputs.stack }}"
+            if [ "$req" = "both" ] || [ "$req" = "${{ matrix.stack }}" ]; then
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip stack (manual selection)
+        if: steps.pick.outputs.run != 'true'
+        run: echo "Skipping ${{ matrix.stack }}"
+
+      - name: Ensure exactly 2 prod LBs exist (blue+green)
+        if: steps.pick.outputs.run == 'true'
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y jq curl
+
+          lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
+            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
+
+          total="$(echo "$lbs" | jq '.load_balancers | length')"
+          blue="$(echo "$lbs" | jq '[.load_balancers[] | select(.labels.stack=="blue")] | length')"
+          green="$(echo "$lbs" | jq '[.load_balancers[] | select(.labels.stack=="green")] | length')"
+
+          echo "LB total=$total, blue=$blue, green=$green"
+          test "$total" -eq 2
+          test "$blue" -eq 1
+          test "$green" -eq 1
+
+      - name: Install Ansible + rsync + jq/curl
         if: steps.pick.outputs.run == 'true'
         run: sudo apt-get update && sudo apt-get install -y ansible rsync jq curl
 
@@ -65,7 +114,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
           chmod 600 ~/.ssh/hetzner_realestateproject
 
-      - name: Generate inventory from Hetzner labels (stack=${{ matrix.stack }})
+      - name: Generate inventory from Hetzner servers labels (stack=${{ matrix.stack }})
         if: steps.pick.outputs.run == 'true'
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
@@ -77,16 +126,17 @@ jobs:
           servers="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
             "https://api.hetzner.cloud/v1/servers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod%2Cstack%3D$STACK")"
 
+          count="$(echo "$servers" | jq '.servers | length')"
+          echo "Found $count servers for stack=$STACK"
+          test "$count" -ge 1
+
           ip="$(echo "$servers" | jq -r '.servers[0].public_net.ipv4.ip')"
           test -n "$ip" && [ "$ip" != "null" ]
 
           inv="inventory.generated.$STACK.ini"
           cat > "$inv" <<EOF
-          [realestate_prod]
-          $ip
-
-          [realestate_prod:vars]
-          ansible_user=${{ secrets.SSH_USER }}
+          [realestate_prod_${STACK}]
+          $ip ansible_user=${{ secrets.SSH_USER }}
           EOF
 
           echo "Inventory written: $inv"
@@ -103,6 +153,7 @@ jobs:
         run: |
           set -euo pipefail
           STACK="${{ matrix.stack }}"
+
           echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
           chmod 600 vault_pass.txt
 
@@ -123,6 +174,8 @@ jobs:
 
           lb_ip="$(echo "$lbs" | jq -r '.load_balancers[0].public_net.ipv4.ip')"
           test -n "$lb_ip" && [ "$lb_ip" != "null" ]
+          echo "LB IP ($STACK): $lb_ip"
 
-          echo "LB IP: $lb_ip"
-          curl -fsS "http://$lb_ip/lb-health" || (echo "LB health failed"; exit 1)
+          code="$(curl -sS -o /dev/null -w "%{http_code}" "http://$lb_ip/lb-health" -H "Host: realestateproject.casa")"
+          echo "HTTP status: $code"
+          test "$code" -eq 200

@@ -1,20 +1,20 @@
-http://realestateproject.casa, http://www.realestateproject.casa {
+# Catch-all HTTP (works for Host = server IP, required for Hetzner LB health checks)
+:80 {
   handle /lb-health {
     respond "ok" 200
   }
 
-  # everything else -> HTTPS to non-www
+  # everything else -> HTTPS to non-www (domain)
   handle {
     redir https://realestateproject.casa{uri} 308
   }
 }
 
-# HTTPS (port 443): basic traffic
-https://realestateproject.casa, https://www.realestateproject.casa {
+# HTTPS (port 443): real traffic
+realestateproject.casa, www.realestateproject.casa {
   tls zyabrina95@gmail.com
   encode gzip
 
-  # redirect from www
   @www host www.realestateproject.casa
   handle @www {
     redir https://realestateproject.casa{uri} 308
@@ -28,7 +28,6 @@ https://realestateproject.casa, https://www.realestateproject.casa {
     reverse_proxy backend:5000
   }
 
-  # everything else -> frontend
   handle {
     reverse_proxy frontend:80
   }
