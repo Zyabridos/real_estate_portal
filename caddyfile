@@ -1,11 +1,23 @@
-realestateproject.casa www.realestateproject.casa {
+http://realestateproject.casa, http://www.realestateproject.casa {
+  handle /lb-health {
+    respond "ok" 200
+  }
+
+  # everything else -> HTTPS to non-www
+  handle {
+    redir https://realestateproject.casa{uri} 308
+  }
+}
+
+# HTTPS (port 443): basic traffic
+https://realestateproject.casa, https://www.realestateproject.casa {
   tls zyabrina95@gmail.com
   encode gzip
 
   # redirect from www
   @www host www.realestateproject.casa
   handle @www {
-    redir https://realestateproject.casa{uri}
+    redir https://realestateproject.casa{uri} 308
   }
 
   handle /lb-health {
@@ -13,11 +25,11 @@ realestateproject.casa www.realestateproject.casa {
   }
 
   handle /api/* {
-      reverse_proxy backend:5000
-   }
+    reverse_proxy backend:5000
+  }
 
-  # everything else -> frontend (prod serves on 80)
+  # everything else -> frontend
   handle {
-      reverse_proxy frontend:80
-   }
+    reverse_proxy frontend:80
+  }
 }

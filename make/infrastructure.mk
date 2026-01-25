@@ -151,7 +151,7 @@ infra-ansible-ping: infra-known-hosts
 	@cd "$(ANSIBLE_DIR)" && \
 	$(ANSIBLE) -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_LIMIT)" -m ping
 
-infra-ansible-playbook: infra-known-hosts infra-check-playbook
+infra-ansible-playbook: infra-known-hosts
 	@echo -e "$(BLUE)▶ Ansible playbook (workspace: $(TF_WORKSPACE), limit: $(ANSIBLE_LIMIT))$(RESET)"
 	@$(ensure_vault)
 	@cd "$(ANSIBLE_DIR)" && \
@@ -160,7 +160,7 @@ infra-ansible-playbook: infra-known-hosts infra-check-playbook
 		$(if $(EXTRA_VARS),-e "$(EXTRA_VARS)",) \
 		--vault-password-file "$(VAULT_PASS_FILE)"
 
-infra-ansible-dry-run: infra-known-hosts infra-check-playbook
+infra-ansible-dry-run: infra-known-hosts
 	@echo -e "$(BLUE)▶ Ansible dry-run (workspace: $(TF_WORKSPACE), limit: $(ANSIBLE_LIMIT))$(RESET)"
 	@$(ensure_vault)
 	@cd "$(ANSIBLE_DIR)" && \
@@ -170,7 +170,7 @@ infra-ansible-dry-run: infra-known-hosts infra-check-playbook
 		$(if $(EXTRA_VARS),-e "$(EXTRA_VARS)",) \
 		--vault-password-file "$(VAULT_PASS_FILE)"
 
-infra-ansible-deploy: infra-known-hosts infra-check-playbook
+infra-ansible-deploy: infra-known-hosts
 	@echo -e "$(BLUE)▶ Ansible deploy (tags=deploy) (workspace: $(TF_WORKSPACE), limit: $(ANSIBLE_LIMIT))$(RESET)"
 	@$(ensure_vault)
 	@cd "$(ANSIBLE_DIR)" && \
