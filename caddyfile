@@ -1,10 +1,10 @@
 # Catch-all HTTP (works for Host = server IP, required for Hetzner LB health checks)
 :80 {
   handle /lb-health {
-    respond "ok" 200
+    rewrite * /api/health
+    reverse_proxy backend:5000
   }
 
-  # everything else -> HTTPS to non-www (domain)
   handle {
     redir https://realestateproject.casa{uri} 308
   }
