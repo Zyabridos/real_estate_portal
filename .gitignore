@@ -9,8 +9,13 @@ crash.log
 terraform.tfvars
 secrets.auto.tfvars
 secrets.backend.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
 vault-password
 !.env.*.j2
+
+infrastructure/ansible/inventory.prod.green.ini
+infrastructure/ansible/inventory.prod.blue.ini
 
 # Env/Config
 .env
