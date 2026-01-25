@@ -48,7 +48,7 @@ jobs:
   # Deploy on main or manual
   deploy:
     name: Deploy (main/manual) – ${{ matrix.stack }}
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+#    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     strategy:
