@@ -2,7 +2,7 @@ name: Deploy to production (blue/green) + DNS cutover
 
 on:
   push:
-    branches: [ "main" ]
+#    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       mode:
@@ -146,7 +146,7 @@ jobs:
           curl -fsS "http://$LB_IP/lb-health" -H "Host: $DOMAIN" | cat
 
       - name: DNS cutover (update A records in Cloudflare)
-        if: github.event.inputs.mode != 'deploy_only'
+#        if: github.event.inputs.mode != 'deploy_only'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
