@@ -14,8 +14,9 @@ secrets.backend.tfvars
 vault-password
 !.env.*.j2
 
-infrastructure/ansible/inventory.prod.green.ini
-infrastructure/ansible/inventory.prod.blue.ini
+infrastructure/ansible/inventory.prod.*.ini
+infrastructure/ansible/inventory.prod-blue.*
+infrastructure/ansible/inventory.prod-green.*
 
 # Env/Config
 .env
