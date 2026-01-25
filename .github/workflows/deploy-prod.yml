@@ -7,15 +7,11 @@ on:
   workflow_dispatch:
     inputs:
       stack:
-        description: "Target stack to deploy"
+        description: "Target stack"
         required: true
         type: choice
-        options:
-          - blue
-          - green
-  
-  # push:
-  #   branches: [ "main" ]
+        options: [ blue, green, both ]
+        default: both
 
 env:
   FRONTEND_URL: https://realestateproject.casa
@@ -24,32 +20,32 @@ env:
   ANSIBLE_DIR: infrastructure/ansible
 
 jobs:
-  deploy:
+  deploy_blue:
+    if: github.event_name == 'push' || github.event.inputs.stack == 'blue' || github.event.inputs.stack == 'both'
     runs-on: ubuntu-latest
-
-    # In order for two deploys not going n the same stack parallel
     concurrency:
-      group: prod-${{ github.event.inputs.stack || 'blue' }}
+      group: prod-blue
       cancel-in-progress: true
 
+    env:
+      TF_DIR: infrastructure/terraform
+      ANSIBLE_DIR: infrastructure/ansible
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set target stack vars
-        id: vars
+      - name: ensure exactly 2 prod LBs exist (blue+green)
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
         run: |
-          STACK="${{ github.event.inputs.stack }}"
-          if [ -z "$STACK" ]; then
-            STACK="blue"
-          fi
+          sudo apt-get update && sudo apt-get install -y jq
+          lbs="$(curl -sS -H "Authorization: Bearer $HCLOUD_TOKEN" \
+            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
+          count="$(echo "$lbs" | jq '.load_balancers | length')"
+          echo "Found $count load balancers (project=real-estate-hub, env=prod)"
+          test "$count" -eq 2 || exit 1
 
-          echo "stack=$STACK" >> $GITHUB_OUTPUT
-          echo "workspace=prod-$STACK" >> $GITHUB_OUTPUT
-          echo "varfile=terraform.prod.$STACK.tfvars" >> $GITHUB_OUTPUT
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.7
 
@@ -68,30 +64,25 @@ jobs:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
         run: terraform init -input=false
 
-      - name: Select Terraform workspace (blue/green)
+      - name: Select workspace (prod-blue)
         working-directory: ${{ env.TF_DIR }}
         env:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: |
-          terraform workspace select "${{ steps.vars.outputs.workspace }}" \
-            || terraform workspace new "${{ steps.vars.outputs.workspace }}"
+        run: terraform workspace select prod-blue || terraform workspace new prod-blue
 
-      - name: Terraform apply (target stack)
+      - name: Terraform apply (blue)
         working-directory: ${{ env.TF_DIR }}
         env:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform apply -input=false -auto-approve -var-file="${{ steps.vars.outputs.varfile }}"
+        run: terraform apply -auto-approve -var-file="terraform.prod.blue.tfvars"
 
-      - name: Export Ansible inventory from Terraform output
+      - name: Export inventory
         working-directory: ${{ env.TF_DIR }}
         env:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: |
-          terraform output -raw ansible_inventory_ini > ../ansible/inventory.generated.ini
-          echo "Generated inventory:"
-          cat ../ansible/inventory.generated.ini
+        run: terraform output -raw ansible_inventory_ini > ../ansible/inventory.generated.ini
 
-      - name: Run Ansible deploy (target stack)
+      - name: Run Ansible deploy (blue)
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
@@ -101,19 +92,22 @@ jobs:
         run: |
           echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
           chmod 600 vault_pass.txt
-
           ansible-playbook -i inventory.generated.ini playbook.yml \
-          --vault-password-file vault_pass.txt \
-          -e "stack_id=${{ steps.vars.outputs.stack }}"  
-  
-      - name: Wait for services to start
-        run: sleep 60
+            --vault-password-file vault_pass.txt \
+            -e "stack_id=blue"
 
-      - name: Health check backend (by IP)
+      - name: LB health-check through LB IP (blue)
         working-directory: ${{ env.TF_DIR }}
         env:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
         run: |
-          IP="$(terraform output -raw public_ip)"
-          echo "Checking backend at http://$IP/health"
-          curl -fsSL "http://$IP/health" > /dev/null
+          LB_IP="$(terraform output -raw load_balancer_ipv4)"
+          echo "LB_IP=$LB_IP"
+          curl -fsS "http://$LB_IP/lb-health" -H "Host: realestateproject.casa"
+
+  deploy_green:
+    if: github.event_name == 'push' || github.event.inputs.stack == 'green' || github.event.inputs.stack == 'both'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: prod-green
+      cancel-in-progress: true
