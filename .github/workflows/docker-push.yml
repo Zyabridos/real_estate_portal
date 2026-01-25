@@ -2,8 +2,7 @@ name: Push docker image to Docker Hub
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [ "main" ]
 
 env:
   TEST_DB_HOST: localhost

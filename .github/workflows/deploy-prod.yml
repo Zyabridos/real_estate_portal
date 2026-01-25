@@ -1,6 +1,9 @@
 name: Deploy to production (blue/green)
 
 on:
+  push:
+    branches:
+      - '**'
   workflow_dispatch:
     inputs:
       stack:
