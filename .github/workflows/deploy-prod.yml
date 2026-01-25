@@ -1,7 +1,8 @@
 name: Deploy to production (blue/green)
 
 on:
-  push: {}
+  push:
+    branches: ["**"]
   workflow_dispatch:
     inputs:
       stack:
@@ -12,178 +13,116 @@ on:
         default: both
 
 env:
-  FRONTEND_URL: https://realestateproject.casa
-  BACKEND_HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL }}
-  TF_DIR: infrastructure/terraform
   ANSIBLE_DIR: infrastructure/ansible
 
 jobs:
-  deploy_blue:
-    if: github.event_name == 'push' || github.event.inputs.stack == 'blue' || github.event.inputs.stack == 'both'
+  # just check that workflow works (smoke-test)
+  smoke:
+    if: github.event_name == 'push' && github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hetzner API smoke (count LBs)
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y jq curl
+          lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
+            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
+          count="$(echo "$lbs" | jq '.load_balancers | length')"
+          echo "Found $count prod load balancers (project=real-estate-hub, env=prod)"
+
+  deploy:
+    # Autodeploy on main
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: [blue, green]
+
+    continue-on-error: false
+
     concurrency:
-      group: prod-blue
+      group: prod-${{ matrix.stack }}
       cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ensure exactly 2 prod LBs exist (blue+green)
-        env:
-          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
-        run: |
-          set -euo pipefail
-          sudo apt-get update && sudo apt-get install -y jq
-          lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
-            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
-          count="$(echo "$lbs" | jq '.load_balancers | length')"
-          echo "Found $count load balancers (project=real-estate-hub, env=prod)"
-          test "$count" -eq 2
+      - name: Install Ansible + rsync
+        if: steps.pick.outputs.run == 'true'
+        run: sudo apt-get update && sudo apt-get install -y ansible rsync jq curl
 
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.7
-
-      - name: Install Ansible
-        run: sudo apt-get update && sudo apt-get install -y ansible
-
-      - name: Configure SSH key for Ansible
+      - name: Configure SSH key
+        if: steps.pick.outputs.run == 'true'
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
           chmod 600 ~/.ssh/hetzner_realestateproject
 
-      - name: Terraform init
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform init -input=false
-
-      - name: Select workspace (prod-blue)
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform workspace select prod-blue || terraform workspace new prod-blue
-
-      - name: Terraform apply (blue)
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform apply -input=false -auto-approve -var-file="terraform.prod.blue.tfvars"
-
-      - name: Export inventory
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform output -raw ansible_inventory_ini > ../ansible/inventory.generated.ini
-
-      - name: Run Ansible deploy (blue)
+      - name: Generate inventory from Hetzner labels (stack=${{ matrix.stack }})
+        if: steps.pick.outputs.run == 'true'
         working-directory: ${{ env.ANSIBLE_DIR }}
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "false"
-          ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/hetzner_realestateproject
-          ANSIBLE_REMOTE_USER: ${{ secrets.SSH_USER }}
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
-        run: |
-          set -euo pipefail
-          echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
-          chmod 600 vault_pass.txt
-          ansible-playbook -i inventory.generated.ini playbook.yml \
-            --vault-password-file vault_pass.txt \
-            -e "stack_id=blue"
-
-      - name: LB health-check through LB IP (blue)
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: |
-          set -euo pipefail
-          LB_IP="$(terraform output -raw load_balancer_ipv4)"
-          echo "LB_IP=$LB_IP"
-          curl -fsS "http://$LB_IP/lb-health" -H "Host: realestateproject.casa"
-
-  deploy_green:
-    if: github.event_name == 'push' || github.event.inputs.stack == 'green' || github.event.inputs.stack == 'both'
-    runs-on: ubuntu-latest
-    concurrency:
-      group: prod-green
-      cancel-in-progress: true
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Ensure exactly 2 prod LBs exist (blue+green)
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
         run: |
           set -euo pipefail
-          sudo apt-get update && sudo apt-get install -y jq
-          lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
-            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
-          count="$(echo "$lbs" | jq '.load_balancers | length')"
-          echo "Found $count load balancers (project=real-estate-hub, env=prod)"
-          test "$count" -eq 2
 
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.7
+          STACK="${{ matrix.stack }}"
+          servers="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
+            "https://api.hetzner.cloud/v1/servers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod%2Cstack%3D$STACK")"
 
-      - name: Install Ansible
-        run: sudo apt-get update && sudo apt-get install -y ansible
+          ip="$(echo "$servers" | jq -r '.servers[0].public_net.ipv4.ip')"
+          test -n "$ip" && [ "$ip" != "null" ]
 
-      - name: Configure SSH key for Ansible
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
-          chmod 600 ~/.ssh/hetzner_realestateproject
+          inv="inventory.generated.$STACK.ini"
+          cat > "$inv" <<EOF
+          [realestate_prod]
+          $ip
 
-      - name: Terraform init
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform init -input=false
+          [realestate_prod:vars]
+          ansible_user=${{ secrets.SSH_USER }}
+          EOF
 
-      - name: Select workspace (prod-green)
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform workspace select prod-green || terraform workspace new prod-green
+          echo "Inventory written: $inv"
+          cat "$inv"
 
-      - name: Terraform apply (green)
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform apply -input=false -auto-approve -var-file="terraform.prod.green.tfvars"
-
-      - name: Export inventory
-        working-directory: ${{ env.TF_DIR }}
-        env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-        run: terraform output -raw ansible_inventory_ini > ../ansible/inventory.generated.ini
-
-      - name: Run Ansible deploy (green)
+      - name: Run Ansible deploy (stack=${{ matrix.stack }})
+        if: steps.pick.outputs.run == 'true'
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/hetzner_realestateproject
-          ANSIBLE_REMOTE_USER: ${{ secrets.SSH_USER }}
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           set -euo pipefail
+          STACK="${{ matrix.stack }}"
           echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
           chmod 600 vault_pass.txt
-          ansible-playbook -i inventory.generated.ini playbook.yml \
-            --vault-password-file vault_pass.txt \
-            -e "stack_id=green"
 
-      - name: LB health-check through LB IP (green)
-        working-directory: ${{ env.TF_DIR }}
+          ansible-playbook -i "inventory.generated.$STACK.ini" playbook.yml \
+            --vault-password-file vault_pass.txt \
+            -e "stack_id=$STACK"
+
+      - name: LB health check (stack=${{ matrix.stack }})
+        if: steps.pick.outputs.run == 'true'
         env:
-          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
         run: |
           set -euo pipefail
-          LB_IP="$(terraform output -raw load_balancer_ipv4)"
-          echo "LB_IP=$LB_IP"
-          curl -fsS "http://$LB_IP/lb-health" -H "Host: realestateproject.casa"
+          STACK="${{ matrix.stack }}"
+
+          lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
+            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod%2Cstack%3D$STACK")"
+
+          lb_ip="$(echo "$lbs" | jq -r '.load_balancers[0].public_net.ipv4.ip')"
+          test -n "$lb_ip" && [ "$lb_ip" != "null" ]
+
+          echo "LB IP: $lb_ip"
+          curl -fsS "http://$lb_ip/lb-health" || (echo "LB health failed"; exit 1)

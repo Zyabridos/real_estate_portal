@@ -37,20 +37,19 @@
     owner: root
     group: root
     mode: "0640"
+    
+- name: Stop stack (clean old containers/networks)
+  ansible.builtin.command:
+    chdir: "{{ project_root_remote }}"
+    cmd: docker compose -f {{ app_compose_file }} --env-file {{ app_env_file }} down --remove-orphans
+  changed_when: false
+  failed_when: false
 
 - name: Pull/build and start stack
   ansible.builtin.command:
     chdir: "{{ project_root_remote }}"
-    cmd: docker compose -f {{ app_compose_file }} --env-file {{ app_env_file }} up -d --build
+    cmd: docker compose -f {{ app_compose_file }} --env-file {{ app_env_file }} up -d --build --force-recreate --remove-orphans
   register: compose_result
-
-# Just in case. I had old Caddy-container running, and therefore there were errors
-- name: Restart all containers
-  ansible.builtin.command:
-    chdir: "{{ project_root_remote }}"
-    cmd: docker compose -f {{ app_compose_file }} --env-file {{ app_env_file }} restart
-  when: compose_result.changed
-  changed_when: true
   
 - name: Show docker compose status
   ansible.builtin.command:

@@ -19,7 +19,7 @@ data "hcloud_ssh_key" "main" {
 }
 
 resource "hcloud_firewall" "real_estate_hub_fw" {
-  name   = "${local.name_prefix}-fw"
+  name = "real-estate-hub-${var.env}-${var.stack_id}-fw"
   labels = local.common_labels
 
   rule {

@@ -7,6 +7,7 @@ variable "hcloud_token" {
 variable "env" {
   description = "Environment name (dev/stage/prod)"
   type        = string
+  default = "prod"
 }
 
 variable "stack_id" {
@@ -60,7 +61,7 @@ variable "load_balancer_algorithm" {
 }
 
 variable "load_balancer_certificate_id" {
-  description = "Optional: Hetzner certificate ID for TLS termination on LB (enables HTTPS service)."
+  description = "Hetzner certificate ID for TLS termination on LB (enables HTTPS service)."
   type        = number
   default     = null
 }

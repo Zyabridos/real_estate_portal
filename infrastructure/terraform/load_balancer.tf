@@ -8,6 +8,10 @@ resource "hcloud_load_balancer" "real_estate_hub" {
   algorithm {
     type = var.load_balancer_algorithm
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # choose server by label
