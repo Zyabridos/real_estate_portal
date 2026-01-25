@@ -1,5 +1,5 @@
-- name: Configure Real Estate prod
-  hosts: realestate_prod
+- name: Configure Real Estate prod stack
+  hosts: all
   become: true
 
   vars_files:
