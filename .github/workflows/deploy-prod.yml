@@ -1,21 +1,49 @@
-name: Deploy to production server
+name: Deploy to production (blue/green)
 
 on:
-  push:
-    branches:
-      - '**'
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: "Target stack to deploy"
+        required: true
+        type: choice
+        options:
+          - blue
+          - green
+  
+  # push:
+  #   branches: [ "main" ]
 
 env:
   FRONTEND_URL: https://realestateproject.casa
   BACKEND_HEALTH_URL: ${{ secrets.BACKEND_HEALTH_URL }}
+  TF_DIR: infrastructure/terraform
+  ANSIBLE_DIR: infrastructure/ansible
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # In order for two deploys not going n the same stack parallel
+    concurrency:
+      group: prod-${{ github.event.inputs.stack || 'blue' }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set target stack vars
+        id: vars
+        run: |
+          STACK="${{ github.event.inputs.stack }}"
+          if [ -z "$STACK" ]; then
+            STACK="blue"
+          fi
+
+          echo "stack=$STACK" >> $GITHUB_OUTPUT
+          echo "workspace=prod-$STACK" >> $GITHUB_OUTPUT
+          echo "varfile=terraform.prod.$STACK.tfvars" >> $GITHUB_OUTPUT
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -25,10 +53,6 @@ jobs:
       - name: Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
-        # Note: .ssh key should be set in repo secrets fully, i. e.
-        # -----BEGIN OPENSSH PRIVATE KEY-----
-        # ...
-        # -----END OPENSSH PRIVATE KEY-----
       - name: Configure SSH key for Ansible
         run: |
           mkdir -p ~/.ssh
@@ -36,23 +60,36 @@ jobs:
           chmod 600 ~/.ssh/hetzner_realestateproject
 
       - name: Terraform init
-        working-directory: infrastructure/terraform
+        working-directory: ${{ env.TF_DIR }}
         env:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-          TF_VAR_ssh_key_name: ${{ secrets.HETZNER_SSH_KEY }}
-          TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
         run: terraform init -input=false
 
-      - name: Terraform apply
-        working-directory: infrastructure/terraform
+      - name: Select Terraform workspace (blue/green)
+        working-directory: ${{ env.TF_DIR }}
         env:
           TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
-          TF_VAR_ssh_key_name: ${{ secrets.HETZNER_SSH_KEY }}
-          TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
-        run: terraform apply -input=false -auto-approve
-      
-      - name: Run Ansible deploy
-        working-directory: infrastructure/ansible
+        run: |
+          terraform workspace select "${{ steps.vars.outputs.workspace }}" \
+            || terraform workspace new "${{ steps.vars.outputs.workspace }}"
+
+      - name: Terraform apply (target stack)
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: terraform apply -input=false -auto-approve -var-file="${{ steps.vars.outputs.varfile }}"
+
+      - name: Export Ansible inventory from Terraform output
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          terraform output -raw ansible_inventory_ini > ../ansible/inventory.generated.ini
+          echo "Generated inventory:"
+          cat ../ansible/inventory.generated.ini
+
+      - name: Run Ansible deploy (target stack)
+        working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/hetzner_realestateproject
@@ -62,20 +99,18 @@ jobs:
           echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
           chmod 600 vault_pass.txt
 
-          ansible-playbook -i inventory.ini playbook.yml --vault-password-file vault_pass.txt
-
+          ansible-playbook -i inventory.generated.ini playbook.yml \
+          --vault-password-file vault_pass.txt \
+          -e "stack_id=${{ steps.vars.outputs.stack }}"  
+  
       - name: Wait for services to start
         run: sleep 60
 
-      - name: Health check frontend
+      - name: Health check backend (by IP)
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
         run: |
-          echo "Checking frontend at $FRONTEND_URL"
-          curl -fsSL "$FRONTEND_URL" > /dev/null
-
-      - name: Health check backend
-        run: |
-          echo "Checking backend at $BACKEND_HEALTH_URL"
-          curl -fsSL "$BACKEND_HEALTH_URL" > /dev/null
-
-      # TODO: consider adding 2nd server in order to have no-downtime deploy»
-      # TODO: consider creation of telegram bot and separate chat for failed deployment
+          IP="$(terraform output -raw public_ip)"
+          echo "Checking backend at http://$IP/health"
+          curl -fsSL "http://$IP/health" > /dev/null
