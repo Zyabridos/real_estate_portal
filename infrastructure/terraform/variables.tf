@@ -4,8 +4,23 @@ variable "hcloud_token" {
   sensitive   = true
 }
 
+variable "env" {
+  description = "Environment name (dev/stage/prod)"
+  type        = string
+}
+
+variable "stack_id" {
+  description = "Blue/green stack id (blue|green). Used for names/labels."
+  type        = string
+
+  validation {
+    condition     = contains(["blue", "green"], var.stack_id)
+    error_message = "stack_id must be either 'blue' or 'green'."
+  }
+}
+
 variable "ssh_key_name" {
-  description = "Name of SSH key in Hetzner Cloud"
+  description = "Existing SSH key name in Hetzner Cloud"
   type        = string
 }
 
@@ -27,14 +42,26 @@ variable "location" {
   default     = "hel1"
 }
 
-variable "env" {
-  description = "Environment name (dev/stage/prod)."
+variable "load_balancer_type" {
+  description = "Hetzner load balancer type (lb11/lb21/...)"
   type        = string
-  default     = "prod"
+  default     = "lb11"
 }
 
-variable "ssh_public_key" {
-  description = "Public SSH key in OpenSSH format (~/.ssh/id_of_public_key.pub)."
+variable "load_balancer_algorithm" {
+  description = "Load balancer algorithm: round_robin or least_connections"
   type        = string
-  sensitive   = true
+  default     = "round_robin"
+
+  validation {
+    condition     = contains(["round_robin", "least_connections"], var.load_balancer_algorithm)
+    error_message = "load_balancer_algorithm must be 'round_robin' or 'least_connections'."
+  }
 }
+
+variable "load_balancer_certificate_id" {
+  description = "Optional: Hetzner certificate ID for TLS termination on LB (enables HTTPS service)."
+  type        = number
+  default     = null
+}
+

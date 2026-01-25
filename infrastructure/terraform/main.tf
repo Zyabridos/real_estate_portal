@@ -1,32 +1,26 @@
-terraform {
-  required_version = ">= 1.5.0"
-
-  required_providers {
-    hcloud = {
-      source  = "hetznercloud/hcloud"
-      version = "~> 1.48"
-    }
-  }
-}
-
 provider "hcloud" {
   token = var.hcloud_token
 }
 
 locals {
+  base_name   = "real-estate-hub"
+  name_prefix = "${local.base_name}-${var.env}-${var.stack_id}"
+
   common_labels = {
     project = "real-estate-hub"
     env     = var.env
+    stack   = var.stack_id
   }
 }
 
-resource "hcloud_ssh_key" "main" {
-  name       = var.ssh_key_name
-  public_key = var.ssh_public_key
+# Use an existing SSH key (recommended for blue/green; avoids uniqueness conflicts)
+data "hcloud_ssh_key" "main" {
+  name = var.ssh_key_name
 }
 
-resource "hcloud_firewall" "real-estate_hub_fw" {
-  name = "real-estate-hub-fw"
+resource "hcloud_firewall" "real_estate_hub_fw" {
+  name   = "${local.name_prefix}-fw"
+  labels = local.common_labels
 
   rule {
     direction  = "in"
@@ -50,19 +44,19 @@ resource "hcloud_firewall" "real-estate_hub_fw" {
   }
 }
 
-resource "hcloud_server" "real-estate_hub_prod" {
-  name        = "real-estate-hub-prod"
+resource "hcloud_server" "real_estate_hub" {
+  name        = "${local.name_prefix}-server"
   server_type = var.server_type
   image       = var.image
   location    = var.location
 
   labels   = local.common_labels
-  ssh_keys = [hcloud_ssh_key.main.id]
+  ssh_keys = [data.hcloud_ssh_key.main.id]
 
   public_net {
     ipv4_enabled = true
     ipv6_enabled = false
   }
 
-  firewall_ids = [hcloud_firewall.real-estate_hub_fw.id]
+  firewall_ids = [hcloud_firewall.real_estate_hub_fw.id]
 }
