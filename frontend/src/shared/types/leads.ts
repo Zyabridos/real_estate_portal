@@ -1,7 +1,8 @@
 import type { PagedResult } from "@/shared/types/pagedResult.ts";
+import type { SortDirection } from "@/shared/types/queries";
+
 export type LeadFormStatus = "idle" | "loading" | "error" | "success";
 export type LeadStatus = "New" | "Contacted" | "Closed";
-export type SortDirection = "asc" | "desc";
 export type LeadSortBy = "PropertyId" | "FullName" | "Email" | "PhoneNumber" | "CreatedAt";
 
 export type LeadFormValues = {

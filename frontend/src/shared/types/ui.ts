@@ -1,6 +1,7 @@
-export type UIStatus =
+export type UIState =
   | 'idle'
   | 'loading'
   | 'success'
   | 'error'
   | 'empty'
+  | 'ready'

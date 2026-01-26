@@ -19,6 +19,14 @@ export const leadsApi = {
     return http.get<PagedResultDto<LeadListItemDto>>(routes.api.leads.create(), { params });
   },
 
+  // GET /api/leads/{id}
+  async getById(id: string): Promise<LeadDetailsDto> {
+    if (!id) {
+      throw new Error("leadsApi.getById: id is required");
+    }
+    return http.get<LeadDetailsDto>(routes.api.leads.getById(id));
+  },
+
   // POST /api/leads
   async createLead(payload: CreateLeadRequestDto): Promise<LeadDetailsDto> {
     return http.post<LeadDetailsDto>(routes.api.leads.create(), payload);
