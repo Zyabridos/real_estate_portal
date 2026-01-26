@@ -12,10 +12,9 @@ export type AppEnv = {
 
 export const env: AppEnv = {
   apiBaseUrl: readEnvString("VITE_API_PREFIX") ?? "/api",
-
   sanity: {
-    projectId: requireEnv("VITE_SANITY_PROJECT_ID"),
-    dataset: requireEnv("VITE_SANITY_DATASET"),
+    projectId: requireEnv("VITE_SANITY_PROJECT_ID") ?? "kb7oir9o",
+    dataset: requireEnv("VITE_SANITY_DATASET") ?? "production",
     apiVersion: readEnvString("VITE_SANITY_API_VERSION") ?? "2025-01-01",
     useCdn: readEnvBool("VITE_SANITY_USE_CDN", true),
   },
