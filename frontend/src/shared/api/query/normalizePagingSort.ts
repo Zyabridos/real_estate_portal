@@ -54,7 +54,7 @@ export function normalizePagedQuery<T extends Record<string, unknown>>(
 
   // 2) Paging
   result.page = normalizeInt(result.page, defaults.page, 1, 10_000);
-  result.pageSize = normalizeInt(result.pageSize, defaults.pageSize, 1, 200);
+  result.pageSize = normalizeInt(result.pageSize, defaults.pageSize, 1, 100);
 
   // 3) Sorting
   const sortBy = trimOrUndef(result.sortBy) ?? defaults.sortBy;
