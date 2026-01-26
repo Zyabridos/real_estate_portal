@@ -29,6 +29,9 @@ onMounted(async () => {
       <h1 class="text-xl font-semibold">
         {{ $t('pages:home.title') }}
       </h1>
+      <h2 class="text-xl font-semibold">
+        If automatic deploy works, we will see this text
+      </h2>
 
       <p class="mt-2 text-slate-700" role="status" aria-live="polite">
         <span class="font-medium">{{ statusLabel }}:</span>

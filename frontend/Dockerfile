@@ -15,6 +15,6 @@ USER node
 EXPOSE 3000
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=8 \
-  CMD curl -fsS http://localhost:3333/ > /dev/null || exit 1
+  CMD curl -fsS http://localhost:3000/ > /dev/null || exit 1
 
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]

@@ -1,0 +1,21 @@
+# Where the project will live on the server
+project_root_remote: /opt/realestate
+
+# Where the repo root is on local machine
+project_root_local: "{{ playbook_dir }}/../.."
+
+# App ports
+api_port: 5055
+mongo_port: 27017
+
+# Domain / TLS
+domain_name: "realestateproject.casa"
+letsencrypt_email: "zyabrina95@gmail.com"
+
+# Frontend build-time/runtime env
+vite_api_origin: "https://{{ domain_name }}"
+vite_api_prefix: "/api"
+
+# Sanity
+vite_sanity_project_id: "kb7oir9o"
+vite_sanity_dataset: "production"

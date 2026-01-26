@@ -1,0 +1,44 @@
+# build
+FROM node:20-alpine AS build
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci || npm install
+
+COPY . .
+
+# Build-time env for Vite
+ARG VITE_API_ORIGIN
+ARG VITE_API_PREFIX
+ARG VITE_SANITY_PROJECT_ID
+ARG VITE_SANITY_DATASET
+ARG VITE_SANITY_API_VERSION
+ARG VITE_SANITY_USE_CDN
+
+ENV VITE_API_ORIGIN=$VITE_API_ORIGIN
+ENV VITE_API_PREFIX=$VITE_API_PREFIX
+ENV VITE_SANITY_PROJECT_ID=$VITE_SANITY_PROJECT_ID
+ENV VITE_SANITY_DATASET=$VITE_SANITY_DATASET
+ENV VITE_SANITY_API_VERSION=$VITE_SANITY_API_VERSION
+ENV VITE_SANITY_USE_CDN=$VITE_SANITY_USE_CDN
+
+RUN npm run build
+
+# serve
+FROM nginx:alpine AS runtime
+COPY --from=build /app/dist /usr/share/nginx/html
+
+RUN printf '%s\n' \
+'server {' \
+'  listen 80;' \
+'  server_name _;' \
+'  root /usr/share/nginx/html;' \
+'  index index.html;' \
+'  location / {' \
+'    try_files $uri $uri/ /index.html;' \
+'  }' \
+'}' > /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=10 \
+  CMD wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1

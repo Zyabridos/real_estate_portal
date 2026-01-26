@@ -1,0 +1,59 @@
+name: Push docker image to Docker Hub
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  TEST_DB_HOST: localhost
+  TEST_DB_PORT: 5433
+  TEST_DB_USER: ${{ secrets.TEST_DB_USER }}
+  TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+  TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
+
+  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+  INTERNAL_API_URL: ${{ secrets.INTERNAL_API_URL }}
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          context: ./backend
+          file: ./backend/Dockerfile.production
+          tags: zyabridos/real_estate_prod_backend:latest
+          build-args: |
+            .env
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          file: ./frontend/Dockerfile.production
+          tags: zyabridos/real_estate_prod_frontend:latest
+          build-args: |
+            .env
+
+# TODO: there should be a way to avoid running each test before pushing images.
+# Intead it should be possible to run tests on separate job and if tests pass then
+# only push images. But last time I tried to do that... was not successful :(
+# Investigate later.

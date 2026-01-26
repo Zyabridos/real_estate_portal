@@ -1,3 +1,20 @@
+# Ansible / Terraform secrets
+.terraform/
+.terraform.lock.hcl
+prod.*.tfvars
+*.tfstate
+*.tfstate.backup
+*.log
+crash.log
+terraform.tfvars
+secrets.auto.tfvars
+secrets.backend.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
+vault-password
+
+!infrastructure/ansible/roles/app/templates/.env.production.j2
+
 # Env/Config
 .env
 .env.*

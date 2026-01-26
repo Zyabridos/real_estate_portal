@@ -1,0 +1,33 @@
+:80 {
+  handle /lb-health {
+    rewrite * /api/health
+    reverse_proxy backend:5000
+  }
+
+  handle {
+    redir https://realestateproject.casa{uri} 308
+  }
+}
+
+realestateproject.casa, www.realestateproject.casa {
+  tls zyabrina95@gmail.com
+  encode gzip
+
+  @www host www.realestateproject.casa
+  handle @www {
+    redir https://realestateproject.casa{uri} 308
+  }
+
+  handle /lb-health {
+    rewrite * /api/health
+    reverse_proxy backend:5000
+  }
+
+  handle /api/* {
+    reverse_proxy backend:5000
+  }
+
+  handle {
+    reverse_proxy frontend:80
+  }
+}

@@ -1,0 +1,140 @@
+name: Deploy prod (green, then blue) via Ansible
+
+on:
+  push:
+      branches: [ "main" ]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ANSIBLE_DIR: infrastructure/ansible
+  ANSIBLE_INVENTORY_GREEN: inventory.prod-green.ini
+  ANSIBLE_INVENTORY_BLUE: inventory.prod-blue.ini
+
+jobs:
+  deploy_green:
+    name: Deploy GREEN
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH key for Ansible
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Install dependencies (rsync + python)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends rsync python3-pip
+
+      - name: Install Ansible + collection
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "ansible>=9,<10"
+          ansible-galaxy collection install ansible.posix
+
+      - name: Write vault password file
+        run: |
+          mkdir -p "${{ env.ANSIBLE_DIR }}"
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${{ env.ANSIBLE_DIR }}/vault-password"
+          chmod 600 "${{ env.ANSIBLE_DIR }}/vault-password"
+
+      - name: Ansible ping (GREEN)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" realestate_prod_green -m ping
+
+      - name: Deploy (GREEN)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" playbook.yml \
+            --limit realestate_prod_green \
+            --vault-password-file vault-password \
+            -e "env=prod stack_id=green"
+
+      - name: Health check via Ansible (GREEN)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" realestate_prod_green \
+            -m ansible.builtin.uri \
+            -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
+            -b
+
+  deploy_blue:
+    name: Deploy BLUE
+    runs-on: ubuntu-latest
+    needs: [deploy_green]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH key for Ansible
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Install dependencies (rsync + python)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends rsync python3-pip
+
+      - name: Install Ansible + collection
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "ansible>=9,<10"
+          ansible-galaxy collection install ansible.posix
+
+      - name: Write vault password file
+        run: |
+          mkdir -p "${{ env.ANSIBLE_DIR }}"
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${{ env.ANSIBLE_DIR }}/vault-password"
+          chmod 600 "${{ env.ANSIBLE_DIR }}/vault-password"
+
+      - name: Ansible ping (BLUE)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" realestate_prod_blue -m ping
+
+      - name: Deploy (BLUE)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" playbook.yml \
+            --limit realestate_prod_blue \
+            --vault-password-file vault-password \
+            -e "env=prod stack_id=blue"
+
+      - name: Health check via Ansible (BLUE)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" realestate_prod_blue \
+            -m ansible.builtin.uri \
+            -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
+            -b

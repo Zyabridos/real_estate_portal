@@ -25,7 +25,7 @@ const id = computed(() => String(route.params.id ?? "").trim());
 const pageTitle = computed(() => {
   // TODO: fix it later... (I am tired not)
   const fallback = i18n.t("pages:brokers.details.titleFallback");
-  const name = data.value?.title?.trim();
+  const name = data.value?.firstName?.trim();
   return name ? name : fallback;
 });
 
