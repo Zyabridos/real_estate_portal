@@ -1,199 +1,139 @@
-name: Deploy to production (blue/green) + DNS cutover
+name: Deploy prod (green, then blue) via Ansible
 
 on:
-  push:
-#    branches: [ "main" ]
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: "What to do"
-        required: true
-        type: choice
-        options: [ release, deploy_only, dns_only ]
-        default: release
+#  push:
+#    branches: ["main"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 env:
-  DOMAIN: realestateproject.casa
   ANSIBLE_DIR: infrastructure/ansible
+  ANSIBLE_INVENTORY: inventory.prod.ini
 
 jobs:
-  release:
+  deploy_green:
+    name: Deploy GREEN
     runs-on: ubuntu-latest
-    concurrency:
-      group: prod-release
-      cancel-in-progress: true
-
+    environment: prod
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install tools
-        run: sudo apt-get update && sudo apt-get install -y jq curl ansible rsync dnsutils
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.INFRA_SSH_PRIVATE_KEY }}
 
-      - name: Fetch Hetzner LB IPs (blue+green)
-        id: lbs
-        env:
-          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      - name: Install dependencies (rsync + python)
         run: |
-          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends rsync python3-pip
 
-          lbs="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
-            "https://api.hetzner.cloud/v1/load_balancers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod")"
-
-          total="$(echo "$lbs" | jq '.load_balancers | length')"
-          blue="$(echo "$lbs" | jq -r '.load_balancers[] | select(.labels.stack=="blue") | .public_net.ipv4.ip' | head -n1)"
-          green="$(echo "$lbs" | jq -r '.load_balancers[] | select(.labels.stack=="green") | .public_net.ipv4.ip' | head -n1)"
-
-          echo "total=$total"
-          echo "blue=$blue"
-          echo "green=$green"
-
-          test "$total" -eq 2
-          test -n "$blue"  && [ "$blue"  != "null" ]
-          test -n "$green" && [ "$green" != "null" ]
-
-          echo "lb_blue_ip=$blue"   >> $GITHUB_OUTPUT
-          echo "lb_green_ip=$green" >> $GITHUB_OUTPUT
-
-      - name: Detect active stack by current DNS A record
-        id: active
+      - name: Install Ansible + collection
         run: |
-          set -euo pipefail
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "ansible>=9,<10"
+          ansible-galaxy collection install ansible.posix
 
-          current_ip="$(dig +short A $DOMAIN | tail -n1)"
-          echo "DNS A($DOMAIN) -> $current_ip"
-
-          BLUE="${{ steps.lbs.outputs.lb_blue_ip }}"
-          GREEN="${{ steps.lbs.outputs.lb_green_ip }}"
-
-          if [ "$current_ip" = "$BLUE" ]; then
-            echo "active=blue"  >> $GITHUB_OUTPUT
-            echo "target=green" >> $GITHUB_OUTPUT
-          elif [ "$current_ip" = "$GREEN" ]; then
-            echo "active=green" >> $GITHUB_OUTPUT
-            echo "target=blue"  >> $GITHUB_OUTPUT
-          else
-            # If DNS does not match either LB (e.g. first setup), choose blue as default target
-            echo "active=unknown" >> $GITHUB_OUTPUT
-            echo "target=blue"    >> $GITHUB_OUTPUT
-          fi
-
-      # Deploy to target stack (unless dns_only)
-      - name: Configure SSH key
-#        if: github.event.inputs.mode != 'dns_only'
+      - name: Write vault password file
         run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
-          chmod 600 ~/.ssh/hetzner_realestateproject
+          mkdir -p "${{ env.ANSIBLE_DIR }}"
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${{ env.ANSIBLE_DIR }}/vault-password"
+          chmod 600 "${{ env.ANSIBLE_DIR }}/vault-password"
 
-      - name: Generate Ansible inventory from Hetzner server labels (target)
-#        if: github.event.inputs.mode != 'dns_only'
+      - name: Ansible ping (GREEN)
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
-          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
-        run: |
-          set -euo pipefail
-          STACK="${{ steps.active.outputs.target }}"
-
-          servers="$(curl -fsS -H "Authorization: Bearer $HCLOUD_TOKEN" \
-            "https://api.hetzner.cloud/v1/servers?label_selector=project%3Dreal-estate-hub%2Cenv%3Dprod%2Cstack%3D$STACK")"
-
-          ip="$(echo "$servers" | jq -r '.servers[0].public_net.ipv4.ip')"
-          test -n "$ip" && [ "$ip" != "null" ]
-
-          cat > "inventory.generated.$STACK.ini" <<EOF
-          [realestate_prod]
-          $ip
-
-          [realestate_prod:vars]
-          ansible_user=${{ secrets.SSH_USER }}
-          EOF
-
-          echo "Inventory:"
-          cat "inventory.generated.$STACK.ini"
-
-      - name: Run Ansible deploy (target)
-#        if: github.event.inputs.mode != 'dns_only'
-        working-directory: ${{ env.ANSIBLE_DIR }}
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "false"
-          ANSIBLE_PRIVATE_KEY_FILE: ~/.ssh/hetzner_realestateproject
+          ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          set -euo pipefail
-          STACK="${{ steps.active.outputs.target }}"
-          echo "$ANSIBLE_VAULT_PASSWORD" > vault_pass.txt
-          chmod 600 vault_pass.txt
+          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_green -m ping
 
-          ansible-playbook -i "inventory.generated.$STACK.ini" playbook.yml \
-            --vault-password-file vault_pass.txt \
-            -e "stack_id=$STACK"
-
-      # Health-check target LB directly (must pass BEFORE DNS switch)
-      - name: Health check target LB
-#        if: github.event.inputs.mode != 'dns_only'
-        run: |
-          set -euo pipefail
-          TARGET="${{ steps.active.outputs.target }}"
-          if [ "$TARGET" = "blue" ]; then
-            LB_IP="${{ steps.lbs.outputs.lb_blue_ip }}"
-          else
-            LB_IP="${{ steps.lbs.outputs.lb_green_ip }}"
-          fi
-
-          echo "Target=$TARGET, LB=$LB_IP"
-          curl -fsS "http://$LB_IP/lb-health" -H "Host: $DOMAIN" | cat
-
-      - name: DNS cutover (update A records in Cloudflare)
-#        if: github.event.inputs.mode != 'deploy_only'
+      - name: Deploy (GREEN)
+        working-directory: ${{ env.ANSIBLE_DIR }}
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          set -euo pipefail
+          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY }}" playbook.yml \
+            --limit realestate_prod_green \
+            --vault-password-file vault-password \
+            -e "env=prod stack_id=green"
 
-          TARGET="${{ steps.active.outputs.target }}"
-          if [ "$TARGET" = "blue" ]; then
-            NEW_IP="${{ steps.lbs.outputs.lb_blue_ip }}"
-          else
-            NEW_IP="${{ steps.lbs.outputs.lb_green_ip }}"
-          fi
-
-          echo "Cutover DNS -> $NEW_IP (target=$TARGET)"
-
-          # Get zone id
-          zone_id="$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/zones?name=$DOMAIN" | jq -r '.result[0].id')"
-          test -n "$zone_id" && [ "$zone_id" != "null" ]
-
-          update_record () {
-            local name="$1"
-            record="$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=A&name=$name")"
-            rec_id="$(echo "$record" | jq -r '.result[0].id')"
-            test -n "$rec_id" && [ "$rec_id" != "null" ]
-
-            curl -fsS -X PUT \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              -H "Content-Type: application/json" \
-              "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$rec_id" \
-              --data "{\"type\":\"A\",\"name\":\"$name\",\"content\":\"$NEW_IP\",\"ttl\":60,\"proxied\":false}" \
-              | jq -r '.success'
-          }
-
-          update_record "$DOMAIN"
-          update_record "www.$DOMAIN"
-
-      # Post-cutover verification
-      - name: Verify domain after cutover
-#        if: github.event.inputs.mode != 'deploy_only'
+      - name: Health check via Ansible (GREEN)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          set -euo pipefail
-          echo "Waiting a bit for DNS propagation..."
-          sleep 20
+          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_green \
+            -m ansible.builtin.uri \
+            -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
+            -b
 
-          # Validate DNS now points to one of LBs
-          dig +short A $DOMAIN
+  deploy_blue:
+    name: Deploy BLUE
+    runs-on: ubuntu-latest
+    environment: prod
+    needs: [deploy_green]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-          # Real user check
-          curl -fsS "https://$DOMAIN/lb-health" | cat
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.INFRA_SSH_PRIVATE_KEY }}
+
+      - name: Install dependencies (rsync + python)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends rsync python3-pip
+
+      - name: Install Ansible + collection
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "ansible>=9,<10"
+          ansible-galaxy collection install ansible.posix
+
+      - name: Write vault password file
+        run: |
+          mkdir -p "${{ env.ANSIBLE_DIR }}"
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${{ env.ANSIBLE_DIR }}/vault-password"
+          chmod 600 "${{ env.ANSIBLE_DIR }}/vault-password"
+
+      - name: Ansible ping (BLUE)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_blue -m ping
+
+      - name: Deploy (BLUE)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY }}" playbook.yml \
+            --limit realestate_prod_blue \
+            --vault-password-file vault-password \
+            -e "env=prod stack_id=blue"
+
+      - name: Health check via Ansible (BLUE)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_blue \
+            -m ansible.builtin.uri \
+            -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
+            -b
