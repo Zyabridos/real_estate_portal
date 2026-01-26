@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import type { PropertyListItem } from "@/shared/types/properties";
 import type { ApiError } from '@/shared/types/errors'
-import type { UIStatus } from '@/shared/types/ui'
+import type { UIState } from '@/shared/types/ui'
 interface PropertiesState {
   items: PropertyListItem[];
-  fetchStatus: UIStatus;
+  fetchStatus: UIState;
   error: ApiError | null;
 }
 

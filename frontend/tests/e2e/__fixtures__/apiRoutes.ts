@@ -10,8 +10,17 @@ const normalizeBase = (base: string): string => {
 const apiBase = normalizeBase(getEnvString("E2E_API_BASE", "/api"));
 
 export const apiRoutes = {
-  leads: {
-    path: () => `${apiBase}/leads`,
-    pattern: () => `**${apiBase}/leads`,
+  health: {
+    path: () => "/api/health",
   },
-} as const;
+  leads: {
+    path: () => "/api/leads",
+    byId: (id: string) => `/api/leads/${id}`,
+    pattern: () => /\/api\/leads(\/[^/?]+)?(\?.*)?$/,
+  },
+  properties: {
+    path: () => "/api/properties",
+    byId: (id: string) => `/api/properties/${id}`,
+    pattern: () => /\/api\/properties(\/[^/?]+)?(\?.*)?$/,
+  },
+};

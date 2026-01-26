@@ -70,7 +70,7 @@ function propertyDetailsTo(propertyId: string) {
           :onSort="onSort"
         />
         <SortableHeader
-          :label="$t('pages:leads.table.columns.fullemail')"
+          :label="$t('pages:leads.table.columns.email')"
           sortKey="Email"
           :activeSortBy="sortBy"
           :activeSortDirection="sortDirection"
@@ -184,7 +184,7 @@ function propertyDetailsTo(propertyId: string) {
               :aria-label="`Open message for ${valueOrDash(lead.fullName)}`"
               @click="emit('open-message', { id: lead.id, fullName: lead.fullName ?? null })"
             >
-              Comment
+              {{ $t("pages:leads.actions.comment") }}
             </button>
           </td>
         </tr>

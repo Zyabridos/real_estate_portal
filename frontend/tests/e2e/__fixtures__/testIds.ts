@@ -1,4 +1,11 @@
 export const testIds = {
+  blog: {
+    list: "blog-articles-list",
+    categorySelect: "blog-category-select",
+    detailsTitle: "blog-details-title",
+    detailsContent: "blog-details-content",
+  },
+
   properties: {
     page: "properties-page",
     loading: "properties-loading",
@@ -52,10 +59,31 @@ export const testIds = {
     error: "lead-error",
   },
 
-  blog: {
-    list: "blog-articles-list",
-    categorySelect: "blog-category-select",
-    detailsTitle: "blog-details-title",
-    detailsContent: "blog-details-content",
+  leadsList: {
+    page: "leads-list-page",
+
+    viewGrouped: "view-grouped",
+    viewList: "view-list",
+
+    loading: "leads-list-loading",
+    error: "leads-list-error",
+    empty: "leads-list-empty",
+
+    tableGrouped: "leads-table-grouped",
+    tableList: "leads-table-list",
+
+    groupHeader: (propertyId: string) => `lead-group-header-${propertyId}`,
+    row: (leadId: string) => `lead-row-${leadId}`,
+    commentBtn: (leadId: string) => `lead-action-comment-${leadId}`,
+    propertyLink: (leadId: string) => `lead-property-link-${leadId}`,
   },
+
+  leadMessageModal: {
+    root: "lead-message-modal",
+    body: "lead-message-body",
+    content: "lead-message-content",
+    close: "lead-message-close",
+    loading: "lead-message-loading",
+    error: "lead-message-error",
+  }
 } as const;

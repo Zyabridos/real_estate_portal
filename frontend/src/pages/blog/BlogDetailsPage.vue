@@ -3,13 +3,13 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { blogService, BlogServiceError } from "@/shared/api/blogService";
 import type { ArticleDetailsDto } from "@/shared/types/blog";
-import type { UIStatus } from "@/shared/types/ui";
+import type { UIState } from "@/shared/types/ui";
 import { ErrorState, LoadingState, EmptyState } from "@/shared/ui/states";
 
 const route = useRoute();
 const slug = computed(() => String(route.params.slug ?? "").trim());
 
-const state = ref<UIStatus>("idle");
+const state = ref<UIState>("idle");
 const errorMessage = ref<string | null>(null);
 const article = ref<ArticleDetailsDto | null>(null);
 

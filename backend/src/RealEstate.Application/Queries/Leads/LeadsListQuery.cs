@@ -6,11 +6,11 @@ namespace RealEstate.Application.Queries.Leads;
 public sealed record LeadListQuery(
     Guid? Id = null,
     Guid? PropertyId = null,
-	string? FullName = null,
+    string? FullName = null,
     string? Email = null,
     string? PhoneNumber = null,
     int Page = 1,
     int PageSize = 20,
-    SortBy? SortBy = null,
+    LeadSortBy? SortBy = null,
     SortDirection? SortDirection = null
 );

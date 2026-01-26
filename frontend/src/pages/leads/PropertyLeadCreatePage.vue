@@ -21,7 +21,7 @@ const leadFormRef = ref<InstanceType<typeof LeadForm> | null>(null);
 const propertyId = computed(() => String(route.params.id ?? "").trim());
 
 function goBackToDetails(): void {
-  router.push({ path: routes.app.propertyDetails(propertyId.value), query: route.query });
+  router.push({ path: routes.app.properties.details(propertyId.value), query: route.query });
 }
 
 async function onSubmit(values: LeadFormValues) {

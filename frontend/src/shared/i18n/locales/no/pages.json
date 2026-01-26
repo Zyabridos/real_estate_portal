@@ -20,45 +20,6 @@
       "actions": {
         "createLead": "Kontakt megler",
         "createLeadAria": "Send en forespørsel om denne boligen"
-      },
-      "leads": {
-        "ariaLabel": "Kontakt megler",
-        "pageTitle": "Kontakt megler",
-        "pageSubtitle": "Send en forespørsel om denne boligen. Vi tar kontakt med deg så snart som mulig.",
-        "actions": {
-          "back": "Tilbake til bolig",
-          "backAria": "Tilbake til boligdetaljer"
-        },
-        "list": {
-          "pageTitle": "Henvendelser",
-          "pageSubtitle": "Gruppert etter PropertyId (standard) eller listevisning",
-          "viewToggleAria": "Visningsmodus for henvendelser",
-          "view": {
-            "grouped": "Gruppert",
-            "list": "Liste"
-          },
-          "total": "Totalt: {count}"
-        },
-        "table": {
-          "captionGrouped": "Henvendelser gruppert etter eiendom",
-          "captionList": "Henvendelser (liste)",
-          "columns": {
-            "fullName": "Fullt navn",
-            "email": "E-post",
-            "phone": "Telefon",
-            "status": "Status",
-            "created": "Opprettet",
-            "updated": "Oppdatert",
-            "property": "Eiendom",
-            "actions": "Handlinger"
-          },
-          "propertyFallback": "Eiendom",
-          "openPropertyAria": "Åpne eiendom {title}",
-          "openMessageAria": "Åpne melding for {name}"
-        },
-        "message": {
-          "loadError": "Kunne ikke laste meldingen."
-        }
       }
     }
   },
@@ -91,26 +52,36 @@
       "phoneNumber": { "label": "Telefonnummer", "placeholder": "+47 123 45 678" },
       "message": { "label": "Melding", "placeholder": "Fortell oss hva du lurer på…" }
     },
+    "list": {
+      "pageTitle": "Henvendelser",
+      "pageSubtitle": "Gruppert etter PropertyId (standard) eller listevisning",
+      "viewToggleAria": "Visningsmodus for henvendelser",
+      "view": { "grouped": "Gruppert", "list": "Liste" },
+      "total": "Totalt: {count}"
+    },
+    "table": {
+      "captionGrouped": "Henvendelser gruppert etter eiendom",
+      "captionList": "Henvendelser (liste)",
+      "columns": {
+        "fullName": "Fullt navn",
+        "email": "E-post",
+        "phone": "Telefon",
+        "status": "Status",
+        "created": "Opprettet",
+        "updated": "Oppdatert",
+        "property": "Eiendom",
+        "actions": "Handlinger"
+      },
+      "propertyFallback": "Eiendom",
+      "openPropertyAria": "Åpne eiendom {title}",
+      "openMessageAria": "Åpne melding for {name}"
+    },
+    "actions": { "comment": "Kommentar" },
+    "message": { "loadError": "Kunne ikke laste meldingen." },
     "submit": "Send forespørsel",
     "submitLoading": "Sender…",
     "success": "Takk! Forespørselen er sendt.",
     "error": "Noe gikk galt. Prøv igjen.",
     "note": "Vi bruker kontaktinformasjonen din kun for å svare på denne forespørselen."
-  },
-  "system": {
-    "notFound": {
-      "badge": "404 • Siden finnes ikke",
-      "title": "Vi fant ikke siden",
-      "description": "Siden du leter etter finnes ikke, eller kan ha blitt flyttet. Sjekk nettadressen eller bruk navigasjonen nedenfor.",
-      "requestedPathLabel": "Forespurt sti",
-      "requestedPathUnknown": "(ukjent)",
-      "whatYouCanDoTitle": "Hva du kan gjøre",
-      "tips": {
-        "checkUrl": "Sjekk nettadressen for skrivefeil.",
-        "useNavigation": "Bruk hovednavigasjonen øverst.",
-        "startFromProperties": "Start fra Boliger og juster filtrene."
-      },
-      "note": "Hvis du tror dette er en feil, vil du senere kunne sende oss en rapport."
-    }
   }
 }
