@@ -22,6 +22,7 @@ const pagesRoutes = {
   propertyDetails: (id: string) => ["/properties", id].join("/"),
   leads: {
     create: (propertyId: string) => ["/properties", propertyId, "lead"].join("/"),
+    list: (): string => "/leads",
   },
 };
 
