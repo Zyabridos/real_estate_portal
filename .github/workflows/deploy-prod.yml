@@ -2,8 +2,7 @@ name: Deploy prod (green, then blue) via Ansible
 
 on:
   push:
-    branches:
-      - '**'
+      branches: [ "main" ]
   workflow_dispatch: {}
 
 concurrency:
