@@ -1,5 +1,12 @@
 {
   "properties": "Boliger",
   "brokers": "Meglere",
-  "blog": "Blogg"
+  "blog": "Blogg",
+  "leads": "Leads",
+  "footer": {
+    "name": "Nina Zyabrina",
+    "github": "GitHub",
+    "telegram": "Telegram",
+    "email": "E-post"
+  }
 }

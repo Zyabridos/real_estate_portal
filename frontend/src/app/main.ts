@@ -1,4 +1,5 @@
 import '@/assets/main.css'
+import 'primeicons/primeicons.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import I18NextVue from 'i18next-vue'
