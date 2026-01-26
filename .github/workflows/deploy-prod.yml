@@ -79,7 +79,6 @@ jobs:
   deploy_blue:
     name: Deploy BLUE
     runs-on: ubuntu-latest
-    environment: prod
     needs: [deploy_green]
     steps:
       - name: Checkout
