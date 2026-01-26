@@ -10,13 +10,13 @@ import BrokerDetailsCard from "@/entities/brokers/ui/BrokerDetailsCard.vue";
 import { ErrorState, LoadingState } from "@/shared/ui/states";
 
 import type { ApiError } from "@/shared/types/errors";
-import type { UIStatus } from "@/shared/types/ui";
+import type { UIState } from "@/shared/types/ui";
 import type { BrokerDetailsDto } from "@/shared/api/dtos/brokers/broker-details.dto";
 
 const route = useRoute();
 const router = useRouter();
 
-const state = ref<UIStatus>("loading");
+const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<BrokerDetailsDto | null>(null);
 
@@ -74,7 +74,7 @@ async function load(): Promise<void> {
 }
 
 function goBack(): void {
-  router.push({ path: routes.app.brokers(), query: route.query });
+  router.push(routes.app.brokers.list());
 }
 
 onMounted(load);

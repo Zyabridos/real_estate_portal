@@ -6,13 +6,15 @@ import { brokersApi } from "@/shared/api/brokers";
 import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/states";
 import { usePagedQueryParams } from "@/shared/composables/usePagedQueryParams";
 import Pagination from "@/shared/ui/pagination/Pagination.vue";
+import PaginationMeta from "@/shared/ui/pagination/PaginationMeta.vue";
+import BrokerCard from "@/pages/brokers/components/BrokerCard.vue";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { BrokerListItemDto } from "@/shared/api/dtos/brokers/broker-list-item.dto";
 import type { PagedResultDto } from "@/shared/api/dtos/common/paged-result.dto";
-import type { UIStatus } from "@/shared/types/ui";
+import type { UIState } from "@/shared/types/ui";
 
-const state = ref<UIStatus>("loading");
+const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PagedResultDto<BrokerListItemDto> | null>(null);
 
@@ -49,11 +51,6 @@ async function load(): Promise<void> {
   } catch (e) {
     error.value = e as ApiError;
     state.value = "error";
-
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to fetch brokers", e);
-    }
   }
 }
 
@@ -89,23 +86,12 @@ watch(
         </div>
       </div>
 
-      <!-- Meta -->
-      <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600" role="status" aria-live="polite">
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t('common:pagination.page') }}:
-          <span class="font-medium text-slate-900">{{ paging.page }}</span>
-        </span>
-
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t('common:pagination.pageSize') }}:
-          <span class="font-medium text-slate-900">{{ paging.pageSize }}</span>
-        </span>
-
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t('common:pagination.total') }}:
-          <span class="font-medium text-slate-900">{{ paging.totalItems }}</span>
-        </span>
-      </div>
+      <PaginationMeta
+        class="mt-4"
+        :page="paging.page"
+        :pageSize="paging.pageSize"
+        :totalItems="paging.totalItems"
+      />
 
       <!-- States -->
       <LoadingState v-if="state === 'loading'" />
@@ -118,42 +104,12 @@ watch(
 
       <!-- List -->
       <div v-else class="mt-8">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" role="list" :aria-label="$t('pages:brokers.list.cardsAriaLabel')">
-          <article
-            v-for="b in items"
-            :key="b.id"
-            class="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
-            role="listitem"
-            :aria-label="$t('pages:brokers.list.cardAriaLabel', { id: b.id })"
-          >
-            <div class="p-5">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <h2 class="text-base font-semibold text-slate-900">
-                    {{ b.firstName }} {{ b.lastName }}
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-600">
-                    {{ b.email }} {{ b.phoneNumber }} {{ b.createdAt }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="mt-4 flex items-center justify-between">
-                <RouterLink
-                  :to="`/brokers/${b.id}`"
-                  class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-                  :aria-label="$t('pages:brokers.list.viewDetailsAriaLabel', { id: b.id })"
-                >
-                  {{ $t('common:actions.viewDetails') }}
-                </RouterLink>
-
-                <div class="text-xs text-slate-500">
-                  {{ $t('common:pagination.idShort') }}:
-                  <span class="font-mono">{{ b.id }}</span>
-                </div>
-              </div>
-            </div>
-          </article>
+        <div
+          class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+          role="list"
+          :aria-label="$t('pages:brokers.list.cardsAriaLabel')"
+        >
+          <BrokerCard v-for="b in items" :key="b.id" :broker="b" />
         </div>
       </div>
       <Pagination
