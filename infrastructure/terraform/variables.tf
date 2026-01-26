@@ -66,3 +66,13 @@ variable "load_balancer_certificate_id" {
   default     = null
 }
 
+variable "lb_owner_stack" {
+  description = "Which stack owns (creates) the shared LB and its services. Usually 'blue'."
+  type        = string
+  default     = "blue"
+
+  validation {
+    condition     = contains(["blue", "green"], var.lb_owner_stack)
+    error_message = "lb_owner_stack must be either 'blue' or 'green'"
+  }
+}
