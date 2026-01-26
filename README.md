@@ -9,10 +9,13 @@ The project is inspired by data-driven listing systems used for managing propert
 ---
 
 ## Badges
+[![Maintainability](https://qlty.sh/gh/Zyabridos/projects/real_estate_portal/maintainability.svg)](https://qlty.sh/gh/Zyabridos/projects/real_estate_portal) \
 [![Backend Integration Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-integration-tests.yml) \
 [![Backend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml) \
 [![Frontend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml) \
-[![Frontend E2E (Playwright) Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml)
+[![Frontend E2E (Playwright) Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml) \
+[![Push images to Docker Hub](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml)
+[![Deployment to production](https://github.com/Zyabridos/real_estate_portal/actions/workflows/deploy-prod.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/deploy-prod.yml)
 
 
 
@@ -38,6 +41,10 @@ The project is inspired by data-driven listing systems used for managing propert
 - GROQ
 - Portable Text
 
+### Infrastructure
+- Terraform
+- Ansible
+- Docker
 ---
 
 
@@ -53,6 +60,24 @@ For provisioning/deployment (infrastructure):
 
 Optional but recommended:
 - `make`
+
+## Deployment & High Availability (Blue/Green)
+
+Production infrastructure uses **1 Load Balancer** and **2 application servers**:
+
+- **Load Balancer:** single entry point for all traffic (HTTP/HTTPS).
+- **Two servers:** `blue` and `green`, running identical stack.
+
+### Automatic deployment on merge to `main`
+
+Deployment is triggered **automatically on every merge to `main`** and follows a **blue/green rollout**:
+
+1. Deploy to green server first (warm-up / health check).
+2. If green is healthy, deploy to **blue** server next.
+
+### Fault tolerance
+
+If one server becomes unavailable (e.g., crash or failed deployment), the **other server stays online** behind the Load Balancer, so the application remains accessible.
 
 ## Project Structure
 
@@ -126,4 +151,3 @@ dotnet test backend/RealEstate.slnx
 - Backend communicates with MongoDB via Docker network
 - MongoDB runs only once per test suite (Testcontainers)
 - CMS is optional and started via Docker profiles
-- Swagger UI is available in development mode

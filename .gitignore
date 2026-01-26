@@ -15,10 +15,6 @@ vault-password
 
 !infrastructure/ansible/roles/app/templates/.env.production.j2
 
-infrastructure/ansible/inventory.prod.*.ini
-infrastructure/ansible/inventory.prod-blue.*
-infrastructure/ansible/inventory.prod-green.*
-
 # Env/Config
 .env
 .env.*
