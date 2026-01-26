@@ -15,7 +15,8 @@ permissions:
 
 env:
   ANSIBLE_DIR: infrastructure/ansible
-  ANSIBLE_INVENTORY: inventory.prod.ini
+  ANSIBLE_INVENTORY_GREEN: inventory.prod-green.ini
+  ANSIBLE_INVENTORY_BLUE: inventory.prod-blue.ini
 
 jobs:
   deploy_green:
@@ -54,7 +55,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_green -m ping
+          ansible -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" realestate_prod_green -m ping
 
       - name: Deploy (GREEN)
         working-directory: ${{ env.ANSIBLE_DIR }}
@@ -62,7 +63,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY }}" playbook.yml \
+          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" playbook.yml \
             --limit realestate_prod_green \
             --vault-password-file vault-password \
             -e "env=prod stack_id=green"
@@ -73,7 +74,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_green \
+          ansible -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" realestate_prod_green \
             -m ansible.builtin.uri \
             -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
             -b
@@ -115,7 +116,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_blue -m ping
+          ansible -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" realestate_prod_blue -m ping
 
       - name: Deploy (BLUE)
         working-directory: ${{ env.ANSIBLE_DIR }}
@@ -123,7 +124,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY }}" playbook.yml \
+          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" playbook.yml \
             --limit realestate_prod_blue \
             --vault-password-file vault-password \
             -e "env=prod stack_id=blue"
@@ -134,7 +135,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
         run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_blue \
+          ansible -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" realestate_prod_blue \
             -m ansible.builtin.uri \
             -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
             -b
