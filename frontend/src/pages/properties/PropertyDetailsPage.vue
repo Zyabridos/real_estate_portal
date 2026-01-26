@@ -10,13 +10,13 @@ import { ErrorState, LoadingState } from "@/shared/ui/states";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
 
 import type { ApiError } from "@/shared/types/errors";
-import type { UIStatus } from "@/shared/types/ui";
+import type { UIState } from "@/shared/types/ui";
 import type { PropertyDetailsDto } from "@/shared/api/dtos/properties/property-details.dto";
 
 const route = useRoute();
 const router = useRouter();
 
-const state = ref<UIStatus>("loading");
+const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PropertyDetailsDto | null>(null);
 
@@ -38,21 +38,21 @@ function goCreateLead(): void {
 }
 
 const errorTitle = computed(() => {
-  if (error.value?.kind === "NotFound") return i18n.t("errors:titles.propertyNotFound");
-  if (error.value?.kind === "Network") return i18n.t("errors:titles.network");
-  if (error.value?.kind === "Timeout") return i18n.t("errors:titles.timeout");
-  if (error.value?.kind === "BadRequest") return i18n.t("errors:titles.badRequest");
+  if (error.value?.kind === "NotFound") return i18n.t("errors:title.notFound.property");
+  if (error.value?.kind === "Network") return i18n.t("errors:title.network");
+  if (error.value?.kind === "Timeout") return i18n.t("errors:title.timeout");
+  if (error.value?.kind === "BadRequest") return i18n.t("errors:title.badRequest");
   return i18n.t("errors:titles.genericLoadFailed");
 });
 
 const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") {
-    return i18n.t("errors:messages.propertyNotFoundLong");
+    return i18n.t("errors:message.notFound.property");
   }
   if (error.value?.kind === "BadRequest") {
-    return i18n.t("errors:messages.invalidPropertyId");
+    return i18n.t("errors:message.invalidPropertyId");
   }
-  return error.value?.message ?? i18n.t("errors:messages.unexpected");
+  return error.value?.message ?? i18n.t("errors:message.unexpected");
 });
 
 async function load(): Promise<void> {
@@ -62,7 +62,7 @@ async function load(): Promise<void> {
 
   if (!id.value) {
     state.value = "error";
-    error.value = { kind: "BadRequest", message: i18n.t("errors:messages.invalidPropertyId") } as ApiError;
+    error.value = { kind: "BadRequest", message: i18n.t("errors:message.invalidPropertyId") } as ApiError;
     return;
   }
 
@@ -82,7 +82,7 @@ async function load(): Promise<void> {
 }
 
 function goBack(): void {
-  router.push({ path: routes.app.properties(), query: route.query });
+  router.push(routes.app.properties.list());
 }
 
 onMounted(load);

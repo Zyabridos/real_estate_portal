@@ -21,7 +21,7 @@ const leadFormRef = ref<InstanceType<typeof LeadForm> | null>(null);
 const propertyId = computed(() => String(route.params.id ?? "").trim());
 
 function goBackToDetails(): void {
-  router.push({ path: routes.app.propertyDetails(propertyId.value), query: route.query });
+  router.push({ path: routes.app.properties.details(propertyId.value), query: route.query });
 }
 
 async function onSubmit(values: LeadFormValues) {
@@ -39,12 +39,11 @@ async function onSubmit(values: LeadFormValues) {
     });
 
     state.value = "success";
-    successMessage.value = null; // или свой текст
-    formKey.value += 1; // ✅ сброс формы через remount
+    successMessage.value = null; // TODO: add some text
+    formKey.value += 1; // clear form vie remount
   } catch (e) {
     const err = e as ApiError;
 
-    // ✅ 400 validation: map ProblemDetails.errors into field messages
     if (err.kind === "Validation") {
       state.value = "idle";
       leadFormRef.value?.applyServerErrors?.(err.problemDetails);

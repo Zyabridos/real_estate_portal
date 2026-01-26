@@ -23,6 +23,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-vue": "^5.4.0",
     "pinia": "^3.0.4",
+    "primeicons": "^7.0.0",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4",
     "zod": "^4.3.5"

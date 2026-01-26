@@ -1,5 +1,12 @@
 {
   "properties": "Properties",
   "brokers": "Brokers",
-  "blog": "Blog"
+  "blog": "Blog",
+  "leads": "Leads",
+  "footer": {
+    "name": "Nina Zyabrina",
+    "github": "GitHub",
+    "telegram": "Telegram",
+    "email": "Email"
+  }
 }

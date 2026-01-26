@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import type { BrokerListItem } from "@/shared/types/brokers";
 import type { ApiError } from '@/shared/types/errors'
-import type { UIStatus } from '@/shared/types/ui'
+import type { UIState } from '@/shared/types/ui'
 interface BrokersState {
   items: BrokerListItem[];
-  fetchStatus: UIStatus;
+  fetchStatus: UIState;
   error: ApiError | null;
 }
 

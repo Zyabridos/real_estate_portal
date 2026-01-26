@@ -1,3 +1,4 @@
+export type SortDirection = "asc" | "desc";
 export interface PropertiesListQuery {
   id?: string
   city?: string;
@@ -21,5 +22,19 @@ export interface BrokersListQuery {
   page?: number;
   pageSize?: number;
   sortBy?: string;
-  sortDirection?: string;
+  sortDirection?: SortDirection | null;
 }
+
+export type LeadsListQuery = {
+  id?: string | null;
+  propertyId?: string | null;
+  fullName?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+
+  page?: number | null;
+  pageSize?: number | null;
+
+  sortBy?: string | null;
+  sortDirection?: SortDirection | null;
+};

@@ -3,17 +3,17 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { blogService, BlogServiceError } from "@/shared/api/blogService";
 import type { ArticleListItemDto, CategoryDto } from "@/shared/types/blog";
-import type { UIStatus } from "@/shared/types/ui";
+import type { UIState } from "@/shared/types/ui";
 import { ErrorState, EmptyState, LoadingState } from "@/shared/ui/states";
 import BlogArticleCard from "@/pages/blog/components/BlogArticleCard.vue";
 
 const route = useRoute();
 const router = useRouter();
 
-const state = ref<UIStatus>("idle");
+const state = ref<UIState>("idle");
 const errorMessage = ref<string | null>(null);
 
-const categoriesState = ref<UIStatus>("idle");
+const categoriesState = ref<UIState>("idle");
 const categoriesError = ref<string | null>(null);
 
 const articles = ref<ArticleListItemDto[]>([]);

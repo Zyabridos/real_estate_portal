@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import GuestNavbar from "@/components/Navbar/GuestNavbar.vue";
 import RealEstatePortal from "@/assets/RealEstateProtal.png";
+
+import GuestNavbar from "@/shared/ui/layout/navbar/GuestNavbar.vue";
+import Footer from "@/shared/ui/layout/Footer.vue"
 
 type Props = {
   isLoading?: boolean;
@@ -71,12 +73,6 @@ const year = new Date().getFullYear();
     <main class="w-full flex-1 px-6 py-6" :aria-label="$t('layout:main.ariaLabel')">
       <slot />
     </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-slate-200 bg-white" :aria-label="$t('layout:footer.ariaLabel')">
-      <div class="w-full px-4 py-4 text-xs text-slate-500">
-        {{ $t('layout:footer.copyright', { year }) }}
-      </div>
-    </footer>
+    <Footer />
   </div>
 </template>

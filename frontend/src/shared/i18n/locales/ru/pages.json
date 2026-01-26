@@ -9,6 +9,10 @@
     }
   },
   "properties": {
+    "list": {
+      "title": "Объекты недвижимости",
+      "subtitle": "Здесь представлены объекты, доступные на нашем сайте."
+    },
     "details": {
       "actions": {
         "createLead": "Создать заявку",
@@ -53,6 +57,39 @@
       "email": { "label": "Email", "placeholder": "you@example.com" },
       "phoneNumber": { "label": "Телефон", "placeholder": "+47 123 45 678" },
       "message": { "label": "Сообщение", "placeholder": "Напишите, что вас интересует…" }
+    },
+    "list": {
+      "pageTitle": "Заявки",
+      "pageSubtitle": "Сгруппировано по PropertyId (по умолчанию) или в виде списка",
+      "viewToggleAria": "Режим отображения заявок",
+      "view": {
+        "grouped": "Группировка",
+        "list": "Список"
+      },
+      "total": "Всего: {count}"
+    },
+    "table": {
+      "captionGrouped": "Заявки, сгруппированные по объектам",
+      "captionList": "Список заявок",
+      "columns": {
+        "fullName": "ФИО",
+        "email": "Email",
+        "phone": "Телефон",
+        "status": "Статус",
+        "created": "Создано",
+        "updated": "Обновлено",
+        "property": "Объект",
+        "actions": "Действия"
+      },
+      "propertyFallback": "Объект",
+      "openPropertyAria": "Открыть объект {title}",
+      "openMessageAria": "Открыть сообщение для {name}"
+    },
+    "actions": {
+      "comment": "Комментарий"
+    },
+    "message": {
+      "loadError": "Не удалось загрузить сообщение."
     },
     "submit": "Отправить заявку",
     "submitLoading": "Отправляем…",

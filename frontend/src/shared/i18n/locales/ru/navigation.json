@@ -1,5 +1,12 @@
 {
   "properties": "Объекты",
   "brokers": "Брокеры",
-  "blog": "Блог"
+  "blog": "Блог",
+  "leads": "Заявки",
+  "footer": {
+    "name": "Нина Зябрина",
+    "github": "GitHub",
+    "telegram": "Telegram",
+    "email": "Email"
+  }
 }

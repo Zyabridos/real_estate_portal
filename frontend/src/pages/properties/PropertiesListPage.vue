@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import {useRoute} from "vue-router";
 
 import i18n from "@/shared/i18n";
 import { propertiesApi } from "@/shared/api/properties";
@@ -9,18 +8,19 @@ import { usePagedQueryParams } from "@/shared/composables/usePagedQueryParams";
 
 import Pagination from "@/shared/ui/pagination/Pagination.vue";
 import PropertyFilters from "@/pages/properties/components/PropertyFilters.vue";
+import PropertyCard from "@/pages/properties/components/PropertyCard.vue";
+import PaginationMeta from "@/shared/ui/pagination/PaginationMeta.vue";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { PropertyListItemDto } from "@/shared/api/dtos/properties/property-list-item.dto";
 import type { PropertyFiltersValue } from "@/shared/types/properties";
 import type { PagedResultDto } from "@/shared/api/dtos/common/paged-result.dto";
-import type { UIStatus } from "@/shared/types/ui";
+import type { UIState } from "@/shared/types/ui";
 
-// TODO: the component is getting too big. Refactor to smaller
+// TODO: the component is getting too big. Need to make component dumbier - it handles too much logic
 // TODO: consider filtration on frontend (?), so will be dynamic
-const route = useRoute();
 
-const state = ref<UIStatus>("loading");
+const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PagedResultDto<PropertyListItemDto> | null>(null);
 
@@ -74,7 +74,7 @@ async function onApplyFilters(next: PropertyFiltersValue): Promise<void> {
   await setQuery({
     ...filtersToQuery(filters.value),
     page: 1,
-    // pageSize: pageSize.value,
+    // pageSize: pageSize.value - evnt users can use pagination as well
   });
 
   if (page.value === 1) {
@@ -116,11 +116,6 @@ async function load(): Promise<void> {
   } catch (e) {
     error.value = e as ApiError;
     state.value = "error";
-
-    if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to fetch properties", e);
-    }
   }
 }
 
@@ -164,33 +159,22 @@ watch(
         @reset="onResetFilters"
       />
 
-      <!-- Meta -->
-      <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600" role="status" aria-live="polite">
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t("common:pagination.page") }}:
-          <span class="font-medium text-slate-900">{{ paging.page }}</span>
-        </span>
-
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t("common:pagination.pageSize") }}:
-          <span class="font-medium text-slate-900">{{ paging.pageSize }}</span>
-        </span>
-
-        <span class="rounded-full border border-slate-200 bg-white px-3 py-1">
-          {{ $t("common:pagination.total") }}:
-          <span class="font-medium text-slate-900">{{ paging.totalItems }}</span>
-        </span>
-      </div>
+      <PaginationMeta
+        class="mt-4"
+        :page="paging.page"
+        :pageSize="paging.pageSize"
+        :totalItems="paging.totalItems"
+      />
 
       <!-- States -->
-      <LoadingState v-if="state === 'loading'" data-testid="properties-loading"/>
+      <LoadingState v-if="state === 'loading'" data-testid="properties-loading" />
       <ErrorState
         v-else-if="state === 'error'"
         data-testid="properties-error"
         :message="error?.message ?? $t('errors:messages.unexpected')"
         :onRetry="load"
       />
-      <EmptyState v-else-if="state === 'empty'" data-testid="properties-empty"/>
+      <EmptyState v-else-if="state === 'empty'" data-testid="properties-empty" />
 
       <!-- List -->
       <div v-else class="mt-8">
@@ -200,53 +184,7 @@ watch(
           role="list"
           :aria-label="$t('pages:properties.list.cardsAriaLabel')"
         >
-          <article
-            v-for="p in items"
-            :key="p.id"
-            data-testid="property-card"
-            class="rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-            role="listitem"
-          >
-            <div class="p-5" :data-testid="`property-card-${p.id}`">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <h2 class="text-base font-semibold text-slate-900">
-                    {{ p.title }}
-                  </h2>
-                  <p class="mt-1 text-sm text-slate-600" data-testid="property-card-meta">
-                    {{ p.city }} • {{ p.type }} • {{ p.status }}
-                  </p>
-                </div>
-
-                <div class="text-right">
-                  <div
-                    class="text-sm font-semibold text-slate-900"
-                    :aria-label="$t('entities:property.priceValueAriaLabel', { value: p.price.toLocaleString() })"
-                  >
-                    {{ p.price.toLocaleString() }}
-                  </div>
-                  <div class="text-xs text-slate-500">
-                    {{ $t("common:currency.nok") }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-4 flex items-center justify-between">
-                <RouterLink
-                  :to="`/properties/${p.id}`"
-                  class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-                  :aria-label="$t('pages:properties.list.viewDetailsAriaLabel', { id: p.id })"
-                >
-                  {{ $t("common:actions.viewDetails") }}
-                </RouterLink>
-
-                <div class="text-xs text-slate-500">
-                  {{ $t("common:pagination.idShort") }}:
-                  <span class="font-mono">{{ p.id }}</span>
-                </div>
-              </div>
-            </div>
-          </article>
+          <PropertyCard v-for="p in items" :key="p.id" :property="p" />
         </div>
       </div>
 

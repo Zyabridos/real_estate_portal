@@ -14,17 +14,12 @@
       "subtitle": "Browse properties from the backend. Filtering and paging will be added next."
     },
     "details": {
+      "actions": {
+        "createLead": "Contact broker",
+        "createLeadAria": "Send a request for this property"
+      },
       "titleFallback": "Property details",
       "subtitle": "Property details loaded from the backend."
-    },
-    "leads": {
-      "ariaLabel": "Create lead",
-      "pageTitle": "Create lead",
-      "pageSubtitle": "Send a request about this property. We will get back to you soon.",
-      "actions": {
-        "back": "Back to property",
-        "backAria": "Back to property details"
-      }
     }
   },
   "brokers": {
@@ -56,6 +51,32 @@
       "phoneNumber": { "label": "Phone number", "placeholder": "+47 123 45 678" },
       "message": { "label": "Message", "placeholder": "Tell us what you’re interested in…" }
     },
+    "list": {
+      "pageTitle": "Leads",
+      "pageSubtitle": "Grouped by PropertyId (default) or List view",
+      "viewToggleAria": "Leads view mode",
+      "view": { "grouped": "Grouped", "list": "List" },
+      "total": "Total: {count}"
+    },
+    "table": {
+      "captionGrouped": "Leads grouped by property",
+      "captionList": "Leads list",
+      "columns": {
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "created": "Created",
+        "updated": "Updated",
+        "property": "Property",
+        "actions": "Actions"
+      },
+      "propertyFallback": "Property",
+      "openPropertyAria": "Open property {title}",
+      "openMessageAria": "Open message for {name}"
+    },
+    "actions": { "comment": "Comment" },
+    "message": { "loadError": "Failed to load message." },
     "submit": "Send request",
     "submitLoading": "Sending…",
     "success": "Thanks! Your request has been sent.",
