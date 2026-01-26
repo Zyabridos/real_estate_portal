@@ -31,6 +31,62 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
           chmod 600 ~/.ssh/hetzner_realestateproject
+          
+      - name: debug - show SSH agent keys (fingerprints only)
+        run: |
+          set -euo pipefail
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK"
+          echo "Loaded keys (fingerprints):"
+          ssh-add -L | ssh-keygen -lf - || true
+          echo "Loaded keys (short list):"
+          ssh-add -l || true
+
+      - name: debug - extract GREEN host from inventory
+        id: green_host
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        run: |
+          set -euo pipefail
+          INV="${{ env.ANSIBLE_INVENTORY }}"
+          echo "Inventory file: $INV"
+          test -f "$INV" || (echo "Inventory not found: $INV" && exit 1)
+
+          # Get first host line under [realestate_prod_green]
+          GREEN_HOST="$(
+            awk '
+              /^\[realestate_prod_green\]/ {in=1; next}
+              /^\[/ {in=0}
+              in && $1 !~ /^#/ && $1 != "" {print $1; exit}
+            ' "$INV"
+          )"
+
+          test -n "$GREEN_HOST" || (echo "Could not find GREEN host under [realestate_prod_green] in $INV" && exit 1)
+          echo "GREEN_HOST=$GREEN_HOST"
+          echo "GREEN_HOST=$GREEN_HOST" >> "$GITHUB_OUTPUT"
+
+      - name: debug - SSH test to GREEN (publickey only)
+        run: |
+          set -euo pipefail
+          HOST="${{ steps.green_host.outputs.GREEN_HOST }}"
+          echo "Testing SSH to root@$HOST using agent key..."
+
+          ssh -o BatchMode=yes \
+              -o PreferredAuthentications=publickey \
+              -o PubkeyAuthentication=yes \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              root@"$HOST" 'echo "SSH OK: $(hostname)"; id' || {
+                echo "SSH FAILED. This usually means: wrong key, root login disabled, or authorized_keys mismatch."
+                exit 1
+              }
+
+      - name: debug - Ansible ping (GREEN, verbose)
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=publickey -o IdentitiesOnly=yes"
+        run: |
+          ansible -i "${{ env.ANSIBLE_INVENTORY }}" realestate_prod_green -m ping -vvv
 
       - name: Install dependencies (rsync + python)
         run: |
