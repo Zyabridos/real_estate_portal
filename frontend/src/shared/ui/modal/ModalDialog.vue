@@ -35,8 +35,10 @@ function onKeydown(e: KeyboardEvent): void {
 
   if (!focusables.length) return;
 
-  const first = focusables[0];
-  const last = focusables[focusables.length - 1];
+  const first = focusables.item(0);
+  const last = focusables.item(focusables.length - 1);
+
+  if (!first || !last) return;
 
   const active = document.activeElement as HTMLElement | null;
 
@@ -97,7 +99,7 @@ onBeforeUnmount(() => {
       <div
         class="absolute inset-0 bg-slate-900/50"
         :data-testid="`${testId ?? 'modal'}-backdrop`"
-        @click="onClose"
+        @click="onClose()"
         aria-hidden="true"
       />
 
@@ -124,7 +126,7 @@ onBeforeUnmount(() => {
               class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
               data-testid="modal-close"
               aria-label="Close dialog"
-              @click="onClose"
+              @click="onClose()"
             >
               Close
             </button>
@@ -140,7 +142,7 @@ onBeforeUnmount(() => {
                 type="button"
                 class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
                 data-testid="modal-ok"
-                @click="onClose"
+                @click="onClose()"
               >
                 OK
               </button>
