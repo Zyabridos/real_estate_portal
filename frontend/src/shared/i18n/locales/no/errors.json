@@ -25,6 +25,9 @@
       "broker": "Vi fant ikke denne megleren. Den kan være fjernet eller lenken er feil."
     }
   },
+  "actions": {
+    "retry": "Prøv igjen"
+  },
   "validation": {
     "lead": {
       "server": "{{message}}",

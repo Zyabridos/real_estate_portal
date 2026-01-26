@@ -14,6 +14,10 @@
       "subtitle": "Browse properties from the backend. Filtering and paging will be added next."
     },
     "details": {
+      "actions": {
+        "createLead": "Contact broker",
+        "createLeadAria": "Send a request for this property"
+      },
       "titleFallback": "Property details",
       "subtitle": "Property details loaded from the backend."
     },
@@ -24,6 +28,36 @@
       "actions": {
         "back": "Back to property",
         "backAria": "Back to property details"
+      },
+      "list": {
+        "pageTitle": "Leads",
+        "pageSubtitle": "Grouped by PropertyId (default) or List view",
+        "viewToggleAria": "Leads view mode",
+        "view": {
+          "grouped": "Grouped",
+          "list": "List"
+        },
+        "total": "Total: {count}"
+      },
+      "table": {
+        "captionGrouped": "Leads grouped by property",
+        "captionList": "Leads list",
+        "columns": {
+          "fullName": "Full name",
+          "email": "Email",
+          "phone": "Phone",
+          "status": "Status",
+          "created": "Created",
+          "updated": "Updated",
+          "property": "Property",
+          "actions": "Actions"
+        },
+        "propertyFallback": "Property",
+        "openPropertyAria": "Open property {title}",
+        "openMessageAria": "Open message for {name}"
+      },
+      "message": {
+        "loadError": "Failed to load message."
       }
     }
   },
