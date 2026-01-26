@@ -13,12 +13,11 @@ export type AppEnv = {
 export const env: AppEnv = {
   apiBaseUrl: readEnvString("VITE_API_PREFIX") ?? "/api",
   sanity: {
-    projectId: requireEnv("VITE_SANITY_PROJECT_ID") ?? "kb7oir9o",
-    dataset: requireEnv("VITE_SANITY_DATASET") ?? "production",
+    projectId: readEnvString("VITE_SANITY_PROJECT_ID") ?? "kb7oir9o",
+    dataset: readEnvString("VITE_SANITY_DATASET") ?? "production",
     apiVersion: readEnvString("VITE_SANITY_API_VERSION") ?? "2025-01-01",
     useCdn: readEnvBool("VITE_SANITY_USE_CDN", true),
   },
-
   i18nDefaultLanguage: readEnvString("VITE_I18N_DEFAULT_LANGUAGE") ?? "en",
 };
 
@@ -34,6 +33,10 @@ function readEnvBool(key: string, fallback: boolean): boolean {
 }
 
 function requireEnv(key: string): string {
+  console.log("MODE", import.meta.env.MODE);
+  console.log("VITE_SANITY_PROJECT_ID", import.meta.env.VITE_SANITY_PROJECT_ID);
+  console.log("ENV FILE CHECK", import.meta.env);
+
   const v = readEnvString(key);
   if (v) return v;
 

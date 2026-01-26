@@ -50,9 +50,6 @@ services:
     build:
       context: ./cms
       dockerfile: Dockerfile
-    environment:
-      SANITY_STUDIO_PROJECT_ID: "${SANITY_STUDIO_PROJECT_ID:-}"
-      SANITY_STUDIO_DATASET: "${SANITY_STUDIO_DATASET:-}"
     ports:
       - "3333:3333"
     volumes:
