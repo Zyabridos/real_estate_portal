@@ -86,10 +86,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.INFRA_SSH_PRIVATE_KEY }}
+      - name: Configure SSH key for Ansible
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/hetzner_realestateproject
+          chmod 600 ~/.ssh/hetzner_realestateproject
 
       - name: Install dependencies (rsync + python)
         run: |
