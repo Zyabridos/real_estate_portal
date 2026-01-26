@@ -1,4 +1,3 @@
-# Catch-all HTTP (works for Host = server IP, required for Hetzner LB health checks)
 :80 {
   handle /lb-health {
     rewrite * /api/health
@@ -10,7 +9,6 @@
   }
 }
 
-# HTTPS (port 443): real traffic
 realestateproject.casa, www.realestateproject.casa {
   tls zyabrina95@gmail.com
   encode gzip
@@ -21,7 +19,8 @@ realestateproject.casa, www.realestateproject.casa {
   }
 
   handle /lb-health {
-    respond "ok" 200
+    rewrite * /api/health
+    reverse_proxy backend:5000
   }
 
   handle /api/* {
