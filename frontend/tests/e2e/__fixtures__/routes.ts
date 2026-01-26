@@ -15,6 +15,8 @@ export const routes = {
 
   leads: {
     create: (id: string) => [pathBase, "properties", id, "leads"].join("/"),
+    getById: (id: string) => [pathBase, "id", id],
+    list: (query?: string) => withQuery([pathBase, "leads"].join("/"), query),
   },
 
   properties: {
