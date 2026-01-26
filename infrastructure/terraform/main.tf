@@ -3,17 +3,16 @@ provider "hcloud" {
 }
 
 locals {
-  base_name   = "real-estate-hub"
   name_prefix = "${local.base_name}-${var.env}-${var.stack_id}"
 
   common_labels = {
     project = "real-estate-hub"
     env     = var.env
     stack   = var.stack_id
+    role    = "web"
   }
 }
 
-# Use an existing SSH key (recommended for blue/green; avoids uniqueness conflicts)
 data "hcloud_ssh_key" "main" {
   name = var.ssh_key_name
 }
