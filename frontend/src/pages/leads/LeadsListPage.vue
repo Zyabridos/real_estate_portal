@@ -1,39 +1,48 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { leadsApi } from "@/shared/api/leads";
+import type { ApiError } from "@/shared/types/errors";
+import LoadingState from "@/shared/ui/states/LoadingState.vue";
+import ErrorState from "@/shared/ui/states/ErrorState.vue";
+import EmptyState from "@/shared/ui/states/EmptyState.vue";
 
-type PageState = "loading" | "ready" | "error";
+type PageState = "loading" | "ready" | "error" | "empty";
 
 const state = ref<PageState>("loading");
-const errorMessage = ref<string | null>(null);
+const error = ref<ApiError | null>(null);
 
-// for now I just create template, evnt fetch from api
 const totalItems = ref<number>(0);
 
 const isLoading = computed(() => state.value === "loading");
 const isError = computed(() => state.value === "error");
-const isEmpty = computed(() => state.value === "ready" && totalItems.value === 0);
+const isEmpty = computed(() => state.value === "empty");
+
+async function load(): Promise<void> {
+  state.value = "loading";
+  error.value = null;
+
+  try {
+    const result = await leadsApi.list({ page: 1, pageSize: 20 });
+
+    totalItems.value = result.items.length;
+    state.value = totalItems.value === 0 ? "empty" : "ready";
+  } catch (e) {
+    error.value = e as ApiError;
+    state.value = "error";
+  }
+}
 
 function retry(): void {
-  state.value = "loading";
-  errorMessage.value = null;
-
-  // evnt fetch /api/leads
-  state.value = "ready";
-  totalItems.value = 0;
+  void load();
 }
 
 onMounted(() => {
-  // evnt show real state
-  state.value = "ready";
+  void load();
 });
 </script>
 
 <template>
-  <section
-    class="w-full px-6 py-4"
-    data-testid="leads-list-page"
-    aria-labelledby="leads-list-title"
-  >
+  <section class="w-full px-6 py-4" data-testid="leads-list-page" aria-labelledby="leads-list-title">
     <header class="mb-6">
       <h1
         id="leads-list-title"
@@ -48,65 +57,24 @@ onMounted(() => {
       </p>
     </header>
 
-    <!-- Status area -->
-    <div aria-live="polite" aria-atomic="true" class="max-w-5xl">
-      <!-- Loading -->
-      <div
-        v-if="isLoading"
-        class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        data-testid="leads-list-loading"
-        role="status"
-      >
-        <div class="flex items-center gap-3">
-          <span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" aria-hidden="true" />
-          <span class="text-sm text-slate-700">{{ $t("common:loading") }}</span>
-        </div>
-      </div>
+    <!-- States -->
+    <LoadingState v-if="isLoading" data-testid="leads-list-loading" />
+    <ErrorState
+      v-else-if="isError"
+      data-testid="leads-list-error"
+      :message="error?.message ?? $t('errors:messages.unexpected')"
+      :onRetry="retry"
+    />
+    <EmptyState v-else-if="isEmpty" data-testid="leads-list-empty" />
 
-      <!-- Error -->
-      <div
-        v-else-if="isError"
-        class="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-900"
-        data-testid="leads-list-error"
-        role="alert"
-      >
-        <p class="text-sm font-medium">
-          {{ errorMessage || $t("common:error.unexpected") }}
-        </p>
-
-        <button
-          type="button"
-          class="mt-3 inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
-          data-testid="leads-list-retry"
-          @click="retry"
-          :aria-label="$t('common:actions.retry')"
-        >
-          {{ $t("common:actions.retry") }}
-        </button>
-      </div>
-
-      <!-- Empty -->
-      <div
-        v-else-if="isEmpty"
-        class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        data-testid="leads-list-empty"
-        role="status"
-      >
-        <p class="text-sm text-slate-700">
-          {{ $t("pages:leads.list.empty") }}
-        </p>
-      </div>
-
-      <!-- Content placeholder -->
-      <div
-        v-else
-        class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        data-testid="leads-list-content"
-      >
-        <p class="text-sm text-slate-700">
-          {{ $t("pages:leads.list.placeholder") }}
-        </p>
-      </div>
+    <!-- Content placeholder -->
+    <div v-else class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" data-testid="leads-list-content">
+      <p class="text-sm text-slate-700">
+        {{ $t("pages:leads.list.placeholder") }}
+      </p>
+      <p class="mt-2 text-xs text-slate-500" data-testid="leads-list-count">
+        {{ $t("pages:leads.list.totalItems", { count: totalItems }) }}
+      </p>
     </div>
   </section>
 </template>

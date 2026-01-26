@@ -1,16 +1,19 @@
 import { http } from "@/shared/api/http";
+import buildQuery from "@/shared/api/query/buildQuery";
+import normalizePagedQuery from "@/shared/api/query/normalizePagingSort";
+import routes from "@/shared/routes";
+import { REQUEST_QUERY_DEFAULTS } from "@/shared/config/defaults";
+
 import type { PagedResultDto } from "@/shared/api/dtos/common/paged-result.dto";
 import type { PropertyDetailsDto } from "@/shared/api/dtos/properties/property-details.dto";
 import type { PropertyListItemDto } from "@/shared/api/dtos/properties/property-list-item.dto";
 import type { PropertiesListQuery } from "@/shared/types/queries";
-import routes from "@/shared/routes";
-import buildQuery from "@/shared/api/query/buildQuery";
 
-// Note to myself: Pages / stores MUST use this module instead of http directly
 export const propertiesApi = {
   // GET /api/properties
   async list(query: PropertiesListQuery = {}): Promise<PagedResultDto<PropertyListItemDto>> {
-    const params = buildQuery(query as Record<string, unknown>);
+    const normalized = normalizePagedQuery(query as Record<string, unknown>, REQUEST_QUERY_DEFAULTS);
+    const params = buildQuery(normalized);
     return http.get<PagedResultDto<PropertyListItemDto>>(routes.api.properties.list(), { params });
   },
 

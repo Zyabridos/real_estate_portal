@@ -1,20 +1,21 @@
-import { http } from '@/shared/api/http';
+import { http } from "@/shared/api/http";
+import buildQuery from "@/shared/api/query/buildQuery";
+import normalizePagedQuery from "@/shared/api/query/normalizePagingSort";
+import routes from "@/shared/routes";
+import { REQUEST_QUERY_DEFAULTS } from "@/shared/config/defaults";
+
 import type { PagedResultDto } from '@/shared/api/dtos/common/paged-result.dto';
 import type { BrokerDetailsDto } from "@/shared/api/dtos/brokers/broker-details.dto";
 import type { BrokerListItemDto } from "@/shared/api/dtos/brokers/broker-list-item.dto";
 import type { BrokersListQuery } from "@/shared/types/queries"
-import { serializeQuery } from '@/shared/api/query';
-import routes from "@/shared/routes.ts"
-import buildQuery from "@/shared/api/query/buildQuery.ts";
-import type {PropertyListItemDto} from "@/shared/api/dtos/properties/property-list-item.dto.ts";
 
-// Note to myself: Pages / stores MUST use this module instead of http directly
 export const brokersApi = {
   // GET /api/brokers
   async list(
     query: BrokersListQuery = {},
   ): Promise<PagedResultDto<BrokerListItemDto>> {
-    const params = buildQuery(query as Record<string, unknown>);
+    const normalized = normalizePagedQuery(query as Record<string, unknown>, REQUEST_QUERY_DEFAULTS);
+    const params = buildQuery(normalized);
     return http.get<PagedResultDto<BrokerListItemDto>>(routes.api.brokers.list(), { params });
   },
 
