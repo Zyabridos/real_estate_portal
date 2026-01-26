@@ -20,17 +20,27 @@ ${hcloud_server.real_estate_hub.ipv4_address} ansible_user=root
 EOT
 }
 
-output "load_balancer_name" {
-  description = "Load balancer name"
-  value       = hcloud_load_balancer.real_estate_hub.name
+output "load_balancer_id" {
+  value = local.lb_id
 }
 
+output "load_balancer_name" {
+  value = local.shared_lb_name
+}
+
+# IPv4 LB (в обоих workspaces)
 output "load_balancer_ipv4" {
-  description = "Load balancer public IPv4"
-  value       = hcloud_load_balancer.real_estate_hub.ipv4
+  value = (
+    local.lb_owner
+    ? hcloud_load_balancer.shared_prod[0].ipv4
+    : data.hcloud_load_balancer.shared_prod[0].ipv4
+  )
 }
 
 output "public_entrypoint" {
-  description = "Suggested public entrypoint"
-  value       = "http://${hcloud_load_balancer.real_estate_hub.ipv4}"
+  value = "http://${(
+    local.lb_owner
+    ? hcloud_load_balancer.shared_prod[0].ipv4
+    : data.hcloud_load_balancer.shared_prod[0].ipv4
+  )}"
 }
