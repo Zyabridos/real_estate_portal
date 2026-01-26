@@ -1,27 +1,26 @@
+// TODO: move somewhere more centilized
 export type AppEnv = {
   apiBaseUrl: string;
-
   sanity: {
-    projectId: string | null;
-    dataset: string | null;
+    projectId: string;
+    dataset: string;
     apiVersion: string;
     useCdn: boolean;
   };
+  i18nDefaultLanguage: string;
 };
-const isDocker = (import.meta.env.VITE_DOCKER as string | undefined) === "1"
-  || (import.meta.env.DOCKER as string | undefined) === "1"
-  || !!import.meta.env.VITE_API_PROXY_TARGET;
 
 export const env: AppEnv = {
-  apiBaseUrl: readEnvString("VITE_API_BASE_URL")
-    ?? (import.meta.env.DEV ? "http://localhost:5000" : "/api"),
+  apiBaseUrl: readEnvString("VITE_API_PREFIX") ?? "/api",
 
   sanity: {
-    projectId: readEnvString("VITE_SANITY_PROJECT_ID"),
-    dataset: readEnvString("VITE_SANITY_DATASET"),
+    projectId: requireEnv("VITE_SANITY_PROJECT_ID"),
+    dataset: requireEnv("VITE_SANITY_DATASET"),
     apiVersion: readEnvString("VITE_SANITY_API_VERSION") ?? "2025-01-01",
     useCdn: readEnvBool("VITE_SANITY_USE_CDN", true),
   },
+
+  i18nDefaultLanguage: readEnvString("VITE_I18N_DEFAULT_LANGUAGE") ?? "en",
 };
 
 function readEnvString(key: string): string | null {
@@ -35,14 +34,9 @@ function readEnvBool(key: string, fallback: boolean): boolean {
   return v.toLowerCase() === "true";
 }
 
-if (import.meta.env.DEV) {
-  const missing: string[] = [];
-  if (!env.sanity.projectId) missing.push("VITE_SANITY_PROJECT_ID");
-  if (!env.sanity.dataset) missing.push("VITE_SANITY_DATASET");
+function requireEnv(key: string): string {
+  const v = readEnvString(key);
+  if (v) return v;
 
-  if (missing.length > 0) {
-    console.warn(
-      `[Sanity] Missing env variables: ${missing.join(", ")}. Blog is scaffolded only.`,
-    );
-  }
+  throw new Error(`Missing required env variable: ${key}`);
 }

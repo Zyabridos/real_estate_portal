@@ -5,8 +5,6 @@ Frontend application for the Real Estate Portal project.
 
 This SPA is responsible for rendering the user interface, managing client-side routing and state, communicating with the backend API, and displaying editorial content from Sanity CMS.
 
-The frontend is intentionally designed with a clean, scalable architecture, suitable for production-grade applications.
-
 
 ## Tech Stack
 

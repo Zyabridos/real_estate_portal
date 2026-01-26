@@ -2,7 +2,10 @@ import { defineConfig, loadEnv, mergeConfig } from "vite";
 import { createViteSharedConfig } from "./vite.shared";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd());
+  const env = loadEnv(mode, __dirname);
+
+  const port = Number(env.VITE_PORT) || 3000;
+  const apiPrefix = env.VITE_API_PREFIX || "/api";
 
   const apiTarget =
     env.VITE_API_PROXY_TARGET ||
@@ -10,11 +13,11 @@ export default defineConfig(({ mode }) => {
 
   return mergeConfig(createViteSharedConfig(), {
     server: {
-      port: Number(env.VITE_PORT) || 3000,
-      allowedHosts: ["realestateproject.casa", "www.realestateproject.casa"],
+      port,
       host: true,
+      allowedHosts: ["realestateproject.casa", "www.realestateproject.casa"],
       proxy: {
-        [env.VITE_API_PREFIX || "/api"]: {
+        [apiPrefix]: {
           target: apiTarget,
           changeOrigin: true,
         },
