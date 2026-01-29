@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { PropertyDetailsDto } from "@/shared/api/dtos/properties/property-details.dto";
+import type { PropertyDetailsDto } from "@/features/properties/api/dtos/property-details.dto";
 
 type Props = {
   property: PropertyDetailsDto;

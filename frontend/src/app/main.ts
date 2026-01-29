@@ -10,7 +10,7 @@ import { env } from "@/shared/config/env"
 import { DEFAULT_HTTP_TIMEOUT_MS } from "@/shared/config/defaults.ts"
 
 import App from '@/app/App.vue'
-import router from '@/router'
+import router from '@/app/router'
 
 export const http = createHttpClient({
   baseURL: env.apiBaseUrl,
