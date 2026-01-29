@@ -9,8 +9,8 @@ COPY ./Directory.Packages.props ./Directory.Packages.props
 # Copy csproj files (more control over what is going on in container)
 COPY src/Api/Api.csproj ./src/Api/
 COPY src/Application/Application.csproj ./src/Application/
-COPY src/RealEstate.Domain/RealEstate.Domain.csproj ./src/RealEstate.Domain/
-COPY src/RealEstate.Infrastructure/RealEstate.Infrastructure.csproj ./src/RealEstate.Infrastructure/
+COPY src/Application/Domain/RealEstate.Domain.csproj ./src/RealEstate.Domain/
+COPY src/Application/Infrastructure/RealEstate.Infrastructure.csproj ./src/RealEstate.Infrastructure/
 
 RUN dotnet restore ./src/Api/Api.csproj
 

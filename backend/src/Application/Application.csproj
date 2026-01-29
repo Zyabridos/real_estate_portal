@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\RealEstate.Domain\RealEstate.Domain.csproj" />
+    <ProjectReference Include="Domain\RealEstate.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,4 +16,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Domain\**\*.cs" />
+    <Compile Remove="Infrastructure\**\*.cs" />
+    <EmbeddedResource Remove="Domain\**\*" />
+    <EmbeddedResource Remove="Infrastructure\**\*" />
+    <None Remove="Domain\**\*" />
+    <None Remove="Infrastructure\**\*" />
+  </ItemGroup>
 </Project>

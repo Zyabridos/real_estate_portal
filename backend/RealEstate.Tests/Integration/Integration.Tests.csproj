@@ -20,8 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Api\Api.csproj" />
-    <ProjectReference Include="..\..\src\RealEstate.Infrastructure\RealEstate.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\RealEstate.Domain\RealEstate.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Application\Infrastructure\RealEstate.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Application\Domain\RealEstate.Domain.csproj" />
     <ProjectReference Include="..\TestData\TestData.csproj" />
   </ItemGroup>
 
