@@ -52,13 +52,13 @@ The API uses the Options pattern for MongoDB configuration.
 Rename appsettings.example.json:
 
 ```
-mv backend/src/RealEstate.Api/appsettings.example.json backend/src/RealEstate.Api/appsettings.json
+mv backend/src/Api/appsettings.example.json backend/src/Api/appsettings.json
 ```
 Then adjust the values according to your local environment.
 ```bash
-nano backend/src/RealEstate.Api/appsettings.json
+nano backend/src/Api/appsettings.json
 # or
-code backend/src/RealEstate.Api/appsettings.json
+code backend/src/Api/appsettings.json
 ```
 ## MongoDB Conventions
 Global MongoDB conventions are configured on application startup:

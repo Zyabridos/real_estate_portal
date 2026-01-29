@@ -1,23 +1,22 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# COPY . ./ often break restore, therefore we copy exactly only solutions we need:
 COPY RealEstate.slnx ./
 COPY src/RealEstate.Api ./src/RealEstate.Api
 COPY ./Directory.Packages.props ./Directory.Packages.props
 
 # Copy csproj files (more control over what is going on in container)
-COPY src/RealEstate.Api/RealEstate.Api.csproj ./src/RealEstate.Api/
-COPY src/RealEstate.Application/RealEstate.Application.csproj ./src/RealEstate.Application/
+COPY src/Api/Api.csproj ./src/Api/
+COPY src/Application/Application.csproj ./src/Application/
 COPY src/RealEstate.Domain/RealEstate.Domain.csproj ./src/RealEstate.Domain/
 COPY src/RealEstate.Infrastructure/RealEstate.Infrastructure.csproj ./src/RealEstate.Infrastructure/
 
-RUN dotnet restore ./src/RealEstate.Api/RealEstate.Api.csproj
+RUN dotnet restore ./src/Api/Api.csproj
 
 COPY . .
 
 # Publish API
-RUN dotnet publish ./src/RealEstate.Api/RealEstate.Api.csproj -c Release -o /app/publish
+RUN dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
