@@ -6,14 +6,19 @@ using MongoDB.Bson;
 using System.Text.Json.Serialization;
 using System.Reflection;
 using Swashbuckle.AspNetCore.Filters;
-using RealEstate.Application.Interfaces.Services;
-using RealEstate.Application.Interfaces.Repositories;
-using RealEstate.Application.Services;
+using RealEstate.Application.Features.Brokers.Contracts;
+using RealEstate.Application.Features.Brokers.Services;
 using RealEstate.Infrastructure.Mongo;
-using RealEstate.Infrastructure.Repositories;
+using RealEstate.Infrastructure.Repositories.Brokers;
 using RealEstate.Infrastructure.Mongo.Indexes;
 using RealEstate.Infrastructure.Mongo.Conventions;
 using RealEstate.Application.Mapping;
+using RealEstate.Application.Features.Leads.Contracts;
+using RealEstate.Application.Features.Leads.Services;
+using RealEstate.Application.Features.Properties.Contracts;
+using RealEstate.Application.Features.Properties.Services;
+using RealEstate.Infrastructure.Repositories.Leads;
+using RealEstate.Infrastructure.Repositories.Properties;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,10 +35,10 @@ builder.Services
 
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Validation.Leads.CreateLeadRequestValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(RealEstate.Application.Features.Leads.Create.CreateLeadRequestValidator).Assembly);
 
 //Mapper
-builder.Services.AddAutoMapper(typeof(PropertyProfile).Assembly);
+builder.Services.AddAutoMapper(typeof(RealEstate.Application.Features.Brokers.Mapping.BrokerMappingProfile).Assembly);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

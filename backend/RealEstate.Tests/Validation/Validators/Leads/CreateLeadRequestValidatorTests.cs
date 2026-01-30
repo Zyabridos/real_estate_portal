@@ -1,5 +1,4 @@
-using RealEstate.Application.DTOs.Leads;
-using RealEstate.Application.Validation.Leads;
+using RealEstate.Application.Features.Leads.Create;
 using RealEstate.Validation.Tests.Common;
 using RealEstate.Validation.Tests.TestData;
 using Xunit;

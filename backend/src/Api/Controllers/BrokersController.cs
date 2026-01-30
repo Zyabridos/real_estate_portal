@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Brokers;
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Brokers;
-using RealEstate.Application.Interfaces.Services;
-using RealEstate.Application.Queries.Brokers;
+using RealEstate.Application.Features.Brokers.Contracts;
+using RealEstate.Application.Features.Brokers.Create;
+using RealEstate.Application.Features.Brokers.GetById;
+using RealEstate.Application.Features.Brokers.List;
+using RealEstate.Application.Features.Brokers.Update;
 
 namespace RealEstate.Api.Controllers;
 

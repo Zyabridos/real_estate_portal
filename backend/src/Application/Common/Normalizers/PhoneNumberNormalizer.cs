@@ -22,16 +22,14 @@ public static class PhoneNumberNormalizer
             error = "Phone number may contain at most 3 separators (spaces or hyphens).";
             return false;
         }
-
-        // '+'
+        
         var plusCount = raw.Count(c => c == '+');
         if (plusCount > 1 || (plusCount == 1 && raw[0] != '+'))
         {
             error = "Phone number may contain '+' only once and only at the start.";
             return false;
         }
-
-        // allowed chars
+        
         foreach (var ch in raw)
         {
             if (!(char.IsDigit(ch) || ch is ' ' or '-' || ch == '+'))
@@ -40,8 +38,7 @@ public static class PhoneNumberNormalizer
                 return false;
             }
         }
-
-        // remove separators
+        
         var compact = raw.Replace(" ", "").Replace("-", "");
 
         // if country code is not provided, we automatically set +47

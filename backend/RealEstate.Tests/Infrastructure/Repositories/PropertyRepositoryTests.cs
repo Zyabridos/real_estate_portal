@@ -1,7 +1,8 @@
 using Xunit;
 using FluentAssertions;
+using RealEstate.Infrastructure.Repositories.Properties;
 
-using RealEstate.Application.Queries.Properties;
+using RealEstate.Application.Features.Properties.List;
 using RealEstate.Domain.Enums.Properties;
 using RealEstate.Domain.Entities;
 

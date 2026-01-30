@@ -1,7 +1,8 @@
 using Xunit;
 using FluentAssertions;
+using RealEstate.Infrastructure.Repositories.Brokers;
 
-using RealEstate.Application.Queries.Brokers;
+using RealEstate.Application.Features.Brokers.List;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums.Brokers;
 using RealEstate.Domain.Enums.Common;

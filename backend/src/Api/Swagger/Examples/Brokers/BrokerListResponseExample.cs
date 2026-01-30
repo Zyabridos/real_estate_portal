@@ -1,6 +1,6 @@
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Brokers;
+using RealEstate.Application.Features.Brokers.List;
 
 namespace RealEstate.Api.Swagger.Examples.Brokers;
 

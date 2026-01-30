@@ -1,5 +1,5 @@
 using Swashbuckle.AspNetCore.Filters;
-using RealEstate.Application.DTOs.Leads;
+using RealEstate.Application.Features.Leads.GetById;
 using RealEstate.Domain.Enums.Leads;
 
 namespace RealEstate.Api.Swagger.Examples.Leads;

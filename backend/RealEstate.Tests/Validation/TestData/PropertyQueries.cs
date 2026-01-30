@@ -1,4 +1,4 @@
-using RealEstate.Application.Queries.Properties;
+using RealEstate.Application.Features.Properties.List;
 
 namespace RealEstate.Validation.Tests.TestData;
 

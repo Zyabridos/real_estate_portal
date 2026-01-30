@@ -1,5 +1,5 @@
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Properties;
+using RealEstate.Application.Features.Properties.List;
 using RealEstate.Domain.Enums.Properties;
 using Swashbuckle.AspNetCore.Filters;
 

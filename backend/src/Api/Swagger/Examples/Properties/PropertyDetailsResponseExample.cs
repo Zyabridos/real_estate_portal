@@ -1,4 +1,4 @@
-using RealEstate.Application.DTOs.Properties;
+using RealEstate.Application.Features.Properties.GetById;
 using RealEstate.Domain.Enums.Properties;
 using Swashbuckle.AspNetCore.Filters;
 

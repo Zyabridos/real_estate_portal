@@ -6,8 +6,7 @@ public static class EmailNormalizer
     public static string NormalizeEmail(string email)
     {
         var s = (email ?? string.Empty).Trim().Normalize(NormalizationForm.FormKC);
-
-        // Remove any whitespace and common zero-width chars (often comes from copy-paste operations)
+        
         var cleaned = new string(s
             .Where(c =>
                     !char.IsWhiteSpace(c) &&

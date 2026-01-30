@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Leads;
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Leads;
-using RealEstate.Application.Interfaces.Services;
-using RealEstate.Application.Queries.Leads;
+using RealEstate.Application.Features.Leads.Contracts;
+using RealEstate.Application.Features.Leads.Create;
+using RealEstate.Application.Features.Leads.List;
+using RealEstate.Application.Features.Leads.Update;
+
+using RealEstate.Application.Features.Leads.GetById;
 
 namespace RealEstate.Api.Controllers;
 

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Properties;
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Properties;
-using RealEstate.Application.Interfaces.Services;
-using RealEstate.Application.Queries.Properties;
+using RealEstate.Application.Features.Properties.Contracts;
+using RealEstate.Application.Features.Properties.Create;
+using RealEstate.Application.Features.Properties.GetById;
+using RealEstate.Application.Features.Properties.List;
+using RealEstate.Application.Features.Properties.Update;
 
 namespace RealEstate.Api.Controllers;
 
