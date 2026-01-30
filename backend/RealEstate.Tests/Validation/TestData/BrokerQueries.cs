@@ -1,4 +1,4 @@
-using RealEstate.Application.Queries.Brokers;
+using RealEstate.Application.Features.Brokers.List;
 
 namespace RealEstate.Validation.Tests.TestData;
 

@@ -1,4 +1,4 @@
-using RealEstate.Application.DTOs.Leads;
+using RealEstate.Application.Features.Leads.Create;
 
 namespace RealEstate.Validation.Tests.TestData;
 

@@ -13,9 +13,9 @@
     <Project Path="RealEstate.Tests/Normalizers/Normalizers.Tests.csproj" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/RealEstate.Api/RealEstate.Api.csproj" />
-    <Project Path="src/RealEstate.Application/RealEstate.Application.csproj" />
-    <Project Path="src/RealEstate.Domain/RealEstate.Domain.csproj" />
-    <Project Path="src/RealEstate.Infrastructure/RealEstate.Infrastructure.csproj" />
+    <Project Path="src/Api/Api.csproj" />
+    <Project Path="src/Application/Application.csproj" />
+    <Project Path="src/Application/Domain/RealEstate.Domain.csproj" />
+    <Project Path="src/Application/Infrastructure/RealEstate.Infrastructure.csproj" />
   </Folder>
 </Solution>

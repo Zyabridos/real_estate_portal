@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import type { BrokerDetailsDto } from "@/shared/api/dtos/brokers/broker-details.dto";
+import type { BrokerDetailsDto } from "@/features/brokers/api/dtos/broker-details.dto";
 
 type Props = {
   broker: BrokerDetailsDto;

@@ -1,5 +1,7 @@
-using RealEstate.Application.DTOs.Leads;
-
+using RealEstate.Application.Features.Leads.Create;
+using RealEstate.Application.Features.Leads.GetById;
+using RealEstate.Application.Features.Leads.List;
+using RealEstate.Application.Features.Leads.Update;
 namespace RealEstate.TestData.Requests;
 
 public static class TestLeadRequests

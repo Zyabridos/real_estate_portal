@@ -1,31 +1,27 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# COPY . ./ often break restore, therefore we copy exactly only solutions we need:
 COPY RealEstate.slnx ./
-COPY src/RealEstate.Api ./src/RealEstate.Api
 COPY ./Directory.Packages.props ./Directory.Packages.props
 
-# Copy csproj files (more control over what is going on in container)
-COPY src/RealEstate.Api/RealEstate.Api.csproj ./src/RealEstate.Api/
-COPY src/RealEstate.Application/RealEstate.Application.csproj ./src/RealEstate.Application/
-COPY src/RealEstate.Domain/RealEstate.Domain.csproj ./src/RealEstate.Domain/
-COPY src/RealEstate.Infrastructure/RealEstate.Infrastructure.csproj ./src/RealEstate.Infrastructure/
+COPY src/Api/Api.csproj ./src/Api/
+COPY src/Application/Application.csproj ./src/Application/
+COPY src/Application/Domain/RealEstate.Domain.csproj ./src/Application/Domain/
+COPY src/Application/Infrastructure/RealEstate.Infrastructure.csproj ./src/Application/Infrastructure/
 
-RUN dotnet restore ./src/RealEstate.Api/RealEstate.Api.csproj
+RUN dotnet restore ./src/Api/Api.csproj
 
 COPY . .
 
-# Publish API
-RUN dotnet publish ./src/RealEstate.Api/RealEstate.Api.csproj -c Release -o /app/publish
+RUN dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-# install curl
 RUN apt-get update && apt-get install -y --no-install-recommends curl
 
-# Official .NET images include a non-root user named `app`
+# Run as non-root (`app`) to follow container security best practices. 
+# Default is root, so "no sudo today".
 USER app
 
 COPY --from=build /app/publish ./
@@ -36,5 +32,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=8 \
   CMD curl -fsS http://localhost:5000/api/health || exit 1
 
-CMD ["dotnet", "RealEstate.Api.dll"]
-
+CMD ["dotnet", "Api.dll"]

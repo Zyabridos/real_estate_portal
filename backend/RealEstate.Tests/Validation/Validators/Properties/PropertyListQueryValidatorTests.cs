@@ -1,5 +1,4 @@
-using RealEstate.Application.Queries.Properties;
-using RealEstate.Application.Validation.Properties;
+using RealEstate.Application.Features.Properties.List;
 using RealEstate.Validation.Tests.Common;
 using RealEstate.Validation.Tests.TestData;
 using Xunit;

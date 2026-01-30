@@ -1,5 +1,4 @@
-using RealEstate.Application.Queries.Brokers;
-using RealEstate.Application.Validation.Brokers;
+using RealEstate.Application.Features.Brokers.List;
 using RealEstate.Validation.Tests.Common;
 using RealEstate.Validation.Tests.TestData;
 using Xunit;
