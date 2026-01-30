@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { effectScope, nextTick, ref } from "vue";
-import { useLeadFormValidation } from "../../src/pages/leads/validation/useLeadFormValidation";
-import type { LeadFormStatus, LeadFormValues } from "../../src/shared/types/leads";
+import { useLeadFormValidation } from "../../src/features/leads/create/validation/useLeadFormValidation"
+import type { LeadFormStatus, LeadFormValues } from "../../src/features/leads/create/validation/useLeadFormValidation.ts";
 import type { ProblemDetails } from "../../src/shared/types/errors";
 
 
