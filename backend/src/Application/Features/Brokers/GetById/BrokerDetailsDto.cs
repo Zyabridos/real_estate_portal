@@ -1,4 +1,4 @@
-namespace RealEstate.Application.DTOs.Brokers;
+namespace RealEstate.Application.Features.Brokers.GetById;
 
 public sealed record BrokerDetailsDto(
     Guid Id,

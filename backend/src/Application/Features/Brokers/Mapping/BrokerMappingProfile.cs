@@ -1,12 +1,15 @@
 using AutoMapper;
-using RealEstate.Application.DTOs.Brokers;
+using RealEstate.Application.Features.Brokers.Create;
+using RealEstate.Application.Features.Brokers.GetById;
+using RealEstate.Application.Features.Brokers.List;
+using RealEstate.Application.Features.Brokers.Update;
 using RealEstate.Domain.Entities;
 
-namespace RealEstate.Application.Mapping;
+namespace RealEstate.Application.Features.Brokers.Mapping;
 
-public sealed class BrokersMappingProfile : Profile
+public sealed class BrokerMappingProfile : Profile
 {
-    public BrokersMappingProfile()
+    public BrokerMappingProfile()
     {
         // Entity -> DTO
         CreateMap<Broker, BrokerDetailsDto>()

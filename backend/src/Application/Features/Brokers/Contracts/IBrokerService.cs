@@ -1,8 +1,10 @@
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Brokers;
-using RealEstate.Application.Queries.Brokers;
+using RealEstate.Application.Features.Brokers.Create;
+using RealEstate.Application.Features.Brokers.GetById;
+using RealEstate.Application.Features.Brokers.List;
+using RealEstate.Application.Features.Brokers.Update;
 
-namespace RealEstate.Application.Interfaces.Services;
+namespace RealEstate.Application.Features.Brokers.Contracts;
 
 public interface IBrokerService
 {

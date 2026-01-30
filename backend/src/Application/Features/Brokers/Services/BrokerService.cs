@@ -1,12 +1,13 @@
 using AutoMapper;
 using RealEstate.Application.Common;
-using RealEstate.Application.DTOs.Brokers;
-using RealEstate.Application.Interfaces.Repositories;
-using RealEstate.Application.Interfaces.Services;
-using RealEstate.Application.Queries.Brokers;
+using RealEstate.Application.Features.Brokers.Create;
+using RealEstate.Application.Features.Brokers.GetById;
+using RealEstate.Application.Features.Brokers.List;
+using RealEstate.Application.Features.Brokers.Update;
+using RealEstate.Application.Features.Brokers.Contracts;
 using RealEstate.Domain.Entities;
 
-namespace RealEstate.Application.Services;
+namespace RealEstate.Application.Features.Brokers.Services;
 
 public sealed class BrokerService : IBrokerService
 {

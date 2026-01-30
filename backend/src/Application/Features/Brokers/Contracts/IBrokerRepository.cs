@@ -1,7 +1,7 @@
-using RealEstate.Application.Queries.Brokers;
+using RealEstate.Application.Features.Brokers.List;
 using RealEstate.Domain.Entities;
 
-namespace RealEstate.Application.Interfaces.Repositories;
+namespace RealEstate.Application.Features.Brokers.Contracts;
 
 public interface IBrokerRepository
 {
@@ -12,7 +12,7 @@ public interface IBrokerRepository
     Task<bool> UpdateAsync(Broker entity, CancellationToken ct);
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
     
-    // Returns brokers matching the query filters: current page as Items and total matches as TotalItems
+    // current page as Items and total matches as TotalItems
     Task<(IReadOnlyList<Broker> Items, long TotalItems)> GetListAsync(
         BrokerListQuery query,
         CancellationToken ct);
