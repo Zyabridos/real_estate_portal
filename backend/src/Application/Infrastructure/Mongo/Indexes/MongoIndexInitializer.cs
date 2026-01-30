@@ -28,7 +28,7 @@ public sealed class MongoIndexInitializer : IHostedService
         var properties = db.GetCollection<Property>(MongoCollectionNames.Properties);
         var leads = db.GetCollection<Lead>(MongoCollectionNames.Leads);
 
-        // Properties: brokerId, city, type, status + compound city+type
+        // Properties
         await properties.Indexes.CreateManyAsync(new[]
         {
             new CreateIndexModel<Property>(Builders<Property>.IndexKeys.Ascending(x => x.BrokerId)),
@@ -40,7 +40,7 @@ public sealed class MongoIndexInitializer : IHostedService
                 .Ascending(x => x.Type))
         }, cancellationToken);
 
-        // Leads: propertyId, createdAt, status + compound propertyId+createdAt
+        // Leads
         await leads.Indexes.CreateManyAsync(new[]
         {
             new CreateIndexModel<Lead>(Builders<Lead>.IndexKeys.Ascending(x => x.PropertyId)),
