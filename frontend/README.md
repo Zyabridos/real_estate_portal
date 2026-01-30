@@ -64,23 +64,22 @@ Key architectural principles:
 -   Clear separation between domain data and UI concerns
 
 
-## Project Structure
-```
-src/
-  app/                # App bootstrap and global setup
-  layouts/            # Application layouts (AppLayout)
-  pages/              # Route-level pages
-  router/             # Vue Router configuration
-  stores/             # Pinia stores (properties, brokers)
-  shared/
-    api/              # HTTP client and domain API modules
-    cms/              # Sanity client (scaffold)
-    config/           # Environment configuration
-    ui/               # UI state components (Loading, Error, Empty)
-  assets/             # Static assets
-  styles/             # Global styles` 
-```
 
+## Project Structure
+
+```bash
+frontend/
+  src/
+    app/              # App bootstrap and global setup
+    features/         # Feature modules (brokers, leads, properties, etc.)
+    entities/         # Domain entities and helpers
+    shared/           # API client, config, shared UI/components, utils
+    assets/           # Static assets
+    RealEstate.*      # Project-specific API/contracts modules
+  tests/
+    unit/             # Unit tests (Vitest)
+    e2e/              # E2E tests (Playwright)
+ ```
 ## Routing
 
 Configured routes:
