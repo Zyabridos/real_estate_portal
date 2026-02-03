@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind      : Deployment
+metadata:
+  name  : realestate-mongo
+  labels:
+    project: realestate
+    app    : realestate-mongo
+    env    : local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realestate-mongo
+  template:
+    metadata:
+      labels:
+        project: realestate
+        app    : realestate-mongo
+    spec:
+      containers:
+        - name           : mongo
+          image          : mongo:7.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name         : mongo
+              containerPort: 27017

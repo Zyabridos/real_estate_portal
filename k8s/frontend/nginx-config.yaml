@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: realestate-frontend-nginx
+  labels:
+    project: realestate
+    app: realestate-frontend
+data:
+  # This key becomes a file inside the frontend pod:
+  # /etc/nginx/conf.d/default.conf
+  default.conf: |
+    server {
+      # (K8s Service maps localhost:3000 -> pod:80)
+      listen 80;
+
+      # Default server - match any Host header
+      server_name _;
+
+      # Default path for static files
+      root /usr/share/nginx/html;
+      index index.html;
+
+      # Proxy API requests from the browser to the backend service inside the cluster.
+      # http://localhost:3000/api/ => http://realestate-api-svc:5001/api/
+      location /api/ {
+        proxy_pass http://realestate-api-svc:5001;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+      # SPA fallback
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+    }

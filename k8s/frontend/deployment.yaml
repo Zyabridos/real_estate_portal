@@ -3,7 +3,7 @@ kind      : Deployment
 metadata:
   name  : realestate-frontend
   labels:
-    project: realestate
+    project: realestate # Service will look for those PODs labels!
     app    : realestate-frontend
     env    : local
     owner  : NinaZyabrina
@@ -19,6 +19,15 @@ spec:
         project: realestate
         app    : realestate-frontend
     spec:
+      # frontend is proxying to itself, so lets use nginx
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: realestate-frontend-nginx
+            items:
+              - key: default.conf
+                path: default.conf
+
       containers:
         - name : frontend
           image: zyabridos/real_estate_prod_frontend:latest
@@ -26,6 +35,10 @@ spec:
           ports:
             - name         : http
               containerPort: 80
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
 ---
 apiVersion: autoscaling/v2
 kind      : HorizontalPodAutoscaler

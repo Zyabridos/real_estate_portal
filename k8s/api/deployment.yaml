@@ -19,6 +19,18 @@ spec:
         project: realestate
         app    : realestate-api
     spec:
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MongoDB at realestate-mongo:27017...";
+              until nc -z realestate-mongo 27017; do
+                sleep 2;
+              done;
+              echo "Mongo is ready. Poceeding to backend container."
       containers:
         - name : api
           image: zyabridos/real_estate_prod_backend:latest
@@ -26,6 +38,13 @@ spec:
           ports:
             - name         : http
               containerPort: 80
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://0.0.0.0:5000"
+            - name: Mongo__ConnectionString
+              value: "mongodb://realestate-mongo:27017"
+            - name: Mongo__Database
+              value: "realestate"
 ---
 apiVersion: autoscaling/v2
 kind      : HorizontalPodAutoscaler
