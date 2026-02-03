@@ -2,7 +2,8 @@
 
 This folder contains a minimal Kubernetes setup for the RealEstate Portal:
 
-**Note:** I am learning by doing, so the structure is not final. It probably will change a lot, but one step at the time.  
+**Note:** I am learning by doing, so the structure is not final. It probably will change a lot, but one step at the time.
+
 ## Project structure
 - `k8s/frontend/deployment.yaml`
 - `k8s/api/deployment.yaml`
@@ -19,7 +20,6 @@ Each file contains:
 
 ## Make targets
 All commands are defined in `make/k8s.mk`.
-
 
 ## Start from scratch (highly recommended)
 
@@ -88,4 +88,21 @@ Cluster resources:
 ```bash
 make k8s-status
 kubectl get all -l project=realestate
+```
+
+### Ingress (optional)
+
+This setup uses **NGINX Ingress Controller** for local HTTP routing:
+
+- `/` → frontend service
+- `/api` and `/health` → API service
+- `cms.localhost` → Sanity Studio
+### Prerequisite
+ Install **ingress-nginx** in your cluster. [Quick Start](https://kubernetes.github.io/ingress-nginx/deploy/#quick-start)
+
+Apply ingress rules:
+
+```bash
+kubectl apply -f k8s/ingress/ingress.yaml
+kubectl get ingress
 ```
