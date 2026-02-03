@@ -52,7 +52,17 @@ jobs:
           tags: zyabridos/real_estate_prod_frontend:latest
           build-args: |
             .env
-
+            
+      - name: Build and push CMS Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./cms
+          push: true
+          file: ./cms/Dockerfile
+          tags: zyabridos/real_estate_prod_cms:latest
+          build-args: |
+            .env
+            
 # TODO: there should be a way to avoid running each test before pushing images.
 # Intead it should be possible to run tests on separate job and if tests pass then
 # only push images. But last time I tried to do that... was not successful :(

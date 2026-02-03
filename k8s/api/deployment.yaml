@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind      : Deployment
+metadata:
+  name  : realestate-api
+  labels:
+    project: realestate
+    app    : realestate-api
+    env    : local
+    owner  : NinaZyabrina
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realestate-api
+# how will pods look like:
+  template:
+    metadata:
+      labels:
+        project: realestate
+        app    : realestate-api
+    spec:
+      containers:
+        - name : api
+          image: zyabridos/real_estate_prod_backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name         : http
+              containerPort: 80
+---
+apiVersion: autoscaling/v2
+kind      : HorizontalPodAutoscaler
+metadata:
+  name  : realestate-api-hpa
+  labels:
+    project: realestate
+    app    : realestate-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind      : Deployment
+    name      : realestate-api
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name  : cpu
+        target:
+          type              : Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name  : memory
+        target:
+          type              : Utilization
+          averageUtilization: 80

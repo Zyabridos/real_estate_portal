@@ -1,8 +1,9 @@
 include make/dev.mk
-include make/pings.mk
-include make/seeds.mk
 include make/docker.mk
 include make/infrastructure.mk
+include make/k8s.mk
+include make/pings.mk
+include make/seeds.mk
 
 SHELL := /bin/bash
 .ONESHELL:
