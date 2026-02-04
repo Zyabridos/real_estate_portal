@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind      : Deployment
 metadata:
   name  : realestate-mongo
+  namespace: realestate
   labels:
     project: realestate
     app    : realestate-mongo

@@ -1,21 +1,28 @@
 # Kubernetes 
+# Kubernetes
 
-This folder contains a minimal Kubernetes setup for the RealEstate Portal:
+This folder contains a minimal Kubernetes setup for the RealEstate Portal.
+It is intended for local development with **k3d** and provides a clean baseline for a future production setup.
 
-**Note:** I am learning by doing, so the structure is not final. It probably will change a lot, but one step at the time.
+All application resources are deployed into the `realestate` namespace.
+Networking is available via direct ports (debug) and optionally via an **NGINX Ingress Controller**.
 
 ## Project structure
-- `k8s/frontend/deployment.yaml`
-- `k8s/api/deployment.yaml`
-- `k8s/cms/deployment.yaml`
+**Note:** I am learning by doing, so the structure is not final. It probably will change a lot, but one step at the time.
+- `k8s/namespace.yaml` — `realestate` namespace definition
+- `k8s/mongo/` — MongoDB deployment + service
+- `k8s/api/` — API deployment + service (+ HPA)
+- `k8s/frontend/` — Frontend deployment + service (+ HPA)
+- `k8s/cms/` — Sanity deployment + service (+ HPA)
+- `k8s/ingress/` — local ingress rules (optional)
 
-Each file contains:
+Each `deployment.yaml` typically includes:
 - `Deployment`
 - `HorizontalPodAutoscaler` (HPA)
 
 ## Prerequisites
-- `k3d`
-- `kubectl`
+- k3d
+- kubectl
 - Docker
 
 ## Make targets
@@ -32,27 +39,36 @@ This creates cluster realestate and exposes ports:
 
 3000, 5001, 3333 on the k3d load balancer.
 
-### 2) Apply manifests
+### 2) Apply namespace
+```bash
+kubectl apply -f k8s/namespace.yaml
+```
+
+### 3) Apply manifests
 ```bash
 make k8s-apply
 ```
-### 3) Wait until everything is ready
+### 4) Wait until everything is ready
 ```bash
 make k8s-wait-all
 ```
-### 4) Check status
+### 5) Check status
 ```bash
 make k8s-status
 make k8s-urls
 ```
 ## Verify locally
-### For Frontend open:
+### Ingress (recommended)
+```md
+- Frontend: http://localhost/
+- API health: curl -i http://localhost/api/health
+- CMS: http://cms.localdev.me/ (or http://cms.localhost/)
 ```
-http://localhost:3000
-```
-### For backend ping health-cheak:
-```
-curl -i http://localhost:5001/api/health
+### Direct ports (debug)
+```md
+- Frontend: http://localhost:3000
+- API health: curl -i http://localhost:5001/api/health
+- CMS: http://localhost:3333
 ```
 **Seeding data**
 
@@ -97,7 +113,7 @@ This setup uses **NGINX Ingress Controller** for local HTTP routing:
 - `/` → frontend service
 - `/api` and `/health` → API service
 - `cms.localhost` → Sanity Studio
-### Prerequisite
+
  Install **ingress-nginx** in your cluster. [Quick Start](https://kubernetes.github.io/ingress-nginx/deploy/#quick-start)
 
 Apply ingress rules:

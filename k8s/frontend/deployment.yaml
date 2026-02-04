@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind      : Deployment
 metadata:
   name  : realestate-frontend
+  namespace: realestate
   labels:
     project: realestate # Service will look for those PODs labels!
     app    : realestate-frontend
@@ -31,6 +32,7 @@ apiVersion: autoscaling/v2
 kind      : HorizontalPodAutoscaler
 metadata:
   name  : realestate-frontend-hpa
+  namespace: realestate
   labels:
     project: realestate
     app    : realestate-frontend
