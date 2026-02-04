@@ -2,14 +2,10 @@ name: backend-unit-tests
 
 on:
   pull_request:
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-unit-tests.yml"
+    branches: [ "main" ]
   push:
-    branches: ["main"]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-unit-tests.yml"
+    branches: [ "main" ]
+  workflow_dispatch: {}
 
 concurrency:
   group: backend-backend-unit-tests-${{ github.ref }}

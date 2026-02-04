@@ -2,10 +2,10 @@ name: Frontend checks (type-check + build)
 
 on:
   pull_request:
-    branches: [main]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend-types-checks.yml"
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+    
   workflow_dispatch:
 
 concurrency:

@@ -2,15 +2,10 @@ name: Frontend Unit
 
 on:
   pull_request:
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend-unit.yml"
+    branches: [ "main" ]
   push:
-    branches: ["main"]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend-unit.yml"
-  workflow_dispatch:
+    branches: [ "main" ]
+  workflow_dispatch: {}
 
 concurrency:
   group: frontend-unit-${{ github.ref }}

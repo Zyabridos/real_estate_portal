@@ -1,21 +1,10 @@
 name: Frontend E2E (Playwright)
 
 on:
-  pull_request:
-    paths:
-      - "frontend/**"
-      - "backend/**"
-      - "docker-compose.yml"
-      - ".github/workflows/frontend-e2e.yml"
+  pull_request: 
+    branches: [ "main" ]
   push:
-    branches:
-      - '**'
-    paths:
-      - "frontend/**"
-      - "backend/**"
-      - "docker-compose.yml"
-      - ".github/workflows/frontend-e2e.yml"
-  workflow_dispatch:
+    branches: [ "main" ]
 
 concurrency:
   group: frontend-e2e-${{ github.ref }}
