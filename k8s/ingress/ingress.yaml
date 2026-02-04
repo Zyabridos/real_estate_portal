@@ -1,0 +1,81 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: realestate-ingress-hosts
+  namespace: realestate
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    # Normal situation:
+    # - host: wwww.realestateproject.casa
+    # - http:
+    #   paths:
+    #     - path    : /
+    #       pathType: Prefix
+    #      backend:
+    #       service:
+    #         name  : realestate-backend
+    #         port  :
+    #         number: 5000
+    # But for local development I play with default - no host
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: realestate-frontend-svc
+                port:
+                  number: 3000
+
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: realestate-api-svc
+                port:
+                  number: 5001
+
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: realestate-api-svc
+                port:
+                  number: 5001
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: realestate-cms-ingress-hosts
+  namespace: realestate
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cms.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend  :
+              service:
+                name: realestate-cms-svc
+                port:
+                  number: 3333
+
+    # resolves to 127.0.0.1 automatically
+    - host: cms.localdev.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: realestate-cms-svc
+                port:
+                  number: 3333

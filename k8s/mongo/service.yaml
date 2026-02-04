@@ -1,0 +1,18 @@
+apiVersion: v1
+kind      : Service
+metadata:
+  name: realestate-mongo-svc
+  namespace: realestate
+  labels:
+    project: realestate
+    app    : realestate-mongo
+    env    : local
+spec:
+  type: ClusterIP
+  selector:
+    app: realestate-mongo
+  ports:
+    - name      : mongo
+      protocol  : TCP
+      port      : 27017
+      targetPort: 27017
