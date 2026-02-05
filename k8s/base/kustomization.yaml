@@ -9,7 +9,9 @@ resources:
   - namespace.yaml
 
   - mongo/deployment.yaml
+  - mongo/pvc.yaml
   - mongo/service.yaml
+  - mongo/statefulset.yaml
 
   - api/deployment.yaml
   - api/service.yaml

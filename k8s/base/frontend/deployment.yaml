@@ -4,7 +4,7 @@ metadata:
   name  : realestate-frontend
   namespace: realestate
   labels:
-    project: realestate # Service will look for those PODs labels!
+    project: realestate
     app    : realestate-frontend
     env    : local
     owner  : NinaZyabrina
@@ -17,8 +17,8 @@ spec:
   template:
     metadata:
       labels:
-        project: realestate
         app    : realestate-frontend
+        project: realestate
     spec:
       containers:
         - name : frontend

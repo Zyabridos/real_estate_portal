@@ -12,6 +12,7 @@ spec:
   # on which PODs will work - to load balance the traffic
   selector:
     app: realestate-frontend # selecting PODs with these labels
+    project: realestate
   ports:
     - name      : http
       protocol  : TCP

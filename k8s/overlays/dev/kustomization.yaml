@@ -5,7 +5,7 @@ resources:
   - ../../base
 
 labels:
-  - includeSelectors: true
+  - includeSelectors: false
     includeTemplates: true
     pairs:
       project: realestate
@@ -26,3 +26,10 @@ replicas:
     count: 1
   - name: realestate-mongo
     count: 1
+    
+patches:
+  - path: patches/mongo-pvc.yaml
+    target:
+      kind: PersistentVolumeClaim
+      name: realestate-mongo-pvc
+
