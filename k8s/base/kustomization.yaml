@@ -1,18 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-commonAnnotations:
-  realestate.dev/owner: NinaZyabrina
-  realestate.dev/repo: realestate-portal
+namespace: realestate
 
 resources:
   - namespace.yaml
 
-  - mongo/deployment.yaml
   - mongo/pvc.yaml
   - mongo/service.yaml
   - mongo/statefulset.yaml
 
+  - api/configmap.yaml
   - api/deployment.yaml
   - api/service.yaml
 
@@ -21,5 +19,3 @@ resources:
 
   - frontend/deployment.yaml
   - frontend/service.yaml
-
-  - ingress/ingress.yaml

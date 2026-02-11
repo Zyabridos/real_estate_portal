@@ -3,6 +3,10 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - api/secret.enc.yaml
+  - mongo/secret.enc.yaml
+  - ingress/realestate-ingress.yaml
+  - cert-manager/clusterissuer.yaml
 
 labels:
   - pairs:
@@ -29,3 +33,7 @@ patches:
     target:
       kind: PersistentVolumeClaim
       name: realestate-mongo-pvc
+  - path: patches/api-configmap.yaml
+    target:
+      kind: ConfigMap
+      name: realestate-api-config

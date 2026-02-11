@@ -26,10 +26,37 @@ spec:
           ports:
             - name: mongo
               containerPort: 27017
-
           # listen not only localhost
           args:
             - "--bind_ip_all"
+              
+          envFrom:
+            - secretRef:
+                name: realestate-mongo-secrets
+                
+          readinessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 6
+            
+          livenessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 6
+            
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
 
           volumeMounts:
             - name: mongo-data
@@ -39,18 +66,3 @@ spec:
         - name: mongo-data
           persistentVolumeClaim:
             claimName: realestate-mongo-pvc
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: realestate-mongo-pvc
-  labels:
-    app: realestate-mongo
-spec:
-  accessModes:
-    - ReadWriteOnce
-
-  resources:
-    requests:
-      storage: 1Gi

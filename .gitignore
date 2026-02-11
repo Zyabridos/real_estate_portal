@@ -66,3 +66,15 @@ personal_notes.*
 
 # Typescript
 *.tsbuildinfo
+
+# Kubernetes
+# TODO: remove after secrets are automatically generated in Ansible
+# but consider creating some kind of example-file ?
+k8s/**/secret.yaml
+k8s/**/secrets.yaml
+k8s/**/secret.*.yaml
+k8s/**/secret.enc.yaml
+k8s/**/secret*.enc.yaml
+k8s/**/secret*.sops.yaml
+k8s/**/secret*.sealed.yaml
+/tmp/realestate-*.yaml

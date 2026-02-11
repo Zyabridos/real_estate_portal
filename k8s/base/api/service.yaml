@@ -3,17 +3,11 @@ kind: Service
 metadata:
   name: realestate-api-svc
   namespace: realestate
-  labels:
-    project: realestate
-    app: realestate-api
-    env: local
 spec:
-  type: LoadBalancer
-  # on which PODs will work - to load balance the traffic
+  type: ClusterIP
   selector:
-    app: realestate-api # selecting PODs with these labels
+    app: realestate-api
   ports:
-    - name      : http
-      protocol  : TCP
-      port      : 5001 # Port on load balancer
-      targetPort: 5000 # Port on POD
+    - name: http
+      port: 5000
+      targetPort: 5000

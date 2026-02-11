@@ -38,7 +38,7 @@ spec:
                 port:
                   number: 5001
 
-          - path: /health
+          - path: /api/health
             pathType: Prefix
             backend:
               service:

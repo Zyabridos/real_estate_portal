@@ -1,20 +1,13 @@
 apiVersion: v1
-kind      : Service
+kind: Service
 metadata:
-  name  : realestate-frontend-svc
+  name: realestate-frontend-svc
   namespace: realestate
-  labels:
-    project: realestate
-    app    : realestate-frontend
-    env    : local
 spec:
-  type: LoadBalancer
-  # on which PODs will work - to load balance the traffic
+  type: ClusterIP
   selector:
-    app: realestate-frontend # selecting PODs with these labels
-    project: realestate
+    app: realestate-frontend
   ports:
-    - name      : http
-      protocol  : TCP
-      port      : 3000 # Port on load balancer
-      targetPort: 80   # Port on POD
+    - name: http
+      port: 80
+      targetPort: 80
