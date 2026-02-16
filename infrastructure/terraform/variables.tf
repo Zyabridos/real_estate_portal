@@ -38,7 +38,7 @@ variable "image" {
 }
 
 variable "location" {
-  description = "Hetzner location/region for resources (e.g., hel1, nbg1, fsn1)."
+  description = "Hetzner region for resources (e.g., hel1, nbg1, fsn1)."
   type        = string
   default     = "hel1"
 }
@@ -60,14 +60,8 @@ variable "load_balancer_algorithm" {
   }
 }
 
-variable "load_balancer_certificate_id" {
-  description = "Optional Hetzner certificate ID to enable TLS termination on the Load Balancer."
-  type        = number
-  default     = null
-}
-
 variable "load_balancer_owner_stack" {
-  description = "Which stack owns (creates) the shared Load Balancer and its services. Usually 'blue'."
+  description = "Which stack owns (creates) the shared Load Balancer and its services."
   type        = string
   default     = "blue"
 
@@ -124,7 +118,7 @@ variable "k3s_api_port" {
 }
 
 variable "ssh_allowed_cidrs" {
-  description = "CIDR allowlist for SSH access to servers (tcp/22)"
+  description = "List of CIDR blocks allowed to SSH into servers (tcp/22). Use this to restrict admin access to known IPs."
   type        = list(string)
 
   validation {
@@ -147,7 +141,36 @@ variable "k3s_subnet_ip_range" {
 }
 
 variable "k3s_network_zone" {
-  description = "Hetzner network zone for the k3s private subnet"
+  description = "Hetzner network zone for the k3s private subnet (e.g. eu-central)"
   type        = string
   default     = "eu-central"
+}
+
+variable "enable_green_stack" {
+  description = "When enabled, Terraform creates a second isolated private network/subnet and a separate set of nodes."
+  type        = bool
+  default     = true
+}
+
+variable "k3s_network_ip_range_green" {
+  description = "Private network CIDR for GREEN k3s nodes"
+  type        = string
+  default     = "10.51.0.0/16"
+}
+
+variable "k3s_subnet_ip_range_green" {
+  description = "Private subnet CIDR for GREEN k3s nodes"
+  type        = string
+  default     = "10.51.1.0/24"
+}
+
+variable "k3s_workers_count_green" {
+  description = "Number of GREEN k3s workers (pre-prod). I have limit of 3 servers, so green worker is not enabled yet (1 blue server, 1 blue worker, 1 green server)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.k3s_workers_count_green >= 0
+    error_message = "k3s_workers_count_green must be >= 0."
+  }
 }
