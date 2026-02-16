@@ -30,7 +30,16 @@ Make variables:
 
 
 ## Common workflows
-
+### Prepare variables
+Copy example files (from root directory):
+```bash
+mv ./infrastructure/terraform/terraform.tfvars.example ./infrastructure/terraform/terraform.tfvars
+mv ./infrastructure/terraform/terraform.prod.blue.tfvars.example ./infrastructure/terraform/terraform.prod.blue.tfvars
+mv ./infrastructure/terraform/terraform.prod.blue.tfvars.example ./infrastructure/terraform/terraform.prod.green.tfvars 
+```
+Set correct values:
+- `terraform.tfvars` - shared variables
+- `terraform.prod.blue.tfvars` - special variables (specfied based on eviorment and stack)
 ### Initialize (from root directory `./`)
 ```bash
 make tf-init
