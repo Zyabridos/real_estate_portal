@@ -1,7 +1,6 @@
 # Ansible / Terraform secrets
 .terraform/
 .terraform.lock.hcl
-prod.*.tfvars
 *.tfstate
 *.tfstate.backup
 *.log
@@ -12,8 +11,9 @@ secrets.backend.tfvars
 *.auto.tfvars
 *.auto.tfvars.json
 vault-password
-
-!infrastructure/ansible/roles/app/templates/.env.production.j2
+infrastructure/terraform/terraform.prod.*.tfvars
+!infrastructure/terraform/terraform.prod.*.tfvars.example
+!infrastructure/terraform/terraform.tfvars.example
 
 # Env/Config
 .env
@@ -62,7 +62,7 @@ TestResults
 *.log*
 /coverage
 scripts/.seed/
-personal_notes.*
+.personal_docs
 
 # Typescript
 *.tsbuildinfo
