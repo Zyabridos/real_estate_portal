@@ -30,7 +30,7 @@ onMounted(async () => {
         {{ $t('pages:home.title') }}
       </h1>
       <h2 class="text-xl font-semibold">
-        If automatic deploy works, we will see this text
+        New text for autodeploy test
       </h2>
 
       <p class="mt-2 text-slate-700" role="status" aria-live="polite">
