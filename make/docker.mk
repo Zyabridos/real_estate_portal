@@ -1,5 +1,13 @@
 ENV_FILE ?= .env.development
 
+FRONTEND_IMAGE ?= zyabridos/real_estate_prod_frontend:latest
+BACKEND_IMAGE ?= zyabridos/real_estate_prod_backend:latest
+CMS_IMAGE ?= zyabridos/real_estate_prod_cms:latest
+
+DOCKERFILE_PATH_FRONTEND = ./frontend/Dockerfile.production
+DOCKERFILE_PATH_BACKEND = ./backend/Dockerfile.production
+DOCKERFILE_PATH_CMS = ./cms/Dockerfile 
+
 # Requires variables: CORE_SERVICES, CMS_SERVICE, BACKEND, FRONTEND
 COMPOSE = docker compose --env-file $(ENV_FILE)
 
@@ -74,3 +82,20 @@ sh-backend:
 sh-frontend:
 	@echo "$(GREEN)Opening shell in frontend...$(RESET)"
 	$(COMPOSE) exec $(FRONTEND) sh
+
+# Build and push to Docker Hub Single Services:
+push-frontend:
+	@echo "$(PURPLE)Building frontend image...$(RESET)"
+	docker build -f $(DOCKERFILE_PATH_FRONTEND) -t $(FRONTEND_IMAGE) ./frontend
+	@echo "$(PURPLE)Pushing frontend image to Docker Hub...$(RESET)"
+	docker push $(FRONTEND_IMAGE)
+	
+push-backend:
+	docker build -f $(DOCKERFILE_PATH_BACKEND) -t $(BACKEND_IMAGE) ./backend && \
+	@echo "$(PURPLE)Pushing backend image to Docker Hub...$(RESET)"
+	docker push $(BACKEND_IMAGE)
+
+push-cmsd:
+	docker build -f $(DOCKERFILE_PATH_CMS)e -t $(CMS_IMAGE) ./cms && \
+	@echo "$(PURPLE)Pushing CMS image to Docker Hub...$(RESET)"
+	docker push $(CMS_IMAGE)

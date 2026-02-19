@@ -4,10 +4,9 @@ TERRAFORM_DIR ?= $(INFRA_DIR)/terraform
 ANSIBLE_DIR   ?= $(INFRA_DIR)/ansible
 
 # Tools
-TF                   ?= terraform
-ANSIBLE              ?= ansible
-ANSIBLE_PLAYBOOK_BIN ?= ansible-playbook
-ANSIBLE_PLAYBOOK     ?= playbook.yml
+TF                    ?= terraform
+ANSIBLE               ?= ansible
+ANSIBLE_MAIN_PLAYBOOK ?= playbooks/site.yml
 
 # Env selection
 ENV   ?= prod
@@ -23,7 +22,7 @@ EXTRA_VARS      ?=
 VAULT_PASS_FILE ?= vault-password
 
 # Inventory file (generated)
-ANSIBLE_INVENTORY      ?= inventory.$(TF_WORKSPACE).ini
+ANSIBLE_INVENTORY      ?= inventories/generated/inventory.$(ENV)-$(STACK).ini
 ANSIBLE_INVENTORY_PATH := $(ANSIBLE_DIR)/$(ANSIBLE_INVENTORY)
 
 # SSH helpers
@@ -34,13 +33,8 @@ KNOWN_HOSTS_FILE ?= $(HOME)/.ssh/known_hosts
 INFRA_SSH_USER ?= root
 INFRA_SSH_HOST ?=
 
-# Colors (fallback if not defined in root Makefile)
-RESET ?= \033[0m
-BOLD  ?= \033[1m
-GREEN ?= \033[1;32m
-YELLOW?= \033[1;33m
-RED   ?= \033[1;31m
-BLUE  ?= \033[1;34m
+# K3S 
+K3S_SERVER_IP ?= 89.167.61.6
 
 # Helpers
 define TF_SELECT_WORKSPACE
@@ -53,83 +47,52 @@ test -f "$(ANSIBLE_DIR)/$(VAULT_PASS_FILE)" || \
 ( echo -e "$(RED)Vault password file not found: $(ANSIBLE_DIR)/$(VAULT_PASS_FILE)$(RESET)"; exit 1 )
 endef
 
-# Help
-.PHONY: infra-help
-infra-help:
-	@echo -e "$(BOLD)RealEstate infra commands:$(RESET)"
-	@echo ""
-	@echo -e "$(YELLOW)Deploy:$(RESET)"
-	@echo -e "  $(GREEN)make deploy-blue$(RESET)                - Terraform apply + inventory + known_hosts + ansible (prod-blue)"
-	@echo -e "  $(GREEN)make deploy-green$(RESET)               - Terraform apply + inventory + known_hosts + ansible (prod-green)"
-	@echo ""
-	@echo -e "$(YELLOW)Terraform:$(RESET)"
-	@echo -e "  $(GREEN)make infra-init$(RESET)                 - terraform init"
-	@echo -e "  $(GREEN)make infra-plan$(RESET)                 - terraform plan (workspace: $(TF_WORKSPACE))"
-	@echo -e "  $(GREEN)make infra-apply$(RESET)                - terraform apply"
-	@echo -e "  $(GREEN)make infra-output$(RESET)               - terraform output"
-	@echo -e "  $(GREEN)make infra-fmt$(RESET)                  - terraform fmt"
-	@echo -e "  $(GREEN)make infra-validate$(RESET)             - terraform validate"
-	@echo -e "  $(GREEN)make infra-destroy$(RESET)              - terraform destroy ($(RED)danger!$(RESET))"
-	@echo ""
-	@echo -e "$(YELLOW)Ansible:$(RESET)"
-	@echo -e "  $(GREEN)make infra-inventory$(RESET)            - generate inventory from terraform output"
-	@echo -e "  $(GREEN)make infra-known-hosts$(RESET)          - refresh ~/.ssh/known_hosts from inventory"
-	@echo -e "  $(GREEN)make infra-ansible-ping$(RESET)         - ansible ping (limit: $(ANSIBLE_LIMIT))"
-	@echo -e "  $(GREEN)make infra-ansible-playbook$(RESET)     - run full playbook"
-	@echo -e "  $(GREEN)make infra-ansible-dry-run$(RESET)      - run playbook --check --diff"
-	@echo -e "  $(GREEN)make infra-ansible-deploy$(RESET)       - run playbook with --tags deploy"
-	@echo -e "  $(GREEN)make infra-ssh$(RESET)                  - ssh helper (INFRA_SSH_HOST=...)"
-	@echo ""
-	@echo -e "$(YELLOW)Config:$(RESET)"
-	@echo -e "  $(GREEN)make show-config$(RESET)                - print infra config"
-	@echo ""
-
-infra-init:
+tf-init:
 	@echo -e "$(BLUE)▶ Terraform init ($(TERRAFORM_DIR))$(RESET)"
 	@$(TF) -chdir=$(TERRAFORM_DIR) init
 
-infra-fmt:
-	@echo -e "$(BLUE)▶ Terraform fmt ($(TERRAFORM_DIR))$(RESET)"
+tf-format:
+	@echo -e "$(BLUE)▶ Terraform formatting (pretty-print) ($(TERRAFORM_DIR))$(RESET)"
 	@$(TF) -chdir=$(TERRAFORM_DIR) fmt -recursive
 
-infra-validate:
+tf-validate:
 	@echo -e "$(BLUE)▶ Terraform validate ($(TERRAFORM_DIR))$(RESET)"
 	@$(TF) -chdir=$(TERRAFORM_DIR) validate
 
-infra-plan:
+tf-plan:
 	@echo -e "$(BLUE)▶ Terraform plan (workspace: $(TF_WORKSPACE), tfvars: $(TFVARS_PATH))$(RESET)"
 	@$(TF_SELECT_WORKSPACE)
 	@$(TF) -chdir=$(TERRAFORM_DIR) plan -var-file="$(TFVARS_PATH)"
 
-infra-apply:
+tf-apply:
 	@echo -e "$(BLUE)▶ Terraform apply (workspace: $(TF_WORKSPACE), tfvars: $(TFVARS_PATH))$(RESET)"
 	@$(TF_SELECT_WORKSPACE)
 	@echo -e "  $(YELLOW)workspace:$(RESET) $$($(TF) -chdir=$(TERRAFORM_DIR) workspace show)"
 	@$(TF) -chdir=$(TERRAFORM_DIR) apply -auto-approve -var-file="$(TFVARS_PATH)"
 
-infra-destroy:
+tf-destroy:
 	@echo -e "$(BLUE)▶ Terraform destroy (workspace: $(TF_WORKSPACE), tfvars: $(TFVARS_PATH))$(RESET)"
 	@$(TF_SELECT_WORKSPACE)
 	@$(TF) -chdir=$(TERRAFORM_DIR) destroy -auto-approve -var-file="$(TFVARS_PATH)"
 
-infra-output:
+tf-output:
 	@echo -e "$(BLUE)▶ Terraform output (workspace: $(TF_WORKSPACE))$(RESET)"
 	@$(TF_SELECT_WORKSPACE)
 	@$(TF) -chdir=$(TERRAFORM_DIR) output
 
 # Inventory generation
-.PHONY: infra-inventory infra-known-hosts
+.PHONY: ansible-inventory ansible-known-hosts
 
-infra-inventory:
+ansible-inventory:
 	@echo -e "$(BLUE)▶ Generate Ansible inventory from Terraform output (workspace: $(TF_WORKSPACE))$(RESET)"
 	@$(TF_SELECT_WORKSPACE)
-	@mkdir -p "$(ANSIBLE_DIR)"
+	@mkdir -p "$(ANSIBLE_DIR)/inventories/generated"
 	@$(TF) -chdir="$(TERRAFORM_DIR)" output -raw ansible_inventory_ini > "$(ANSIBLE_INVENTORY_PATH)"
 	@test -s "$(ANSIBLE_INVENTORY_PATH)" || (echo -e "$(RED)Inventory file is empty. Terraform output ansible_inventory_ini is missing/empty.$(RESET)"; exit 1)
 	@echo -e "$(GREEN)✔ wrote:$(RESET) $(ANSIBLE_INVENTORY_PATH)"
 	@sed -n '1,120p' "$(ANSIBLE_INVENTORY_PATH)"
 
-infra-known-hosts: infra-inventory
+ansible-known-hosts: ansible-inventory
 	@echo -e "$(BLUE)▶ Update SSH known_hosts from inventory ($(ANSIBLE_INVENTORY))$(RESET)"
 	@mkdir -p "$(HOME)/.ssh"
 	@chmod 700 "$(HOME)/.ssh"
@@ -144,46 +107,47 @@ infra-known-hosts: infra-inventory
 	done
 
 # Ansible
-.PHONY: infra-ansible-ping infra-ansible-playbook infra-ansible-dry-run infra-ansible-deploy
+.PHONY: ansible-ping ansible-playbook ansible-show-diff ansible-deploy
 
-infra-ansible-ping: infra-known-hosts
+ansible-ping: ansible-known-hosts
 	@echo -e "$(BLUE)▶ Ansible ping (limit: $(ANSIBLE_LIMIT))$(RESET)"
 	@cd "$(ANSIBLE_DIR)" && \
 	$(ANSIBLE) -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_LIMIT)" -m ping
 
-infra-ansible-playbook: infra-known-hosts
+ansible-playbook: ansible-known-hosts
 	@echo -e "$(BLUE)▶ Ansible playbook (workspace: $(TF_WORKSPACE), limit: $(ANSIBLE_LIMIT))$(RESET)"
 	@$(ensure_vault)
 	@cd "$(ANSIBLE_DIR)" && \
-	$(ANSIBLE_PLAYBOOK_BIN) -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_PLAYBOOK)" \
+	ansible-playbook -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_MAIN_PLAYBOOK)" \
 		--limit "$(ANSIBLE_LIMIT)" \
 		$(if $(EXTRA_VARS),-e "$(EXTRA_VARS)",) \
 		--vault-password-file "$(VAULT_PASS_FILE)"
 
-infra-ansible-dry-run: infra-known-hosts
+ansible-show-diff: ansible-known-hosts
 	@echo -e "$(BLUE)▶ Ansible dry-run (workspace: $(TF_WORKSPACE), limit: $(ANSIBLE_LIMIT))$(RESET)"
 	@$(ensure_vault)
 	@cd "$(ANSIBLE_DIR)" && \
-	$(ANSIBLE_PLAYBOOK_BIN) -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_PLAYBOOK)" \
+	ansible-playbook -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_MAIN_PLAYBOOK)" \
 		--check --diff \
 		--limit "$(ANSIBLE_LIMIT)" \
 		$(if $(EXTRA_VARS),-e "$(EXTRA_VARS)",) \
 		--vault-password-file "$(VAULT_PASS_FILE)"
 
-infra-ansible-deploy: infra-known-hosts
-	@echo -e "$(BLUE)▶ Ansible deploy (tags=deploy) (workspace: $(TF_WORKSPACE), limit: $(ANSIBLE_LIMIT))$(RESET)"
-	@$(ensure_vault)
-	@cd "$(ANSIBLE_DIR)" && \
-	$(ANSIBLE_PLAYBOOK_BIN) -i "$(ANSIBLE_INVENTORY)" "$(ANSIBLE_PLAYBOOK)" \
-		--tags deploy \
-		--limit "$(ANSIBLE_LIMIT)" \
-		$(if $(EXTRA_VARS),-e "$(EXTRA_VARS)",) \
-		--vault-password-file "$(VAULT_PASS_FILE)"
+# Deploy app
+.PHONY: deploy-app
+deploy-app: ansible-inventory ansible-known-hosts ansible-playbook
+	@echo -e "$(GREEN)App deploy done: workspace=$(TF_WORKSPACE)$(RESET)"
 
-# One-command deploy
+deploy-app-blue:
+	@$(MAKE) deploy-app ENV=prod STACK=blue EXTRA_VARS='env=prod stack_id=blue'
+
+deploy-app-green:
+	@$(MAKE) deploy-app ENV=prod STACK=green EXTRA_VARS='env=prod stack_id=green'
+
+# One-command deploy (terraform + ansible) - I might delete servers at some point, so nice to have
 .PHONY: deploy deploy-blue deploy-green
 
-deploy: infra-init infra-apply infra-inventory infra-known-hosts infra-ansible-playbook
+deploy: tf-init tf-apply deploy-app
 	@echo -e "$(GREEN)Deploy done: workspace=$(TF_WORKSPACE)$(RESET)"
 
 deploy-blue:
@@ -193,24 +157,46 @@ deploy-green:
 	@$(MAKE) deploy ENV=prod STACK=green
 
 # Debug / SSH
-.PHONY: show-config infra-ssh
+.PHONY: show-infra-config infra-ssh
 
-show-config:
+show-infra-config:
 	@echo -e "$(BOLD)ENV$(RESET)=$(ENV)"
 	@echo -e "$(BOLD)STACK$(RESET)=$(STACK)"
 	@echo -e "$(BOLD)TF_WORKSPACE$(RESET)=$(TF_WORKSPACE)"
 	@echo -e "$(BOLD)TFVARS$(RESET)=$(TFVARS)"
 	@echo -e "$(BOLD)TFVARS_PATH$(RESET)=$(TFVARS_PATH)"
 	@echo -e "$(BOLD)ANSIBLE_DIR$(RESET)=$(ANSIBLE_DIR)"
-	@echo -e "$(BOLD)ANSIBLE_PLAYBOOK$(RESET)=$(ANSIBLE_PLAYBOOK)"
+	@echo -e "$(BOLD)ANSIBLE_MAIN_PLAYBOOK$(RESET)=$(ANSIBLE_MAIN_PLAYBOOK)"
 	@echo -e "$(BOLD)ANSIBLE_INVENTORY$(RESET)=$(ANSIBLE_INVENTORY)"
 	@echo -e "$(BOLD)ANSIBLE_INVENTORY_PATH$(RESET)=$(ANSIBLE_INVENTORY_PATH)"
 	@echo -e "$(BOLD)ANSIBLE_LIMIT$(RESET)=$(ANSIBLE_LIMIT)"
 	@echo -e "$(BOLD)VAULT_PASS_FILE$(RESET)=$(VAULT_PASS_FILE)"
 	@echo -e "$(BOLD)INFRA_SSH_USER$(RESET)=$(INFRA_SSH_USER)"
 	@echo -e "$(BOLD)INFRA_SSH_HOST$(RESET)=$(INFRA_SSH_HOST)"
+	@echo -e "$(BOLD)K3S_SERVER_IP$(RESET)=$(K3S_SERVER_IP)"
 
 infra-ssh:
 	@test -n "$(INFRA_SSH_HOST)" || (echo -e "$(RED)Set INFRA_SSH_HOST=<ip>$(RESET)"; exit 1)
 	@echo -e "$(BLUE)▶ SSH:$(RESET) $(INFRA_SSH_USER)@$(INFRA_SSH_HOST)"
 	@ssh "$(INFRA_SSH_USER)@$(INFRA_SSH_HOST)"
+
+# --- Kubernetes / k3s helpers ---
+
+.PHONY: k8s-ingress-debug k8s-traefik-remove
+
+k8s-ingress-debug: ## Debug ingress port conflicts on k3s server (checks 80/443 and common ingress pods - i.e. Traefik headache)
+	@ssh root@$(K3S_SERVER_IP) "ss -lntp | egrep ':80|:443' || true"
+	@ssh root@$(K3S_SERVER_IP) "kubectl -n kube-system get pods | egrep 'traefik|caddy|nginx' || true"
+
+k8s-ingress-status: ## Show ingress-nginx status: nodes, ds/pods/events (I used this command a couple of times when controller was "Pending")
+	@ssh root@$(K3S_SERVER_IP) "kubectl get nodes -o wide || true"
+	@ssh root@$(K3S_SERVER_IP) "kubectl -n ingress-nginx get ds,deploy,svc,pods -o wide 2>/dev/null || true"
+	@ssh root@$(K3S_SERVER_IP) "kubectl -n ingress-nginx get events --sort-by=.metadata.creationTimestamp 2>/dev/null | tail -n 40 || true"
+
+k8s-traefik-remove: ## Remove default k3s Traefik (i.e. Traefik headache)
+	@ssh root@$(K3S_SERVER_IP) "\
+		kubectl -n kube-system delete helmchart traefik --ignore-not-found; \
+		kubectl -n kube-system delete helmchartconfig traefik --ignore-not-found || true; \
+		rm -f /var/lib/rancher/k3s/server/manifests/traefik.yaml /var/lib/rancher/k3s/server/manifests/traefik-config.yaml; \
+		systemctl restart k3s \
+	"

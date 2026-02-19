@@ -15,72 +15,57 @@ K8S_LOG_TAIL      ?= 200
 K8S_TIMEOUT       ?= 300
 
 # Ingress / hosts (smoke)
+API_HEALTH_PATH ?= /api/health
+
 DEV_FRONT_HOST    ?= localhost
 DEV_CMS_HOST      ?= cms.localhost
 
 PROD_FRONT_HOST   ?= www.realestateproject.casa
 PROD_CMS_HOST     ?= cms.realestateproject.casa
 
-# Ports (for port-forwarding)
-API_PORT          ?= 5000
-FRONT_PORT        ?= 80
-CMS_PORT          ?= 80
-MONGO_PORT        ?= 27017
+# -----------------------------
+# k3d cluster ports / mappings
+K3D_SERVERS            ?= 1
+K3D_AGENTS             ?= 1
+K3D_API_HOST_PORT      ?= 6550
 
-help-k8s:
-	@echo -e "$(BOLD)RealEstate Kubernetes commands (k3d + kustomize)$(RESET)"
-	@echo -e ""
-	@echo -e "$(YELLOW)Config:$(RESET)"
-	@echo -e "  $(GREEN)K8S_ENV$(RESET)=$(K8S_ENV)           - overlay to use (dev|prod). Override: $(GREEN)make k8s-apply K8S_ENV=prod$(RESET)"
-	@echo -e "  $(GREEN)K3D_CLUSTER$(RESET)=$(K3D_CLUSTER)   - k3d cluster name"
-	@echo -e "  $(GREEN)K8S_NS$(RESET)=$(K8S_NS)             - kubernetes namespace"
-	@echo -e ""
+K3D_LB_HTTP_HOST_PORT  ?= 80
+K3D_LB_HTTPS_HOST_PORT ?= 443
+K3D_LB_HTTP_CLUSTER_PORT  ?= 80
+K3D_LB_HTTPS_CLUSTER_PORT ?= 443
 
-	@echo -e "$(YELLOW)Cluster:$(RESET)"
-	@echo -e "  $(GREEN)make k8s-up$(RESET)                  - create k3d cluster (traefik disabled), set kubectl context + namespace"
-	@echo -e "  $(GREEN)make k8s-down$(RESET)                - delete k3d cluster"
-	@echo -e "  $(GREEN)make k8s-context$(RESET)             - set kubectl context + namespace"
-	@echo -e ""
+# k3s args
+K3D_K3S_ARGS ?= --k3s-arg "--disable=traefik@server:*"
 
-	@echo -e "$(YELLOW)Kustomize (overlay=$(K8S_ENV)):$(RESET)"
-	@echo -e "  $(GREEN)make k8s-build$(RESET)               - render overlay to /tmp/realestate-$(K8S_ENV).yaml"
-	@echo -e "  $(GREEN)make k8s-validate$(RESET)            - kubectl apply --dry-run=client"
-	@echo -e "  $(GREEN)make k8s-apply$(RESET)               - apply overlay"
-	@echo -e "  $(GREEN)make k8s-delete$(RESET)              - delete overlay"
-	@echo -e "  $(GREEN)make k8s-reset$(RESET)               - delete + apply + wait + urls (current overlay)"
-	@echo -e "  $(GREEN)make k8s-reset-dev$(RESET)           - reset dev overlay"
-	@echo -e "  $(GREEN)make k8s-reset-prod$(RESET)          - reset prod overlay"
-	@echo -e ""
+# -----------------------------
+# Ingress local port (for smoke via localhost)
+K8S_INGRESS_LOCAL_HTTP_PORT ?= $(K3D_LB_HTTP_HOST_PORT)
 
-	@echo -e "$(YELLOW)Logs:$(RESET)"
-	@echo -e "  $(GREEN)make k8s-logs-api$(RESET)            - tail API logs"
-	@echo -e "  $(GREEN)make k8s-logs-frontend$(RESET)       - tail frontend logs"
-	@echo -e "  $(GREEN)make k8s-logs-cms$(RESET)            - tail cms logs"
-	@echo -e "  $(GREEN)make k8s-logs-mongo$(RESET)          - tail mongo logs"
-	@echo -e "  $(GREEN)make k8s-logs$(RESET)		         - tail all logs above"
-	@echo -e ""
+# -----------------------------
+# Service ports (inside cluster) - do not forget to change if these will be changed in Service manifests (I might...)
+K8S_SVC_API_PORT     ?= 5000
+K8S_SVC_FRONT_PORT   ?= 80
+K8S_SVC_CMS_PORT     ?= 80
+K8S_SVC_MONGO_PORT   ?= 27017
 
-	@echo -e "$(YELLOW)Port-forward:$(RESET)"
-	@echo -e "  $(GREEN)make k8s-pf-api$(RESET)              - http://localhost:$(API_PORT)/api/health"
-	@echo -e "  $(GREEN)make k8s-pf-frontend$(RESET)         - http://localhost:8080"
-	@echo -e "  $(GREEN)make k8s-pf-cms$(RESET)              - http://localhost:3333"
-	@echo -e "  $(GREEN)make k8s-pf-mongo$(RESET)            - mongodb://localhost:$(MONGO_PORT)"
-	@echo -e ""
+# -----------------------------
+# Port-forward local ports
+K8S_PF_API_LOCAL_PORT    ?= 5000
+K8S_PF_FRONT_LOCAL_PORT  ?= 8080
+K8S_PF_CMS_LOCAL_PORT    ?= 3333
+K8S_PF_MONGO_LOCAL_PORT  ?= 27017
 
-	@echo -e "$(YELLOW)Smoke:$(RESET)"
-	@echo -e "  $(GREEN)make k8s-smoke-dev$(RESET)           - smoke test dev routing (Host headers)"
-	@echo -e "  $(GREEN)make k8s-smoke-prod$(RESET)          - smoke test prod routing (Host headers, local)"
-
-k8s-use-ns:
+k8s-set-ns:
 	kubectl config set-context --current --namespace=$(K8S_NS)
 
 # -----------------------------
-# Cluster lifecycle (local playground)
+# Cluster lifecycle
 k8s-up:
 	@echo "$(BLUE)Creating k3d cluster: $(K3D_CLUSTER)$(RESET)\n"
-	k3d cluster create $(K3D_CLUSTER) --servers 1 --agents 1 --api-port 6550 \
-		-p "80:80@loadbalancer" -p "443:443@loadbalancer" \
-		--k3s-arg "--disable=traefik@server:*"
+	k3d cluster create $(K3D_CLUSTER) --servers $(K3D_SERVERS) --agents $(K3D_AGENTS) --api-port $(K3D_API_HOST_PORT) \
+		-p "$(K3D_LB_HTTP_HOST_PORT):$(K3D_LB_HTTP_CLUSTER_PORT)@loadbalancer" \
+		-p "$(K3D_LB_HTTPS_HOST_PORT):$(K3D_LB_HTTPS_CLUSTER_PORT)@loadbalancer" \
+		$(K3D_K3S_ARGS)
 	$(MAKE) k8s-context
 	@echo "$(GREEN)Cluster ready$(RESET)\n"
 
@@ -90,7 +75,6 @@ k8s-down:
 
 # -----
 # Build / validate (kustomize)
-
 k8s-build:
 	@echo "$(BLUE)Building kustomize overlay: $(K8S_KUSTOMIZE_DIR)$(RESET)\n"
 	kubectl kustomize $(K8S_KUSTOMIZE_DIR) > /tmp/realestate-$(K8S_ENV).yaml
@@ -102,8 +86,7 @@ k8s-validate:
 	kubectl apply -k $(K8S_KUSTOMIZE_DIR) --dry-run=client
 
 # -----
-# Apply / delete / reset
-
+# Apply / delete / reset... yeah, I am that lazy sometimes..
 k8s-apply:
 	@echo "$(BLUE)Applying overlay: $(K8S_ENV)$(RESET)\n"
 	kubectl apply -k $(K8S_KUSTOMIZE_DIR)
@@ -127,8 +110,7 @@ k8s-reset-prod:
 	$(MAKE) k8s-reset K8S_ENV=prod
 
 # -----
-# Wait (helper used in some make-commands)
-
+# Wait
 k8s-wait-frontend:
 	kubectl -n $(K8S_NS) rollout status deploy/realestate-frontend --timeout=$(K8S_TIMEOUT)s
 
@@ -157,46 +139,55 @@ k8s-logs-cms:
 k8s-logs-mongo:
 	kubectl logs -l app=realestate-mongo --tail=$(K8S_LOG_TAIL) -f
 
-k8s-logs: k8s-logs-api k8s-logs-frontend k8s-logs-mongo k8s-logs-cms 
+k8s-logs: k8s-logs-api k8s-logs-frontend k8s-logs-mongo k8s-logs-cms
 
 # -----
 # Port-forward
 k8s-pf-api:
-	@echo "$(YELLOW)API -> http://localhost:$(API_PORT) (Ctrl+C to stop)$(RESET)\n"
-	kubectl port-forward svc/realestate-api-svc $(API_PORT):$(API_PORT)
+	@echo "$(YELLOW)API -> http://localhost:$(K8S_PF_API_LOCAL_PORT) $(RESET)\n"
+	kubectl port-forward svc/realestate-api-svc $(K8S_PF_API_LOCAL_PORT):$(K8S_SVC_API_PORT)
 
 k8s-pf-frontend:
-	@echo "$(YELLOW)Frontend -> http://localhost:8080 (Ctrl+C to stop)$(RESET)\n"
-	kubectl port-forward svc/realestate-frontend-svc 8080:80
+	@echo "$(YELLOW)Frontend -> http://localhost:$(K8S_PF_FRONT_LOCAL_PORT) $(RESET)\n"
+	kubectl port-forward svc/realestate-frontend-svc $(K8S_PF_FRONT_LOCAL_PORT):$(K8S_SVC_FRONT_PORT)
 
 k8s-pf-cms:
-	@echo "$(YELLOW)CMS -> http://localhost:3333 (Ctrl+C to stop)$(RESET)\n"
-	kubectl port-forward svc/realestate-cms-svc 3333:80
+	@echo "$(YELLOW)CMS -> http://localhost:$(K8S_PF_CMS_LOCAL_PORT) $(RESET)\n"
+	kubectl port-forward svc/realestate-cms-svc $(K8S_PF_CMS_LOCAL_PORT):$(K8S_SVC_CMS_PORT)
 
 k8s-pf-mongo:
-	@echo "$(YELLOW)Mongo -> localhost:27017 (Ctrl+C to stop)$(RESET)\n"
-	kubectl port-forward svc/realestate-mongo $(MONGO_PORT):$(MONGO_PORT)
+	@echo "$(YELLOW)Mongo -> mongodb://localhost:$(K8S_PF_MONGO_LOCAL_PORT) $(RESET)\n"
+	kubectl port-forward svc/realestate-mongo $(K8S_PF_MONGO_LOCAL_PORT):$(K8S_SVC_MONGO_PORT)
 
-# -----
-# Smoke tests
-k8s-smoke-dev:
-	@set -e; \
-	echo -e "$(YELLOW) DEV SMOKE K8S (ingress) ==$(RESET)"; \
-	echo -e "$(BLUE)-- Front (Host: $(DEV_FRONT_HOST)) --$(RESET)"; \
-	curl -fsS -I http://localhost/ -H "Host: $(DEV_FRONT_HOST)" | head -n 8 || { echo -e "$(RED)FAILED: Frontend (dev)$(RESET)"; exit 1; }; \
-	echo -e "$(BLUE)-- API (Host: $(DEV_FRONT_HOST)) --$(RESET)"; \
-	curl -fsS -I http://localhost/api/health -H "Host: $(DEV_FRONT_HOST)" | head -n 8 || { echo -e "$(RED)FAILED: API /api/health (dev)$(RESET)"; exit 1; }; \
-	echo -e "$(BLUE)-- CMS (Host: $(DEV_CMS_HOST)) --$(RESET)"; \
-	curl -fsS -I http://localhost/ -H "Host: $(DEV_CMS_HOST)" | head -n 8 || { echo -e "$(RED)FAILED: CMS (dev)$(RESET)"; exit 1; }; \
-	echo -e "$(GREEN)OK$(RESET)"
-
-k8s-smoke-prod:
-	@set -e; \
-	echo -e "$(YELLOW) PROD SMOKE K8S (host headers, local) ==$(RESET)"; \
-	echo -e "$(BLUE)-- Front (Host: $(PROD_FRONT_HOST)) --$(RESET)"; \
-	curl -fsS -I http://localhost/ -H "Host: $(PROD_FRONT_HOST)" | head -n 8 || { echo -e "$(RED)FAILED: Frontend (prod host)$(RESET)"; exit 1; }; \
-	echo -e "$(BLUE)-- API (Host: $(PROD_FRONT_HOST)) --$(RESET)"; \
-	curl -fsS -I http://localhost/api/health -H "Host: $(PROD_FRONT_HOST)" | head -n 8 || { echo -e "$(RED)FAILED: API /api/health (prod host)$(RESET)"; exit 1; }; \
-	echo -e "$(BLUE)-- CMS (Host: $(PROD_CMS_HOST)) --$(RESET)"; \
-	curl -fsS -I http://localhost/ -H "Host: $(PROD_CMS_HOST)" | head -n 8 || { echo -e "$(RED)FAILED: CMS (prod host)$(RESET)"; exit 1; }; \
-	echo -e "$(GREEN)OK$(RESET)"
+show-k8s-config:
+	@echo -e "$(BOLD)K3D_CLUSTER$(RESET)=$(K3D_CLUSTER)"
+	@echo -e "$(BOLD)K8S_NS$(RESET)=$(K8S_NS)"
+	@echo -e "$(BOLD)K8S_DIR$(RESET)=$(K8S_DIR)"
+	@echo -e "$(BOLD)K8S_BASE$(RESET)=$(K8S_BASE)"
+	@echo -e "$(BOLD)K8S_OVERLAYS$(RESET)=$(K8S_OVERLAYS)"
+	@echo -e "$(BOLD)K8S_ENV$(RESET)=$(K8S_ENV)"
+	@echo -e "$(BOLD)K8S_KUSTOMIZE_DIR$(RESET)=$(K8S_KUSTOMIZE_DIR)"
+	@echo -e "$(BOLD)K8S_LOG_TAIL$(RESET)=$(K8S_LOG_TAIL)"
+	@echo -e "$(BOLD)K8S_TIMEOUT$(RESET)=$(K8S_TIMEOUT)"
+	@echo -e "$(BOLD)API_HEALTH_PATH$(RESET)=$(API_HEALTH_PATH)"
+	@echo -e "$(BOLD)DEV_FRONT_HOST$(RESET)=$(DEV_FRONT_HOST)"
+	@echo -e "$(BOLD)DEV_CMS_HOST$(RESET)=$(DEV_CMS_HOST)"
+	@echo -e "$(BOLD)PROD_FRONT_HOST$(RESET)=$(PROD_FRONT_HOST)"
+	@echo -e "$(BOLD)PROD_CMS_HOST$(RESET)=$(PROD_CMS_HOST)"
+	@echo -e "$(BOLD)K3D_SERVERS$(RESET)=$(K3D_SERVERS)"
+	@echo -e "$(BOLD)K3D_AGENTS$(RESET)=$(K3D_AGENTS)"
+	@echo -e "$(BOLD)K3D_API_HOST_PORT$(RESET)=$(K3D_API_HOST_PORT)"
+	@echo -e "$(BOLD)K3D_LB_HTTP_HOST_PORT$(RESET)=$(K3D_LB_HTTP_HOST_PORT)"
+	@echo -e "$(BOLD)K3D_LB_HTTPS_HOST_PORT$(RESET)=$(K3D_LB_HTTPS_HOST_PORT)"
+	@echo -e "$(BOLD)K3D_LB_HTTP_CLUSTER_PORT$(RESET)=$(K3D_LB_HTTP_CLUSTER_PORT)"
+	@echo -e "$(BOLD)K3D_LB_HTTPS_CLUSTER_PORT$(RESET)=$(K3D_LB_HTTPS_CLUSTER_PORT)"
+	@echo -e "$(BOLD)K3D_K3S_ARGS$(RESET)=$(K3D_K3S_ARGS)"
+	@echo -e "$(BOLD)K8S_INGRESS_LOCAL_HTTP_PORT$(RESET)=$(K8S_INGRESS_LOCAL_HTTP_PORT)"
+	@echo -e "$(BOLD)K8S_SVC_API_PORT$(RESET)=$(K8S_SVC_API_PORT)"
+	@echo -e "$(BOLD)K8S_SVC_FRONT_PORT$(RESET)=$(K8S_SVC_FRONT_PORT)"
+	@echo -e "$(BOLD)K8S_SVC_CMS_PORT$(RESET)=$(K8S_SVC_CMS_PORT)"
+	@echo -e "$(BOLD)K8S_SVC_MONGO_PORT$(RESET)=$(K8S_SVC_MONGO_PORT)"
+	@echo -e "$(BOLD)K8S_PF_API_LOCAL_PORT$(RESET)=$(K8S_PF_API_LOCAL_PORT)"
+	@echo -e "$(BOLD)K8S_PF_FRONT_LOCAL_PORT$(RESET)=$(K8S_PF_FRONT_LOCAL_PORT)"
+	@echo -e "$(BOLD)K8S_PF_CMS_LOCAL_PORT$(RESET)=$(K8S_PF_CMS_LOCAL_PORT)"
+	@echo -e "$(BOLD)K8S_PF_MONGO_LOCAL_PORT$(RESET)=$(K8S_PF_MONGO_LOCAL_PORT)"
