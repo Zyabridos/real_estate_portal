@@ -1,124 +1,128 @@
-# Kubernetes 
-# Kubernetes
+# RealEstate Kubernetes Manifests (kustomize) — Blue/Green Ready
 
-This folder contains a minimal Kubernetes setup for the RealEstate Portal.
-It is intended for local development with **k3d** and provides a clean baseline for a future production setup.
+This folder contains Kubernetes manifests for the RealEstate Portal.
+Manifests are managed via **kustomize** with:
+- `base/` — common resources
+- `overlays/` — environment-specific patches and secrets
+- The secrets are located in Ansible`s vault
 
-All application resources are deployed into the `realestate` namespace.
-Networking is available via direct ports (debug) and optionally via an **NGINX Ingress Controller**.
+This repo supports **Blue/Green deployment** using dedicated overlays:
+- `overlays/prod-blue`
+- `overlays/prod-green`
 
-## Project structure
-**Note:** I am learning by doing, so the structure is not final. It probably will change a lot, but one step at the time.
-- `k8s/namespace.yaml` — `realestate` namespace definition
-- `k8s/mongo/` — MongoDB deployment + service
-- `k8s/api/` — API deployment + service (+ HPA)
-- `k8s/frontend/` — Frontend deployment + service (+ HPA)
-- `k8s/cms/` — Sanity deployment + service (+ HPA)
-- `k8s/ingress/` — local ingress rules (optional)
+A typical production flow:
+1) Deploy the new version to **green**
+2) Verify health
+3) Switch traffic to green
+4) Deploy the same version to **blue** (or keep as fallback)
 
-Each `deployment.yaml` typically includes:
-- `Deployment`
-- `HorizontalPodAutoscaler` (HPA)
 
-## Prerequisites
-- k3d
+## Folder structure
+- `base/`
+    - `namespace.yaml` — `realestate` namespace
+    - `api/` — deployment, service, configmap
+    - `frontend/` — deployment, service
+    - `cms/` — deployment, service
+    - `mongo/` — stateful resources (service + storage)
+    - `ingress/ingress.yaml` — base ingress definition (optional, mostly overridden in overlays)
+    - `kustomization.yaml`
+- `overlays/`
+    - `dev/` — local/dev settings + plaintext secrets
+    - `prod/` — production defaults + encrypted secrets references
+    - `prod-blue/` — selects prod config but targets BLUE stack
+    - `prod-green/` — selects prod config but targets GREEN stack
+
+
+## Prerequisites (local)
 - kubectl
-- Docker
+- kustomize (or `kubectl apply -k`)
+- Docker + k3d (for local cluster)
+- Make targets from repository root
 
-## Make targets
-All commands are defined in `make/k8s.mk`.
 
-## Start from scratch (highly recommended)
+## Local: bring up Kubernetes from scratch (k3d)
+From repository root:
 
-### 1) Create the k3d cluster
-
+### 1) Create cluster
 ```bash
 make k8s-up
+make k8s-context
 ```
-This creates cluster realestate and exposes ports:
-
-3000, 5001, 3333 on the k3d load balancer.
-
-### 2) Apply namespace
+### 2) Validate manifests (dry-run)
 ```bash
-kubectl apply -f k8s/namespace.yaml
+make k8s-validate
 ```
-
-### 3) Apply manifests
+### 3) Apply dev overlay
 ```bash
-make k8s-apply
+make k8s-reset-dev
 ```
-### 4) Wait until everything is ready
-```bash
-make k8s-wait-all
-```
-### 5) Check status
+### 4) Check status and URLs
 ```bash
 make k8s-status
 make k8s-urls
 ```
-## Verify locally
-### Ingress (recommended)
-```md
-- Frontend: http://localhost/
-- API health: curl -i http://localhost/api/health
-- CMS: http://cms.localdev.me/ (or http://cms.localhost/)
-```
-### Direct ports (debug)
-```md
-- Frontend: http://localhost:3000
-- API health: curl -i http://localhost:5001/api/health
-- CMS: http://localhost:3333
-```
-**Seeding data**
-
-MongoDB is ephemeral in this setup.
-If you recreate the cluster, you must seed again.
-
-Seed brokers + properties into the API:
-
-```bash
-BACKEND_URL=http://localhost:5001 make seed-brokers
-BACKEND_URL=http://localhost:5001 make seed-properties
-````
-Check that there is some data. For example, send request to:
-```bash
-curl -i "http://localhost:5001/api/properties?page=1&pageSize=5"
-```
-### CMS
-Open:
-```
-http://localhost:3333
-```
-
-## Logs & debugging
-API logs:
+### 5) Logs (optional)
 ```bash
 make k8s-logs-api
-```
-Mongo logs:
-```bash
+make k8s-logs-frontend
+make k8s-logs-cms
 make k8s-logs-mongo
 ```
-Cluster resources:
+### Production: deploy via Make (recommended)
+Production deploy is orchestrated via Terraform + Ansible (not manual kubectl).
+
+From repository root:
+
+### Full infra + app deploy (BLUE)
 ```bash
-make k8s-status
-kubectl get all -l project=realestate
+make deploy-blue
 ```
-
-### Ingress (optional)
-
-This setup uses **NGINX Ingress Controller** for local HTTP routing:
-
-- `/` → frontend service
-- `/api` and `/health` → API service
-- `cms.localhost` → Sanity Studio
-
- Install **ingress-nginx** in your cluster. [Quick Start](https://kubernetes.github.io/ingress-nginx/deploy/#quick-start)
-
-Apply ingress rules:
-
+App-only redeploy (BLUE)
 ```bash
-kubectl apply -f k8s/ingress/ingress.yaml
-kubectl get ingress
+make deploy-app-blue
 ```
+Same for green:
+```bash
+make deploy-green
+make deploy-app-green
+```
+### Verifying what is actually deployed (recommended)
+When “deploy succeeded but UI didn’t change”, verify the live HTML from inside the cluster:
+
+### Example: BLUE cluster port-forward (frontend)
+```bash
+kubectl --kubeconfig .kube/realestate-prod-blue.yaml -n realestate \
+  port-forward svc/realestate-frontend-svc 18080:80
+  
+curl -s http://127.0.0.1:18080 | grep -n "New text for autodeploy test" || true
+```
+This avoids confusion with:
+- load balancer routing to the other stack
+- DNS propagation
+- browser cache
+
+## Common issues (based on real incidents)
+
+### 1) You updated BLUE but you are still seeing GREEN
+If traffic switching is external (LB / DNS), you can deploy blue successfully but users still hit green.
+Always verify:
+
+- port-forward inside the stack
+- or expose a stack-specific header in ingress for debugging
+
+### 2) Secrets format mismatch (dev vs prod)
+- `overlays/dev` uses plaintext secrets (simple local usage)
+- `overlays/prod` uses encrypted/managed secrets (vaulted in Ansible)
+
+If kustomize fails to build:
+
+- check that the overlay expects a secret file that exists (e.g. `secret.yaml` vs `secret.enc.yaml`)
+- confirm Ansible renders or applies the prod secrets correctly
+
+### 3) Ingress does not work / ports conflict
+k3s may ship Traefik and it can conflict with ingress-nginx.
+Fix:
+
+- disable Traefik in k3s
+- verify ports 80/443 are free
+- confirm ingress-nginx service is LoadBalancer where expected
