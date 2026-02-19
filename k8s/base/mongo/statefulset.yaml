@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: realestate-mongo
+  namespace: realestate
+  labels:
+    app: realestate-mongo
+spec:
+  serviceName: realestate-mongo-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realestate-mongo
+  template:
+    metadata:
+      labels:
+        app: realestate-mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mongo
+              containerPort: 27017
+          args:
+            - "--bind_ip_all"
+          envFrom:
+            - secretRef:
+                name: realestate-mongo-secrets
+
+          readinessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 6
+
+          livenessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+        labels:
+          app: realestate-mongo
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

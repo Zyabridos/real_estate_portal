@@ -42,21 +42,39 @@ The project is inspired by data-driven listing systems used for managing propert
 - Portable Text
 
 ### Infrastructure
-- Terraform
-- Ansible
-- Docker
+- Docker / Docker Compose (local dev)
+- Kubernetes (k3s) + Helm (addons) + Kustomize (manifests)
+- Terraform (Hetzner Cloud: servers, networking, firewall, load balancer)
+- Ansible (k3s bootstrap + addons + kustomize deploy + verification)
+- Makefile as a single entry point for local + production workflows
 ---
 
 
+## Repository Structure
+
+```bash
+backend/           # .NET Web API (business logic, database)
+frontend/          # Vue 3 application (UI, routing, state management)
+cms/               # Sanity Studio (editorial content)
+k8s/               # Kubernetes manifests (kustomize base + overlays)
+infrastructure/    # Terraform + Ansible (provisioning + k3s bootstrap + deploy)
+
+docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
+Makefile           # Entry point for common dev/prod commands
+LICENSE
+````
+
 ## Prerequisites
 
-For local development:
+### For local development:
 - Docker + Docker Compose
 
-For provisioning/deployment (infrastructure):
+### For provisioning/deployment (infrastructure):
 - Terraform
 - Ansible
+- kubectl + helm
 - SSH access to provisioned hosts (SSH key)
+- Ansible Vault password file: infrastructure/ansible/vault-password
 
 Optional but recommended:
 - `make`
@@ -145,6 +163,35 @@ Or directly:
 ```bash
 dotnet test backend/RealEstate.slnx
 ```
+
+## Production Deployment (Blue/Green)
+Production deploy is designed as Blue/Green stacks (prod-blue, prod-green) to reduce downtime and make rollbacks safe.
+
+High-level idea:
+
+1) Deploy a new version to green
+2) Verify health
+3) Switch traffic to green (Load Balancer target selector)
+4) Optionally deploy the same version to blue (or keep as fallback)
+
+**One-command deploy (recommended)**
+
+**Blue:**
+```bash
+make deploy-blue
+```
+
+**Green:**
+```bash
+make deploy-green
+```
+
+What it does:
+
+1. Terraform init/apply in workspace $(ENV)-$(STACK) (defaults: prod-blue)
+2. Generate Ansible inventory from Terraform outputs 
+3. Refresh ~/.ssh/known_hosts 
+4. Run Ansible playbook: install/upgrade k3s, fetch kubeconfig, install addons (ingress-nginx/cert-manager/metrics-server), apply kustomize overlay, verify rollout
 
 ## Notes on Configuration
 - Frontend API calls are proxied via Vite (/api → backend)

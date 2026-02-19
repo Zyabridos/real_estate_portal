@@ -1,0 +1,25 @@
+# TODO: not a huge fan of having non-generated files in directory "generated"
+# but it is easier to have vars next to inventory files (so, having "generated" folder wins)
+# maybe I should refactor it later
+
+# k3s
+k3s_version: "v1.30.7+k3s1"
+k3s_disable_traefik: true
+
+# repo layout
+repo_root: "{{ playbook_dir }}/../../.."
+k8s_dir: "{{ repo_root }}/k8s"
+
+# k8s
+k8s_namespace: "realestate"
+# which overlay to apply
+k8s_overlay: "overlays/{{ env }}"
+
+# where to store kubeconfig locally (on runner)
+local_kube_dir: "{{ repo_root }}/.kube"
+local_kubeconfig_path: "{{ local_kube_dir }}/realestate-{{ env }}-{{ stack_id }}.yaml"
+
+# helm versions
+ingress_nginx_chart_version: "4.11.3"
+cert_manager_chart_version: "v1.15.3"
+metrics_server_chart_version: "3.12.2"

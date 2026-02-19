@@ -1,24 +1,14 @@
 locals {
-  base_name = "real-estate-hub"
-  
-  lb_owner = var.stack_id == var.lb_owner_stack
-  shared_lb_name = "${local.base_name}-${var.env}-${var.lb_owner_stack}-lb"
-  
-  shared_lb_labels = {
-    project = local.base_name
-    env     = var.env
-    role    = "public-entry"
-  }
-  server_label_selector = "project=${local.base_name},env=${var.env},role=web"
+  lb_name = "${local.base_name}-${var.env}-lb"
+
+  # IMPORTANT: this selector must match ONLY ONE stack at a time (blue OR green).
+  lb_label_selector = "project=${local.base_name},env=${var.env},stack=${var.load_balancer_target_stack},k8s=true"
 }
 
-resource "hcloud_load_balancer" "shared_prod" {
-  count              = local.lb_owner ? 1 : 0
-  name               = local.shared_lb_name
+resource "hcloud_load_balancer" "shared" {
+  name               = local.lb_name
   load_balancer_type = var.load_balancer_type
   location           = var.location
-  
-  labels = local.shared_lb_labels
 
   algorithm {
     type = var.load_balancer_algorithm
@@ -27,69 +17,69 @@ resource "hcloud_load_balancer" "shared_prod" {
   lifecycle {
     prevent_destroy = true
   }
+
+  labels = {
+    project = local.base_name
+    env     = var.env
+    role    = "public-entry"
+  }
 }
 
-data "hcloud_load_balancer" "shared_prod" {
-  count = local.lb_owner ? 0 : 1
-  name  = local.shared_lb_name
+# Attach LB to only one private network (active stack).
+resource "hcloud_load_balancer_network" "lb_blue" {
+  count                  = var.load_balancer_target_stack == "blue" ? 1 : 0
+  load_balancer_id        = hcloud_load_balancer.shared.id
+  network_id              = hcloud_network.k3s[0].id
+  enable_public_interface = true
 }
 
-locals {
-  lb_id = (
-    local.lb_owner
-    ? hcloud_load_balancer.shared_prod[0].id
-    : data.hcloud_load_balancer.shared_prod[0].id
-  )
+resource "hcloud_load_balancer_network" "lb_green" {
+  count                  = (var.enable_green_stack && var.load_balancer_target_stack == "green") ? 1 : 0
+  load_balancer_id        = hcloud_load_balancer.shared.id
+  network_id              = hcloud_network.k3s_green[0].id
+  enable_public_interface = true
 }
 
-resource "hcloud_load_balancer_target" "all_web" {
-  count            = local.lb_owner ? 1 : 0
-  load_balancer_id = local.lb_id
-  type             = "label_selector"
-  label_selector   = local.server_label_selector
+resource "hcloud_load_balancer_target" "targets" {
+  load_balancer_id = hcloud_load_balancer.shared.id
+  type             = "label_selector" # "all servers that match label_selector are targets"
+  label_selector   = local.lb_label_selector
+
+  # LB -> nodes over private IP
+  use_private_ip = true
+  
+  depends_on = [
+    hcloud_load_balancer_network.lb_blue,
+    hcloud_load_balancer_network.lb_green
+  ]
 }
 
-# HTTP 80 -> server:80
 resource "hcloud_load_balancer_service" "http" {
-  count            = local.lb_owner ? 1 : 0
-  load_balancer_id = local.lb_id
-  protocol         = "http"
+  load_balancer_id = hcloud_load_balancer.shared.id
+  protocol         = "tcp"
   listen_port      = 80
   destination_port = 80
 
   health_check {
-    protocol = "http"
+    protocol = "tcp"
     port     = 80
     interval = 10
     timeout  = 5
     retries  = 3
-
-    http {
-      path         = "/lb-health"
-      status_codes = ["200"]
-    }
   }
 }
 
-# 443 passthrough -> server:443 (TLS on Caddy)
-# remember that Health-check is on HTTP /lb-health на :80
 resource "hcloud_load_balancer_service" "https_tcp" {
-  count            = local.lb_owner ? 1 : 0
-  load_balancer_id = local.lb_id
+  load_balancer_id = hcloud_load_balancer.shared.id
   protocol         = "tcp"
   listen_port      = 443
   destination_port = 443
 
   health_check {
-    protocol = "http"
-    port     = 80
+    protocol = "tcp"
+    port     = 443
     interval = 10
     timeout  = 5
     retries  = 3
-
-    http {
-      path         = "/lb-health"
-      status_codes = ["200"]
-    }
   }
 }

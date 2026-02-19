@@ -1,19 +1,19 @@
 # Ansible / Terraform secrets
 .terraform/
 .terraform.lock.hcl
-prod.*.tfvars
 *.tfstate
 *.tfstate.backup
 *.log
 crash.log
 terraform.tfvars
-secrets.auto.tfvars
-secrets.backend.tfvars
 *.auto.tfvars
 *.auto.tfvars.json
 vault-password
-
-!infrastructure/ansible/roles/app/templates/.env.production.j2
+infrastructure/terraform/terraform.prod.*.tfvars
+!infrastructure/terraform/terraform.prod.*.tfvars.example
+!infrastructure/terraform/terraform.tfvars.example
+# generated files -> do not show IPs to public
+infrastructure/ansible/inventories/generated/inventory.*.ini
 
 # Env/Config
 .env
@@ -58,11 +58,14 @@ TestResults
 
 # Other
 .vscode/
-*.log
 *.log*
 /coverage
 scripts/.seed/
-personal_notes.*
+.personal_docs
 
 # Typescript
 *.tsbuildinfo
+
+# Kubernetes
+/tmp/realestate-*.yaml
+.kube

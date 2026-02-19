@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: realestate-api-config
+  namespace: realestate
+data:
+  Mongo__Database: "realestate_production"

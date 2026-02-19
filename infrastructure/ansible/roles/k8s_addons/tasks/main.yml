@@ -1,0 +1,96 @@
+- name: Add helm repos (local) 
+  ansible.builtin.command: "{{ item }}" 
+  loop: 
+    - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx 
+    - helm repo add jetstack https://charts.jetstack.io 
+    - helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ 
+  register: helm_repo_add
+  changed_when: "'has been added' in (helm_repo_add.stdout | default(''))" 
+  failed_when: helm_repo_add.rc != 0 and ('already exists' not in (helm_repo_add.stderr | default(''))) 
+  delegate_to: localhost
+
+
+- name: Install ingress-nginx (Hetzner LB -> node:80/443 via hostNetwork)
+  ansible.builtin.command: >
+    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
+    --namespace ingress-nginx --create-namespace
+    --version {{ ingress_nginx_chart_version | default('4.11.3') }}
+    --kubeconfig {{ local_kubeconfig_path }}
+    -f {{ repo_root }}/infrastructure/ansible/files/ingress-nginx.private.yaml
+  changed_when: true
+  delegate_to: localhost
+
+
+- name: Wait for ingress-nginx rollout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    KCFG="{{ local_kubeconfig_path }}"
+    NS="ingress-nginx"
+
+    if kubectl --kubeconfig "$KCFG" -n "$NS" get ds ingress-nginx-controller >/dev/null 2>&1; then
+      kubectl --kubeconfig "$KCFG" -n "$NS" rollout status ds/ingress-nginx-controller --timeout=240s
+    else
+      kubectl --kubeconfig "$KCFG" -n "$NS" rollout status deploy/ingress-nginx-controller --timeout=240s
+    fi
+  args:
+    executable: /bin/bash
+  changed_when: false
+  delegate_to: localhost
+
+
+- name: Install cert-manager (CRDs enabled)
+  ansible.builtin.command: >
+    helm upgrade --install cert-manager jetstack/cert-manager
+    --namespace cert-manager --create-namespace
+    --version {{ cert_manager_chart_version | default('v1.15.3') }}
+    --kubeconfig {{ local_kubeconfig_path }}
+    --set crds.enabled=true
+  changed_when: true
+  delegate_to: localhost
+
+
+- name: Wait for cert-manager webhook rollout
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n cert-manager
+    rollout status deploy/cert-manager-webhook --timeout=180s
+  changed_when: false
+  delegate_to: localhost
+
+- name: Wait for cert-manager controller rollout
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n cert-manager
+    rollout status deploy/cert-manager --timeout=180s
+  changed_when: false
+  delegate_to: localhost
+
+
+- name: Detect built-in metrics-server (k3s)
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n kube-system
+    get deploy metrics-server
+  register: ms_deploy
+  changed_when: false
+  failed_when: false
+  delegate_to: localhost
+
+
+- name: Install metrics-server (only if missing)
+  ansible.builtin.command: >
+    helm upgrade --install metrics-server metrics-server/metrics-server
+    --namespace kube-system
+    --version {{ metrics_server_chart_version | default('3.12.2') }}
+    --kubeconfig {{ local_kubeconfig_path }}
+    --set args[0]=--kubelet-insecure-tls
+    --set args[1]=--kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP
+  when: ms_deploy.rc != 0
+  changed_when: true
+  delegate_to: localhost
+
+
+- name: Wait for metrics-server rollout
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n kube-system
+    rollout status deploy/metrics-server --timeout=180s
+  when: ms_deploy.rc != 0
+  changed_when: false
+  delegate_to: localhost

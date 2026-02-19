@@ -1,10 +1,10 @@
-name: Deploy prod (green, then blue) via Ansible
+name: Deploy prod (green, then blue) via Ansible (inventory from Terraform)
 
 on:
-  push:
-      branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch: {}
-
+  
 concurrency:
   group: deploy-prod
   cancel-in-progress: false
@@ -13,128 +13,234 @@ permissions:
   contents: read
 
 env:
+  TF_DIR: infrastructure/terraform
   ANSIBLE_DIR: infrastructure/ansible
-  ANSIBLE_INVENTORY_GREEN: inventory.prod-green.ini
-  ANSIBLE_INVENTORY_BLUE: inventory.prod-blue.ini
+  INVENTORY_GREEN: inventories/generated/inventory.prod-green.ini
+  INVENTORY_BLUE: inventories/generated/inventory.prod-blue.ini
+  ANSIBLE_PLAYBOOK: playbooks/site.yml
+
+  TF_IN_AUTOMATION: "true"
 
 jobs:
   deploy_green:
     name: Deploy GREEN
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure SSH key for Ansible
+      # --- Terraform ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform init
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
         run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" init -input=false
+
+      - name: Generate Ansible inventory (GREEN) from Terraform output
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" workspace select "prod-green" >/dev/null 2>&1 || terraform -chdir="${TF_DIR}" workspace new "prod-green" >/dev/null
+          mkdir -p "${ANSIBLE_DIR}/inventories/generated"
+          terraform -chdir="${TF_DIR}" output -raw ansible_inventory_ini > "${ANSIBLE_DIR}/${INVENTORY_GREEN}"
+          test -s "${ANSIBLE_DIR}/${INVENTORY_GREEN}" || (echo "Inventory is empty: ${ANSIBLE_DIR}/${INVENTORY_GREEN}" && exit 1)
+
+      # --- Ansible ---
+      - name: Configure SSH key for Ansible
+        shell: bash
+        run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-      - name: Install dependencies (rsync + python)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends rsync python3-pip
+          cat > ~/.ssh/config <<'EOF'
+          Host *
+            IdentityFile ~/.ssh/id_ed25519
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
+          EOF
 
-      - name: Install Ansible + collection
+      - name: Install python + pip
+        shell: bash
         run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-pip openssh-client
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.30.0"
+
+      - name: Setup helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.15.4"
+
+      - name: Install Ansible + collections
+        shell: bash
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        run: |
+          set -euo pipefail
           python3 -m pip install --upgrade pip
           python3 -m pip install "ansible>=9,<10"
-          ansible-galaxy collection install ansible.posix
+          ansible --version
+          ansible-galaxy collection install -r requirements.yml
 
-      - name: Write vault password file
+      - name: Create temporary vault password file
+        shell: bash
         run: |
-          mkdir -p "${{ env.ANSIBLE_DIR }}"
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${{ env.ANSIBLE_DIR }}/vault-password"
-          chmod 600 "${{ env.ANSIBLE_DIR }}/vault-password"
+          set -euo pipefail
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${RUNNER_TEMP}/vault-pass"
+          chmod 600 "${RUNNER_TEMP}/vault-pass"
 
       - name: Ansible ping (GREEN)
+        shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          ANSIBLE_FORCE_COLOR: "True"
         run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" realestate_prod_green -m ping
+          set -euo pipefail
+          ansible -i "${{ env.INVENTORY_GREEN }}" all -m ping
 
       - name: Deploy (GREEN)
+        shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          ANSIBLE_FORCE_COLOR: "True"
         run: |
-          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" playbook.yml \
-            --limit realestate_prod_green \
-            --vault-password-file vault-password \
-            -e "env=prod stack_id=green"
-
-      - name: Health check via Ansible (GREEN)
-        working-directory: ${{ env.ANSIBLE_DIR }}
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-        run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY_GREEN }}" realestate_prod_green \
-            -m ansible.builtin.uri \
-            -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
-            -b
+          set -euo pipefail
+          ansible-playbook -i "${{ env.INVENTORY_GREEN }}" "${{ env.ANSIBLE_PLAYBOOK }}" \
+            --vault-password-file "${RUNNER_TEMP}/vault-pass"
 
   deploy_blue:
     name: Deploy BLUE
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [deploy_green]
+    timeout-minutes: 60
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure SSH key for Ansible
+      # --- Terraform  ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform init
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
         run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" init -input=false
+
+      - name: Generate Ansible inventory (BLUE) from Terraform output
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" workspace select "prod-blue" >/dev/null 2>&1 || terraform -chdir="${TF_DIR}" workspace new "prod-blue" >/dev/null
+          mkdir -p "${ANSIBLE_DIR}/inventories/generated"
+          terraform -chdir="${TF_DIR}" output -raw ansible_inventory_ini > "${ANSIBLE_DIR}/${INVENTORY_BLUE}"
+          test -s "${ANSIBLE_DIR}/${INVENTORY_BLUE}" || (echo "Inventory is empty: ${ANSIBLE_DIR}/${INVENTORY_BLUE}" && exit 1)
+
+      # --- Ansible ---
+      - name: Configure SSH key for Ansible
+        shell: bash
+        run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
-      - name: Install dependencies (rsync + python)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends rsync python3-pip
+          cat > ~/.ssh/config <<'EOF'
+          Host *
+            IdentityFile ~/.ssh/id_ed25519
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            LogLevel ERROR
+          EOF
 
-      - name: Install Ansible + collection
+      - name: Install python + pip
+        shell: bash
         run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-pip openssh-client
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.30.0"
+
+      - name: Setup helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.15.4"
+
+      - name: Install Ansible + collections
+        shell: bash
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        run: |
+          set -euo pipefail
           python3 -m pip install --upgrade pip
           python3 -m pip install "ansible>=9,<10"
-          ansible-galaxy collection install ansible.posix
+          ansible --version
+          ansible-galaxy collection install -r requirements.yml
 
-      - name: Write vault password file
+      - name: Create temporary vault password file
+        shell: bash
         run: |
-          mkdir -p "${{ env.ANSIBLE_DIR }}"
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${{ env.ANSIBLE_DIR }}/vault-password"
-          chmod 600 "${{ env.ANSIBLE_DIR }}/vault-password"
+          set -euo pipefail
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > "${RUNNER_TEMP}/vault-pass"
+          chmod 600 "${RUNNER_TEMP}/vault-pass"
 
       - name: Ansible ping (BLUE)
+        shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          ANSIBLE_FORCE_COLOR: "True"
         run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" realestate_prod_blue -m ping
+          set -euo pipefail
+          ansible -i "${{ env.INVENTORY_BLUE }}" all -m ping
 
       - name: Deploy (BLUE)
+        shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          ANSIBLE_FORCE_COLOR: "True"
         run: |
-          ansible-playbook -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" playbook.yml \
-            --limit realestate_prod_blue \
-            --vault-password-file vault-password \
-            -e "env=prod stack_id=blue"
-
-      - name: Health check via Ansible (BLUE)
-        working-directory: ${{ env.ANSIBLE_DIR }}
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_SSH_COMMON_ARGS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-        run: |
-          ansible -i "${{ env.ANSIBLE_INVENTORY_BLUE }}" realestate_prod_blue \
-            -m ansible.builtin.uri \
-            -a "url=http://localhost/lb-health method=GET status_code=200 return_content=yes" \
-            -b
+          set -euo pipefail
+          ansible-playbook -i "${{ env.INVENTORY_BLUE }}" "${{ env.ANSIBLE_PLAYBOOK }}" \
+            --vault-password-file "${RUNNER_TEMP}/vault-pass"

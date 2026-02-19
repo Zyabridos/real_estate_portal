@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind      : Deployment
+metadata:
+  name: realestate-frontend
+  labels:
+    app: realestate-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realestate-frontend
+  template:
+    metadata:
+      labels:
+        app: realestate-frontend
+    spec:
+      containers:
+        - name : frontend
+          image: zyabridos/real_estate_prod_frontend:latest
+          ports:
+            - name         : http
+              containerPort: 80
+          resources:
+            requests:
+              cpu   : "25m"
+              memory: "64Mi"
+            limits:
+              cpu   : "200m"
+              memory: "256Mi"

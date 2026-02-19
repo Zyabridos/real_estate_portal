@@ -1,0 +1,9 @@
+env: "prod"
+
+prod_domains:
+  - "realestateproject.casa"
+  - "www.realestateproject.casa"
+  - "cms.realestateproject.casa"
+
+# kustomize overlay base for prod stacks
+k8s_overlay_base: "overlays"

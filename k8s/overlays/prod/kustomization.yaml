@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - api/hpa.yaml
+  - cert-manager/clusterissuer.yaml
+  - frontend/hpa.yaml
+  - ingress/realestate-ingress.yaml
+
+labels:
+  - pairs:
+      project: realestate
+      env: prod
+    includeSelectors: false
+    
+commonAnnotations:
+  owner: NinaZyabrina
+
+replicas:
+  - name: realestate-api
+    count: 2
+  - name: realestate-frontend
+    count: 2
+  - name: realestate-cms
+    count: 1
+  - name: realestate-mongo
+    count: 1
+
+patches:
+  - path: patches/mongo-pvc.yaml
+    target:
+      kind: PersistentVolumeClaim
+      name: realestate-mongo-pvc
+  - path: patches/api-configmap.yaml
+    target:
+      kind: ConfigMap
+      name: realestate-api-config

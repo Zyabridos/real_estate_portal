@@ -1,0 +1,42 @@
+- name: Base packages on all nodes
+  hosts: k3s_server:k3s_workers
+  become: true
+  gather_facts: true
+  roles:
+    - common
+
+- name: Install k3s server
+  hosts: k3s_server
+  become: true
+  roles:
+    - k3s_server
+
+- name: Install k3s agents
+  hosts: k3s_workers
+  become: true
+  roles:
+    - k3s_agent
+
+- name: Fetch kubeconfig to local runner
+  hosts: k3s_server
+  become: true
+  roles:
+    - kubeconfig
+
+- name: Install cluster addons (helm) from local runner
+  hosts: k3s_server
+  become: false
+  roles:
+    - k8s_addons
+
+- name: Deploy manifests (kustomize) from local runner
+  hosts: k3s_server
+  become: false
+  roles:
+    - k8s_deploy
+
+- name: Verify workloads and health from local runner
+  hosts: k3s_server
+  become: false
+  roles:
+    - k8s_verify

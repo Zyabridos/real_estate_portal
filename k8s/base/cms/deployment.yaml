@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realestate-cms
+  namespace: realestate
+  labels:
+    app: realestate-cms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realestate-cms
+
+  template:
+    metadata:
+      labels:
+        app: realestate-cms
+        project: realestate
+    spec:
+      containers:
+        - name: cms
+          image: zyabridos/real_estate_prod_cms:latest
+          ports:
+            - name: http
+              containerPort: 80
