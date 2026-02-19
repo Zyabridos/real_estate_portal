@@ -1,2 +1,0 @@
-app_compose_file: docker-compose.production.yml
-app_env_file: .env
