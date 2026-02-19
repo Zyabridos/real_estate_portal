@@ -9,21 +9,22 @@ resource "hcloud_firewall" "k3s_fw" {
     port       = "22"
     source_ips = var.ssh_allowed_cidrs
   }
-
-  # Public ingress
+  
+  # Private subnet
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "80"
-    source_ips = ["0.0.0.0/0", "::/0"] # everyone (duuugh, but things r easly to forget when one is not working with it regullary)
+    source_ips = [var.k3s_subnet_ip_range] # 10.50.1.0/24
   }
 
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "443"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = [var.k3s_subnet_ip_range]
   }
+
 
   # k3s API
   rule {
@@ -72,21 +73,21 @@ resource "hcloud_firewall" "k3s_fw_green" {
     source_ips = var.ssh_allowed_cidrs
   }
 
-  # Public ingress
+  # Private subnet
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "80"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = [var.k3s_subnet_ip_range] # 10.50.1.0/24
   }
 
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "443"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = [var.k3s_subnet_ip_range]
   }
-
+  
   # k3s API
   rule {
     direction  = "in"

@@ -25,20 +25,41 @@ resource "hcloud_load_balancer" "shared" {
   }
 }
 
+# Attach LB to only one private network (active stack).
+resource "hcloud_load_balancer_network" "lb_blue" {
+  count                  = var.load_balancer_target_stack == "blue" ? 1 : 0
+  load_balancer_id        = hcloud_load_balancer.shared.id
+  network_id              = hcloud_network.k3s[0].id
+  enable_public_interface = true
+}
+
+resource "hcloud_load_balancer_network" "lb_green" {
+  count                  = (var.enable_green_stack && var.load_balancer_target_stack == "green") ? 1 : 0
+  load_balancer_id        = hcloud_load_balancer.shared.id
+  network_id              = hcloud_network.k3s_green[0].id
+  enable_public_interface = true
+}
+
 resource "hcloud_load_balancer_target" "targets" {
   load_balancer_id = hcloud_load_balancer.shared.id
   type             = "label_selector" # "all servers that match label_selector are targets"
   label_selector   = local.lb_label_selector
+
+  # LB -> nodes over private IP
+  use_private_ip = true
+  
+  depends_on = [
+    hcloud_load_balancer_network.lb_blue,
+    hcloud_load_balancer_network.lb_green
+  ]
 }
 
 resource "hcloud_load_balancer_service" "http" {
   load_balancer_id = hcloud_load_balancer.shared.id
-  protocol         = "http"
+  protocol         = "tcp"
   listen_port      = 80
   destination_port = 80
 
-  # Good enough to detect a dead node, but it won't detect a broken HTTP app... So, just "the port is open" type of check
-  # TODO: investigate if better health-check is possible
   health_check {
     protocol = "tcp"
     port     = 80
@@ -53,7 +74,7 @@ resource "hcloud_load_balancer_service" "https_tcp" {
   protocol         = "tcp"
   listen_port      = 443
   destination_port = 443
-  
+
   health_check {
     protocol = "tcp"
     port     = 443
