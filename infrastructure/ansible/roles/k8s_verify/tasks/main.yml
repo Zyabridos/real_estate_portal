@@ -1,0 +1,93 @@
+- name: Show cluster nodes (wide)
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }}
+    get nodes -o wide
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Show pods in namespace {{ k8s_namespace }} (wide)
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }}
+    -n {{ k8s_namespace }}
+    get pods -o wide
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: In-cluster API health check via Service DNS
+  vars:
+    curl_image: "curlimages/curl:8.5.0"
+    api_url: "http://realestate-api-svc/api/health"
+    check_pod_name: "api-check-{{ stack_id }}-{{ lookup('pipe','date +%s') }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    echo "In-cluster health check: {{ api_url }}"
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n {{ k8s_namespace }} run "{{ check_pod_name }}" \
+      --rm -i --restart=Never \
+      --image={{ curl_image }} -- \
+      sh -lc 'curl -fsS --connect-timeout 5 --max-time 15 {{ api_url }}'
+  args:
+    executable: /bin/bash
+  register: in_cluster_check
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Debug API Service + Endpoints (only if in-cluster check failed)
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n {{ k8s_namespace }}
+    get svc realestate-api-svc,endpoints realestate-api-svc -o wide
+  when: in_cluster_check is failed
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Debug recent events in namespace (only if in-cluster check failed)
+  ansible.builtin.command: >
+    kubectl --kubeconfig {{ local_kubeconfig_path }} -n {{ k8s_namespace }}
+    get events --sort-by=.metadata.creationTimestamp | tail -n 50
+  when: in_cluster_check is failed
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Resolve Load Balancer IP from Terraform output (best-effort)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    {{ lookup('env','TF') | default('terraform', true) }} -chdir={{ repo_root }}/infrastructure/terraform output -raw load_balancer_ipv4
+  args:
+    executable: /bin/bash
+  register: lb_ip_out
+  changed_when: false
+  failed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: External API health check via Load Balancer (HTTPS)
+  vars:
+    host_header: "realestateproject.casa"
+    lb_ip: "{{ (lb_ip_out.stdout | default('') | trim) }}"
+    url: "https://{{ lb_ip }}/api/health"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ -z "{{ lb_ip }}" ]; then
+      echo "LB IP not found (terraform output failed). Skipping external check."
+      exit 0
+    fi
+    echo "External health check: {{ url }}"
+    curl -fsS -k --connect-timeout 5 --max-time 20 \
+      -H "Host: {{ host_header }}" \
+      "{{ url }}"
+  args:
+    executable: /bin/bash
+  changed_when: false
+  delegate_to: localhost
+  become: false
+  run_once: true

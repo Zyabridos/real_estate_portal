@@ -1,0 +1,2 @@
+stack_id: "blue"
+k8s_overlay: "{{ k8s_overlay_base }}/prod-blue"

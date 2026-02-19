@@ -1,0 +1,20 @@
+- name: Install k3s agent
+  ansible.builtin.shell: |
+    set -euo pipefail
+    curl -sfL https://get.k3s.io | \
+      INSTALL_K3S_VERSION="{{ k3s_version }}" \
+      K3S_URL="https://{{ k3s_server_join_ip }}:6443" \
+      K3S_TOKEN="{{ hostvars[groups['k3s_server'][0]].k3s_node_token }}" \
+      sh -s - agent \
+      --node-label "stack={{ stack_id }}" \
+      --node-label "env={{ env }}"
+  args:
+    executable: /bin/bash # Ansible uses /bin/sh by default. Dash doesn't support "set -o pipefail", so we force bash.
+    creates: /usr/local/bin/k3s-agent # Idempotency: if this file exists, Ansible skips the install command (k3s-agent already installed).
+  vars:
+    k3s_server_join_ip: >-
+      {{
+        hostvars[groups['k3s_server'][0]].private_ipv4
+        | default(hostvars[groups['k3s_server'][0]].ansible_host
+        | default(groups['k3s_server'][0]))
+      }}

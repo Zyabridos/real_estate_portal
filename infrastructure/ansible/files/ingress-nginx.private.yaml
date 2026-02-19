@@ -1,0 +1,34 @@
+controller:
+  kind: DaemonSet
+
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+
+  hostPort:
+    enabled: true
+    ports:
+      http: 80
+      https: 443
+
+  # Keep service internal only (no ServiceLB / no public exposure from k8s side)
+  service:
+    enabled: true
+    type: ClusterIP
+
+  publishService:
+    enabled: false
+
+  config:
+    use-forwarded-headers: "true"
+    compute-full-forwarded-for: "true"
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+admissionWebhooks:
+  enabled: true
