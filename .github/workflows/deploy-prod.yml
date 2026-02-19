@@ -1,11 +1,12 @@
-name: Deploy prod (green, then blue) via Ansible
+name: Deploy prod (green, then blue) via Ansible (inventory from Terraform)
 
 on:
   pull_request:
     branches: [ "main" ]
   push:
     branches: [ "main" ]
-
+  workflow_dispatch: {}
+  
 concurrency:
   group: deploy-prod
   cancel-in-progress: false
@@ -14,14 +15,18 @@ permissions:
   contents: read
 
 env:
+  TF_DIR: infrastructure/terraform
   ANSIBLE_DIR: infrastructure/ansible
   INVENTORY_GREEN: inventories/generated/inventory.prod-green.ini
   INVENTORY_BLUE: inventories/generated/inventory.prod-blue.ini
   ANSIBLE_PLAYBOOK: playbooks/site.yml
 
+  TF_IN_AUTOMATION: "true"
+
 jobs:
   deploy_green:
     name: Deploy GREEN
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -29,6 +34,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- Terraform ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform init
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" init -input=false
+
+      - name: Generate Ansible inventory (GREEN) from Terraform output
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" workspace select "prod-green" >/dev/null 2>&1 || terraform -chdir="${TF_DIR}" workspace new "prod-green" >/dev/null
+          mkdir -p "${ANSIBLE_DIR}/inventories/generated"
+          terraform -chdir="${TF_DIR}" output -raw ansible_inventory_ini > "${ANSIBLE_DIR}/${INVENTORY_GREEN}"
+          test -s "${ANSIBLE_DIR}/${INVENTORY_GREEN}" || (echo "Inventory is empty: ${ANSIBLE_DIR}/${INVENTORY_GREEN}" && exit 1)
+
+      # --- Ansible ---
       - name: Configure SSH key for Ansible
         shell: bash
         run: |
@@ -104,6 +137,7 @@ jobs:
 
   deploy_blue:
     name: Deploy BLUE
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [deploy_green]
     timeout-minutes: 60
@@ -112,6 +146,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- Terraform  ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform init
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" init -input=false
+
+      - name: Generate Ansible inventory (BLUE) from Terraform output
+        shell: bash
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform -chdir="${TF_DIR}" workspace select "prod-blue" >/dev/null 2>&1 || terraform -chdir="${TF_DIR}" workspace new "prod-blue" >/dev/null
+          mkdir -p "${ANSIBLE_DIR}/inventories/generated"
+          terraform -chdir="${TF_DIR}" output -raw ansible_inventory_ini > "${ANSIBLE_DIR}/${INVENTORY_BLUE}"
+          test -s "${ANSIBLE_DIR}/${INVENTORY_BLUE}" || (echo "Inventory is empty: ${ANSIBLE_DIR}/${INVENTORY_BLUE}" && exit 1)
+
+      # --- Ansible ---
       - name: Configure SSH key for Ansible
         shell: bash
         run: |

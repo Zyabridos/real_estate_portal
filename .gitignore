@@ -6,14 +6,14 @@
 *.log
 crash.log
 terraform.tfvars
-secrets.auto.tfvars
-secrets.backend.tfvars
 *.auto.tfvars
 *.auto.tfvars.json
 vault-password
 infrastructure/terraform/terraform.prod.*.tfvars
 !infrastructure/terraform/terraform.prod.*.tfvars.example
 !infrastructure/terraform/terraform.tfvars.example
+# generated files -> do not show IPs to public
+infrastructure/ansible/inventories/generated/inventory.*.ini
 
 # Env/Config
 .env
