@@ -3,8 +3,6 @@ name: Deploy prod (green, then blue) via Ansible (inventory from Terraform)
 on:
   pull_request:
     branches: [ "main" ]
-  push:
-    branches: [ "main" ]
   workflow_dispatch: {}
   
 concurrency:
