@@ -1,0 +1,24 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: realestate-api-hpa
+  labels:
+    app: realestate-api
+spec:
+  # This HPA controls replicas of the Deployment below
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: realestate-api
+
+  minReplicas: 2
+  maxReplicas: 3
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          # average CPU ~80% of requests.cpu
+          type: Utilization
+          averageUtilization: 80

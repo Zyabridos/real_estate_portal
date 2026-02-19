@@ -4,19 +4,27 @@ metadata:
   name: realestate-ingress
   namespace: realestate
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
+        - realestateproject.casa
         - www.realestateproject.casa
         - cms.realestateproject.casa
       secretName: realestate-tls
   rules:
-    - host: www.realestateproject.casa
+    - host: realestateproject.casa
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: realestate-api-svc
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
@@ -25,13 +33,23 @@ spec:
                 port:
                   number: 80
 
+    - host: www.realestateproject.casa
+      http:
+        paths:
           - path: /api
             pathType: Prefix
             backend:
               service:
                 name: realestate-api-svc
                 port:
-                  number: 5000
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: realestate-frontend-svc
+                port:
+                  number: 80
 
     - host: cms.realestateproject.casa
       http:

@@ -6,7 +6,6 @@ namespace: realestate
 resources:
   - namespace.yaml
 
-  - mongo/pvc.yaml
   - mongo/service.yaml
   - mongo/statefulset.yaml
 

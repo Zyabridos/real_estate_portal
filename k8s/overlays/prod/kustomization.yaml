@@ -3,17 +3,16 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - api/secret.enc.yaml
-  - mongo/secret.enc.yaml
-  - ingress/realestate-ingress.yaml
+  - api/hpa.yaml
   - cert-manager/clusterissuer.yaml
+  - frontend/hpa.yaml
+  - ingress/realestate-ingress.yaml
 
 labels:
   - pairs:
       project: realestate
       env: prod
     includeSelectors: false
-    includeTemplates: true
     
 commonAnnotations:
   owner: NinaZyabrina

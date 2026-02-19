@@ -2,21 +2,18 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: realestate-mongo
+  namespace: realestate
   labels:
     app: realestate-mongo
 spec:
-  # StatefulSet preferes headless-service (f. ex., realestate-mongo-0.realestate-mongo-headless)
   serviceName: realestate-mongo-headless
-
-  replicas: 
+  replicas: 1
   selector:
     matchLabels:
       app: realestate-mongo
-
   template:
     metadata:
       labels:
-        # label on pod (d-uh..). Services and selectors will look for pods with this name/label
         app: realestate-mongo
     spec:
       containers:
@@ -26,14 +23,12 @@ spec:
           ports:
             - name: mongo
               containerPort: 27017
-          # listen not only localhost
           args:
             - "--bind_ip_all"
-              
           envFrom:
             - secretRef:
                 name: realestate-mongo-secrets
-                
+
           readinessProbe:
             tcpSocket:
               port: 27017
@@ -41,7 +36,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 6
-            
+
           livenessProbe:
             tcpSocket:
               port: 27017
@@ -49,7 +44,7 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 2
             failureThreshold: 6
-            
+
           resources:
             requests:
               cpu: "50m"
@@ -62,7 +57,14 @@ spec:
             - name: mongo-data
               mountPath: /data/db
 
-      volumes:
-        - name: mongo-data
-          persistentVolumeClaim:
-            claimName: realestate-mongo-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+        labels:
+          app: realestate-mongo
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
