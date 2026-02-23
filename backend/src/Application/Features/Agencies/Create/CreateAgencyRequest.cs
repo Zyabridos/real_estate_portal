@@ -6,5 +6,5 @@ public sealed record CreateAgencyRequest(
     string PhoneNumber,
     string City,
     string Street,
-    string ZipCode,
+    string ZipCode
 );

@@ -1,10 +1,10 @@
 using RealEstate.Application.Common;
-using RealEstate.Application.Features.Agency.Create;
-using RealEstate.Application.Features.Agency.GetById;
-using RealEstate.Application.Features.Agency.List;
-using RealEstate.Application.Features.Agency.Update;
+using RealEstate.Application.Features.Agencies.Create;
+using RealEstate.Application.Features.Agencies.GetById;
+using RealEstate.Application.Features.Agencies.List;
+using RealEstate.Application.Features.Agencies.Update;
 
-namespace RealEstate.Application.Features.Agency.Contracts;
+namespace RealEstate.Application.Features.Agencies.Contracts;
 
 public interface IAgencyService
 {

@@ -2,11 +2,11 @@ using FluentValidation;
 using RealEstate.Application.Features.Brokers.Create;
 using RealEstate.Application.Common.Normalizers;
 
-namespace RealEstate.Application.Features.Brokers.Create;
+namespace RealEstate.Application.Features.Agencies.Create;
 
-public sealed class CreateBrokerRequestValidator : AbstractValidator<CreateBrokerRequest>
+public sealed class CreateAgencyRequestValidator : AbstractValidator<CreateAgencyRequest>
 {
-    public CreateBrokerRequestValidator()
+    public CreateAgencyRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -17,4 +17,5 @@ public sealed class CreateBrokerRequestValidator : AbstractValidator<CreateBroke
             .NotEmpty()
             .MinimumLength(6)
             .MaximumLength(20);
+    }
 }

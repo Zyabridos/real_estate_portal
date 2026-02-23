@@ -1,11 +1,11 @@
 using AutoMapper;
-using RealEstate.Application.Features.Agency.Create;
-using RealEstate.Application.Features.Agency.GetById;
-using RealEstate.Application.Features.Agency.List;
-using RealEstate.Application.Features.Agency.Update;
+using RealEstate.Application.Features.Agencies.Create;
+using RealEstate.Application.Features.Agencies.GetById;
+using RealEstate.Application.Features.Agencies.List;
+using RealEstate.Application.Features.Agencies.Update;
 using RealEstate.Domain.Entities;
 
-namespace RealEstate.Application.Features.Agency.Mapping;
+namespace RealEstate.Application.Features.Agencies.Mapping;
 
 public sealed class AgencyMappingProfile : Profile
 {
@@ -13,7 +13,7 @@ public sealed class AgencyMappingProfile : Profile
     {
         // Entity -> DTO
         CreateMap<Agency, AgencyDetailsDto>()
-            .ConstructUsing(b => new AgencyDetailsDto(
+            .ConstructUsing(a => new AgencyDetailsDto(
                 a.Id,
                 a.Name,
                 a.OrgNumber,
@@ -26,7 +26,7 @@ public sealed class AgencyMappingProfile : Profile
             ));
 
         CreateMap<Agency, AgencyListItemDto>()
-            .ConstructUsing(b => new AgencyListItemDto(
+            .ConstructUsing(a => new AgencyListItemDto(
                 a.Id,
                 a.Name,
                 a.OrgNumber,
