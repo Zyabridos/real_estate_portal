@@ -13,7 +13,6 @@ public static class PropertyQueries
             MinPrice: null,
             MaxPrice: null,
             Page: 1,
-            PageSize: 20,
-            Sort: null
+            PageSize: 20
         );
 }

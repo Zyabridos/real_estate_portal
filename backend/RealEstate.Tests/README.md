@@ -25,8 +25,8 @@ Integration tests for HTTP API endpoints.
 
 - **`GET /api/{entities}/{id}`** returns:
     - **`200`** for an existing entity
-    - **`404`** for a missing entity
     - **`400`** for an invalid GUID in route
+    - **`404`** for a missing entity
 
 - **`POST /api/{entity}`** returns:
     - **`201`** for a valid payload
@@ -120,7 +120,7 @@ var property = TestProperties.Create(
 
 ## MongoDB Strategy
 
--   One MongoDB container  per test run
+-   One MongoDB container per test run
 
 -   One database per test class
 
@@ -129,7 +129,6 @@ var property = TestProperties.Create(
 -   Safe for parallel execution
 
 ## Running Tests
-
 Run all tests:
 
 ```csharp

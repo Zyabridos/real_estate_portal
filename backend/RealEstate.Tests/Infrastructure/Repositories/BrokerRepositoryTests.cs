@@ -48,8 +48,7 @@ public sealed class BrokerRepositoryTests : MongoDbTestBase
         found.FirstName.Should().Be("Ola");
         found.LastName.Should().Be("Nordmann");
         found.Email.Should().Be("ola.nordmann@realestate.no");
-
-        // Normalization smoke (depends on repo behavior)
+        
         found.PhoneNumber.Should().Be("+4711111111");
     }
 
