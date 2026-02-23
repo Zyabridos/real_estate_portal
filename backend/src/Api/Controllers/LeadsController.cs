@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Leads;
 using RealEstate.Application.Common;
+using RealEstate.Api.Common;
 using RealEstate.Application.Features.Leads.Contracts;
 using RealEstate.Application.Features.Leads.Create;
 using RealEstate.Application.Features.Leads.List;
@@ -16,6 +17,7 @@ namespace RealEstate.Api.Controllers;
 public sealed class LeadsController : ControllerBase
 {
     private readonly ILeadService _service;
+    private const string EntityName = "Lead";
 
     public LeadsController(ILeadService service)
     {
@@ -43,23 +45,11 @@ public sealed class LeadsController : ControllerBase
     [SwaggerResponseExample(StatusCodes.Status200OK, typeof(LeadDetailsResponseExample))]
     public async Task<ActionResult<LeadDetailsDto>> GetById(string id, CancellationToken ct)
     {
-        if (!Guid.TryParse(id, out var guid))
-        {
-            return BadRequest(Problem(
-                title: "Invalid id",
-                detail: "Lead id must be a valid GUID.",
-                statusCode: StatusCodes.Status400BadRequest));
-        }
+        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        if (bad is not null) return bad;
 
         var dto = await _service.GetByIdAsync(guid, ct);
-
-        if (dto is null)
-        {
-            return NotFound(Problem(
-                title: "Not found",
-                detail: $"Lead '{id}' was not found.",
-                statusCode: StatusCodes.Status404NotFound));
-        }
+        if (dto is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(dto);
     }
@@ -90,20 +80,11 @@ public sealed class LeadsController : ControllerBase
         [FromBody] UpdateLeadRequest request,
         CancellationToken ct)
     {
-        if (!Guid.TryParse(id, out var guid))
-        {
-            return BadRequest(Problem(
-                title: "Invalid id",
-                detail: "Lead id must be a valid GUID.",
-                statusCode: StatusCodes.Status400BadRequest));
-        }
+        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        if (bad is not null) return bad;
 
         var updated = await _service.UpdateAsync(guid, request, ct);
-
-        if (updated is null)
-        {
-            return NotFound();
-        }
+        if (updated is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(updated);
     }
@@ -115,20 +96,11 @@ public sealed class LeadsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(string id, CancellationToken ct)
     {
-        if (!Guid.TryParse(id, out var guid))
-        {
-            return BadRequest(Problem(
-                title: "Invalid id",
-                detail: "Lead id must be a valid GUID.",
-                statusCode: StatusCodes.Status400BadRequest));
-        }
+        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        if (bad is not null) return bad;
 
         var deleted = await _service.DeleteAsync(guid, ct);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
+        if (!deleted) return this.EntityNotFound(EntityName, id);
 
         return NoContent();
     }

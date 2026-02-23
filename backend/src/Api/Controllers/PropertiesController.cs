@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Properties;
+using RealEstate.Api.Common;
 using RealEstate.Application.Common;
 using RealEstate.Application.Features.Properties.Contracts;
 using RealEstate.Application.Features.Properties.Create;
@@ -15,6 +16,7 @@ namespace RealEstate.Api.Controllers;
 public sealed class PropertiesController : ControllerBase
 {
     private readonly IPropertyService _service;
+    private const string EntityName = "Property";
 
     public PropertiesController(IPropertyService service)
     {
@@ -43,18 +45,13 @@ public sealed class PropertiesController : ControllerBase
 	[SwaggerResponseExample(StatusCodes.Status200OK, typeof(PropertyDetailsResponseExample))]
 	public async Task<ActionResult<PropertyDetailsDto>> GetById(string id, CancellationToken ct)
 	{
-    	if (!Guid.TryParse(id, out var guid))
-    	{ 
-			return NotFound(Problem(
-    		title: "Not found",
-    		detail: $"Property '{id}' was not found.",
-    		statusCode: StatusCodes.Status404NotFound));
-		}
+        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        if (bad is not null) return bad;
 
-    var dto = await _service.GetByIdAsync(guid, ct);
-    if (dto is null) return NotFound();
+        var dto = await _service.GetByIdAsync(guid, ct);
+        if (dto is null) return this.EntityNotFound(EntityName, id);
 
-    return Ok(dto);
+        return Ok(dto);
 }
 
     // POST /api/properties
@@ -83,20 +80,11 @@ public sealed class PropertiesController : ControllerBase
         [FromBody] UpdatePropertyRequest request,
         CancellationToken ct)
     {
-        if (!Guid.TryParse(id, out var guid))
-        {
-            return BadRequest(Problem(
-                title: "Invalid id",
-                detail: "Property id must be a valid GUID.",
-                statusCode: StatusCodes.Status400BadRequest));
-        }
+        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        if (bad is not null) return bad;
 
         var updated = await _service.UpdateAsync(guid, request, ct);
-
-        if (updated is null)
-        {
-            return NotFound();
-        }
+        if (updated is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(updated);
     }
@@ -108,20 +96,11 @@ public sealed class PropertiesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(string id, CancellationToken ct)
     {
-        if (!Guid.TryParse(id, out var guid))
-        {
-            return BadRequest(Problem(
-                title: "Invalid id",
-                detail: "Property id must be a valid GUID.",
-                statusCode: StatusCodes.Status400BadRequest));
-        }
+        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        if (bad is not null) return bad;
 
         var deleted = await _service.DeleteAsync(guid, ct);
-
-        if (!deleted)
-        {
-            return NotFound();
-        }
+        if (!deleted) return this.EntityNotFound(EntityName, id);
 
         return NoContent();
     }
