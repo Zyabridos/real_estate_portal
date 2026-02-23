@@ -6,7 +6,7 @@ namespace RealEstate.Application.Features.Agencies.List;
 public sealed record AgencyListQuery(
     Guid? Id = null,
     string? Name = null,
-    string? OrgNumver = null,
+    string? OrgNumber = null,
     string? PhoneNumber = null,
     string? City = null,
     string? Street = null,
