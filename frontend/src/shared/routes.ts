@@ -1,5 +1,3 @@
-import {id} from "zod/v4/locales";
-
 const apiRoutes = {
   health: (): string => ["health"].join("/"),
   agencies: {
@@ -30,7 +28,10 @@ const pagesRoutes = {
     list: (): string => "/brokers",
     details: (id: string): string => ["/brokers", id].join("/"),
   },
-  blog: (): string => "/blog",
+  blog: {
+    list: (): string => "/blog",
+    details: (slug: string): string => ["/blog", slug].join("/"),
+  },
   properties: {
     list: (): string => "/properties",
     details: (id: string): string => ["/properties", id].join("/"),
