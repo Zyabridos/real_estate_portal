@@ -1,4 +1,43 @@
 {
+  "agencies": {
+    "list": {
+      "title": "Agencies",
+      "subtitle": "Browse agencies from the backend.",
+      "ariaLabel": "Agencies list",
+      "cardsAriaLabel": "Agencies cards"
+    },
+    "details": {
+      "titleFallback": "Agency details",
+      "subtitle": "Agency details loaded from the backend.",
+      "ariaLabel": "Agency details"
+    },
+    "card": {
+      "orgNumberLabel": "Org number",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address",
+      "openDetailsAria": "Open agency details: {name}"
+    }
+  },
+  "brokers": {
+    "list": {
+      "title": "Brokers",
+      "subtitle": "Browse brokers from the backend. Filtering and paging will be added next."
+    },
+    "details": {
+      "titleFallback": "Broker details",
+      "subtitle": "Broker details loaded from the backend."
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Blog",
+      "subtitle": "Articles are loaded from Sanity CMS."
+    },
+    "details": {
+      "titleFallback": "Article",
+      "subtitle": "Article content is loaded from Sanity CMS."
+    }
+  },
   "home": {
     "title": "Frontend OK",
     "backendHealthLabel": "Backend health",
@@ -20,26 +59,6 @@
       },
       "titleFallback": "Property details",
       "subtitle": "Property details loaded from the backend."
-    }
-  },
-  "brokers": {
-    "list": {
-      "title": "Brokers",
-      "subtitle": "Browse brokers from the backend. Filtering and paging will be added next."
-    },
-    "details": {
-      "titleFallback": "Broker details",
-      "subtitle": "Broker details loaded from the backend."
-    }
-  },
-  "blog": {
-    "list": {
-      "title": "Blog",
-      "subtitle": "Articles are loaded from Sanity CMS."
-    },
-    "details": {
-      "titleFallback": "Article",
-      "subtitle": "Article content is loaded from Sanity CMS."
     }
   },
   "leads": {

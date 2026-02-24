@@ -1,4 +1,43 @@
 {
+  "agencies": {
+    "list": {
+      "title": "Meglerkontorer",
+      "subtitle": "Bla gjennom meglerkontorer fra backend.",
+      "ariaLabel": "Liste over meglerkontorer",
+      "cardsAriaLabel": "Kort for meglerkontorer"
+    },
+    "details": {
+      "titleFallback": "Detaljer for meglerkontor",
+      "subtitle": "Detaljer er lastet fra backend.",
+      "ariaLabel": "Detaljer for meglerkontor"
+    },
+    "card": {
+      "orgNumberLabel": "Org.nr",
+      "phoneLabel": "Telefon",
+      "addressLabel": "Adresse",
+      "openDetailsAria": "Åpne detaljer for meglerkontor: {name}"
+    }
+  },
+  "brokers": {
+    "list": {
+      "title": "Megetere",
+      "subtitle": "Bla gjennom meglere fra backend. Filtrering og paginering kommer senere."
+    },
+    "details": {
+      "titleFallback": "Meglerdetaljer",
+      "subtitle": "Meglerdetaljer lastet fra backend."
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Blogg",
+      "subtitle": "Artikler lastes fra Sanity CMS."
+    },
+    "details": {
+      "titleFallback": "Artikkel",
+      "subtitle": "Artikkelinnhold lastes fra Sanity CMS."
+    }
+  },
   "home": {
     "title": "Frontend OK",
     "backendHealthLabel": "Backend-status",
@@ -21,26 +60,6 @@
         "createLead": "Kontakt megler",
         "createLeadAria": "Send en forespørsel om denne boligen"
       }
-    }
-  },
-  "brokers": {
-    "list": {
-      "title": "Megetere",
-      "subtitle": "Bla gjennom meglere fra backend. Filtrering og paginering kommer senere."
-    },
-    "details": {
-      "titleFallback": "Meglerdetaljer",
-      "subtitle": "Meglerdetaljer lastet fra backend."
-    }
-  },
-  "blog": {
-    "list": {
-      "title": "Blogg",
-      "subtitle": "Artikler lastes fra Sanity CMS."
-    },
-    "details": {
-      "titleFallback": "Artikkel",
-      "subtitle": "Artikkelinnhold lastes fra Sanity CMS."
     }
   },
   "leads": {

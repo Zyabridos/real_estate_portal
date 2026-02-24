@@ -1,4 +1,43 @@
 {
+  "agencies": {
+    "list": {
+      "title": "Агентства",
+      "subtitle": "Просматривайте агентства из бэкенда.",
+      "ariaLabel": "Список агентств",
+      "cardsAriaLabel": "Карточки агентств"
+    },
+    "details": {
+      "titleFallback": "Детали агентства",
+      "subtitle": "Детали агентства загружены с бэкенда.",
+      "ariaLabel": "Детали агентства"
+    },
+    "card": {
+      "orgNumberLabel": "Орг. номер",
+      "phoneLabel": "Телефон",
+      "addressLabel": "Адрес",
+      "openDetailsAria": "Открыть детали агентства: {name}"
+    }
+  },
+  "brokers": {
+    "list": {
+      "title": "Брокеры",
+      "subtitle": "Список брокеров загружается с бэкенда. Фильтры и пагинация будут добавлены далее."
+    },
+    "details": {
+      "titleFallback": "Детали брокера",
+      "subtitle": "Детали брокера загружены с бэкенда."
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Блог",
+      "subtitle": "Статьи загружаются из Sanity CMS."
+    },
+    "details": {
+      "titleFallback": "Статья",
+      "subtitle": "Контент статьи загружается из Sanity CMS."
+    }
+  },
   "home": {
     "title": "Фронтенд работает",
     "backendHealthLabel": "Состояние бэкенда",
@@ -27,26 +66,6 @@
           "backAria": "Назад к деталям объекта"
         }
       }
-    }
-  },
-  "brokers": {
-    "list": {
-      "title": "Брокеры",
-      "subtitle": "Список брокеров загружается с бэкенда. Фильтры и пагинация будут добавлены далее."
-    },
-    "details": {
-      "titleFallback": "Детали брокера",
-      "subtitle": "Детали брокера загружены с бэкенда."
-    }
-  },
-  "blog": {
-    "list": {
-      "title": "Блог",
-      "subtitle": "Статьи загружаются из Sanity CMS."
-    },
-    "details": {
-      "titleFallback": "Статья",
-      "subtitle": "Контент статьи загружается из Sanity CMS."
     }
   },
   "leads": {
