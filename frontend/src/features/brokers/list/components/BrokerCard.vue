@@ -4,19 +4,21 @@ import { RouterLink } from "vue-router";
 
 import type { BrokerListItemDto } from "@/features/brokers/api/dtos/broker-list-item.dto";
 
+import routes from "@/shared/routes.ts";
+
 type Props = {
   broker: BrokerListItemDto;
 };
 
 const props = defineProps<Props>();
 
-const detailsTo = computed(() => `/brokers/${props.broker.id}`);
+const detailsTo = computed(() => routes.app.brokers.details(props.broker.id));
 </script>
 
 <template>
   <article
     class="rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-    role="listitem"
+    role="article"
     :aria-label="$t('pages:brokers.list.cardAriaLabel', { id: broker.id })"
     :data-testid="`broker-card-${broker.id}`"
   >
