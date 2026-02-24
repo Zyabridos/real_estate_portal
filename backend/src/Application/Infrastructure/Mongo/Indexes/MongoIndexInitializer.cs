@@ -25,8 +25,20 @@ public sealed class MongoIndexInitializer : IHostedService
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
 
+        var agencies = db.GetCollection<Agency>(MongoCollectionNames.Agencies);
         var properties = db.GetCollection<Property>(MongoCollectionNames.Properties);
         var leads = db.GetCollection<Lead>(MongoCollectionNames.Leads);
+        
+        // Agencies
+        await agencies.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<Agency>(Builders<Agency>.IndexKeys.Ascending(x => x.Id)),
+            new CreateIndexModel<Agency>(Builders<Agency>.IndexKeys.Ascending(x => x.OrgNumber)),
+            new CreateIndexModel<Agency>(Builders<Agency>.IndexKeys.Descending(x => x.CreatedAt)),
+            new CreateIndexModel<Agency>(Builders<Agency>.IndexKeys
+                .Ascending(x => x.Id)
+                .Descending(x => x.CreatedAt))
+        }, cancellationToken);
 
         // Properties
         await properties.Indexes.CreateManyAsync(new[]

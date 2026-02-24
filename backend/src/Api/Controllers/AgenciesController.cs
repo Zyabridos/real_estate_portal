@@ -1,49 +1,48 @@
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
-using RealEstate.Api.Swagger.Examples.Leads;
-using RealEstate.Application.Common;
+using RealEstate.Api.Swagger.Examples.Agencies;
 using RealEstate.Api.Common;
-using RealEstate.Application.Features.Leads.Contracts;
-using RealEstate.Application.Features.Leads.Create;
-using RealEstate.Application.Features.Leads.List;
-using RealEstate.Application.Features.Leads.Update;
-
-using RealEstate.Application.Features.Leads.GetById;
+using RealEstate.Application.Common;
+using RealEstate.Application.Features.Agencies.Contracts;
+using RealEstate.Application.Features.Agencies.Create;
+using RealEstate.Application.Features.Agencies.GetById;
+using RealEstate.Application.Features.Agencies.List;
+using RealEstate.Application.Features.Agencies.Update;
 
 namespace RealEstate.Api.Controllers;
 
 [ApiController]
-[Route("api/leads")]
-public sealed class LeadsController : ControllerBase
+[Route("api/agencies")]
+public sealed class AgenciesController : ControllerBase
 {
-    private readonly ILeadService _service;
-    private const string EntityName = "Lead";
+    private readonly IAgencyService _service;
+    private const string EntityName = "Agency";
 
-    public LeadsController(ILeadService service)
+    public AgenciesController(IAgencyService service)
     {
         _service = service;
     }
 
-    // GET /api/leads?id=&propertyId=&fullName=&email=&phoneNumber=&page=&pageSize=&sortBy=&sortDirection=
+    // GET /api/agencies?id=&name=&orgNumber=&city=&page=&pageSize=&sortBy=&sortDirection=
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<LeadListItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<AgencyListItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(LeadListResponseExample))]
-    public async Task<ActionResult<PagedResult<LeadListItemDto>>> GetList(
-        [FromQuery] LeadListQuery query,
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(AgencyListResponseExample))]
+    public async Task<ActionResult<PagedResult<AgencyListItemDto>>> GetList(
+        [FromQuery] AgencyListQuery query,
         CancellationToken ct)
     {
         var result = await _service.GetListAsync(query, ct);
         return Ok(result);
     }
 
-    // GET /api/leads/{id}
+    // GET /api/agencies/{id}
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(LeadDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AgencyDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(LeadDetailsResponseExample))]
-    public async Task<ActionResult<LeadDetailsDto>> GetById(string id, CancellationToken ct)
+    [SwaggerResponseExample(StatusCodes.Status200OK, typeof(AgencyDetailsResponseExample))]
+    public async Task<ActionResult<AgencyDetailsDto>> GetById(string id, CancellationToken ct)
     {
         var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
         if (bad is not null) return bad;
@@ -54,12 +53,12 @@ public sealed class LeadsController : ControllerBase
         return Ok(dto);
     }
 
-    // POST /api/leads
+    // POST /api/ageincies
     [HttpPost]
-    [ProducesResponseType(typeof(LeadDetailsDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(AgencyDetailsDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LeadDetailsDto>> Create(
-        [FromBody] CreateLeadRequest request,
+    public async Task<ActionResult<AgencyDetailsDto>> Create(
+        [FromBody] CreateAgencyRequest request,
         CancellationToken ct)
     {
         var created = await _service.CreateAsync(request, ct);
@@ -69,15 +68,15 @@ public sealed class LeadsController : ControllerBase
             new { id = created.Id.ToString() },
             created);
     }
-
-    // PUT /api/leads/{id}
+    
+    // PUT /api/agencies/{id}
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(LeadDetailsDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(AgencyDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LeadDetailsDto>> Update(
+    public async Task<ActionResult<AgencyDetailsDto>> Update(
         string id,
-        [FromBody] UpdateLeadRequest request,
+        [FromBody] UpdateAgencyRequest request,
         CancellationToken ct)
     {
         var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
@@ -89,10 +88,10 @@ public sealed class LeadsController : ControllerBase
         return Ok(updated);
     }
 
-    // DELETE /api/leads/{id}
+    // DELETE /api/agencies/{id}
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(string id, CancellationToken ct)
     {

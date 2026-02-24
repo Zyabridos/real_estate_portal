@@ -35,6 +35,14 @@ MongoDB is used for **business data only**
 
 ---
 
+
+## Prerequisites
+
+This project is designed to be developed and tested using Docker.  
+Most dependencies (MongoDB, test containers, etc.) run inside containers, so Docker is the recommended setup.
+
+- Docker (required for integration tests)
+
 ## MongoDB Configuration
 The API uses the Options pattern for MongoDB configuration.
 
@@ -47,12 +55,33 @@ Then adjust the values according to your local environment:
 nano src/Api/appsettings.json
 ```
 
-## Prerequisites
+## Dependency Injection conventions (Scrutor scanning)
 
-This project is designed to be developed and tested using Docker.  
-Most dependencies (MongoDB, test containers, etc.) run inside containers, so Docker is the recommended setup.
+### Naming rules (must follow)
 
-- Docker (required for integration tests)
+To be discovered automatically, types must follow these conventions:
+
+1. Services
+
+- Implementation class must end with Service (e.g. PropertyService)
+- Interface must be named exactly I{ClassName} (e.g. IPropertyService)
+
+2. Repositories
+
+- Implementation class must end with Repository (e.g. PropertyRepository)
+- Interface must be named exactly I{ClassName} (e.g. IPropertyRepository)
+
+3. Visibility
+
+- Types must be public and non-abstract
+
+### Assembly anchors (important)
+
+FluentValidation and AutoMapper need a reference point to know which assembly to scan at startup.
+Currently used `PropertyService` as that reference (an “assembly anchor”) to register all validators and mapping profiles from the Application layer.
+
+**Rule:** keep `PropertyService` (and the core mapping profile(s), e.g. `PropertyMappingProfile`) stable and “always present”.  
+If you rename/move/remove these types or relocate the Properties feature to another project, update the anchor accordingly — otherwise validators/profiles may stop being discovered and you’ll see runtime DI or mapping errors.
 
 ## Notes
 - This project is educational but production-oriented

@@ -28,9 +28,17 @@ public sealed class CreateLeadRequestValidator : AbstractValidator<CreateLeadReq
                 .MaximumLength(20);
         });
 
-        RuleFor(x => x)
-            .Must(x => !string.IsNullOrWhiteSpace(x.Email) || !string.IsNullOrWhiteSpace(x.PhoneNumber))
-            .WithMessage("Either Email or PhoneNumber must be provided.");
+        RuleFor(x => x).Custom((req, ctx) =>
+        {
+            var hasEmail = !string.IsNullOrWhiteSpace(req.Email);
+            var hasPhone = !string.IsNullOrWhiteSpace(req.PhoneNumber);
+
+            if (!hasEmail && !hasPhone)
+            {
+                ctx.AddFailure(nameof(req.Email), "Provide either Email or PhoneNumber.");
+                ctx.AddFailure(nameof(req.PhoneNumber), "Provide either Email or PhoneNumber.");
+            }
+        });
 		
 		RuleFor(x => x.Message)
             .MaximumLength(2000);
