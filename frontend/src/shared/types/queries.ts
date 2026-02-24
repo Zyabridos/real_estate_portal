@@ -1,3 +1,5 @@
+import {string} from "zod";
+
 export type SortDirection = "asc" | "desc";
 export interface PropertiesListQuery {
   id?: string
@@ -18,9 +20,11 @@ export interface BrokersListQuery {
   lastName?: string;
   agencyId?: string;
   email?: string;
+
   phoneNumber?: string;
   page?: number;
   pageSize?: number;
+
   sortBy?: string;
   sortDirection?: SortDirection | null;
 }
@@ -37,4 +41,17 @@ export type LeadsListQuery = {
 
   sortBy?: string | null;
   sortDirection?: SortDirection | null;
+};
+
+export type AgenciesListQuery = {
+  id?: string | null;
+  orgNumber?: string | null;
+  name?: string | null;
+  phoneNumber?: string | null;
+  city?: string | null;
+  street?: string | null;
+  zipCode?: string | null;
+
+  page?: number | null;
+  pageSize?: number | null;
 };
