@@ -7,7 +7,7 @@ import type { LoadingStateProps } from "@/shared/types/states";
 const props = defineProps<LoadingStateProps>();
 
 const resolvedTitle = computed(
-  () => props.title?.trim() || i18n.t("states:loading.title")
+  () => props.title?.trim() || i18n.t("states:loading.genericTitle")
 );
 
 const testId = computed(() => props.testId?.trim() || "loading-state");

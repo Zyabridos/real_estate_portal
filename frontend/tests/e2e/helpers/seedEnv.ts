@@ -1,12 +1,12 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
 const parseEnvFile = (content: string): Record<string, string> => {
   const out: Record<string, string> = {};
-
   for (const line of content.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
@@ -18,27 +18,51 @@ const parseEnvFile = (content: string): Record<string, string> => {
     const value = trimmed.slice(idx + 1).trim();
     out[key] = value;
   }
-
   return out;
 };
 
-export function getSeedPropertyId(): string {
-  const repoRoot = path.resolve(__dirname, "../../../..");
-  const seedEnvPath = path.join(repoRoot, "scripts/.seed/seed.env");
+function findSeedEnvPath(repoRoot: string): string {
+  const candidates = [
+    path.join(repoRoot, "scripts/.seed/seed.env"), // основной путь (как в твоих seed-скриптах)
+    path.join(repoRoot, ".env.seed"),              // fallback, если ты это используешь
+    path.join(repoRoot, ".seed/seed.env"),         // fallback (если вдруг поменяешь структуру)
+  ];
 
-  if (!fs.existsSync(seedEnvPath)) {
+  const existing = candidates.find((p) => fs.existsSync(p));
+  if (!existing) {
     throw new Error(
-      `seed.env not found at: ${seedEnvPath}. Ensure the path is correct and you have seeded the DB`
+      `seed env file not found. Tried:\n- ${candidates.join("\n- ")}\nRun seeding first (e.g. make seed).`
     );
   }
 
-  const content = fs.readFileSync(seedEnvPath, "utf-8");
-  const env = parseEnvFile(content);
+  return existing;
+}
 
+function readSeedEnv(): Record<string, string> {
+  const repoRoot = path.resolve(__dirname, "../../../..");
+  const seedEnvPath = findSeedEnvPath(repoRoot);
+
+  const content = fs.readFileSync(seedEnvPath, "utf-8");
+  return parseEnvFile(content);
+}
+
+export function getSeedPropertyId(): string {
+  const env = readSeedEnv();
   const propertyId = env.PROPERTY_ID;
-  if (!propertyId) {
-    throw new Error(`PROPERTY_ID is missing in ${seedEnvPath}`);
+  if (!propertyId) throw new Error(`PROPERTY_ID is missing in seed env file`);
+  return propertyId;
+}
+
+export function getSeedAgencyIds(): { agency1Id: string; agency2Id: string; agency3Id: string } {
+  const env = readSeedEnv();
+
+  const a1 = env.AGENCY1_ID;
+  const a2 = env.AGENCY2_ID;
+  const a3 = env.AGENCY3_ID;
+
+  if (!a1 || !a2 || !a3) {
+    throw new Error(`AGENCY1_ID/AGENCY2_ID/AGENCY3_ID missing in seed env file`);
   }
 
-  return propertyId;
+  return { agency1Id: a1, agency2Id: a2, agency3Id: a3 };
 }

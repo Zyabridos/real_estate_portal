@@ -1,4 +1,72 @@
 {
+  "agencies": {
+    "list": {
+      "title": "Agencies",
+      "subtitle": "Browse agencies from the backend.",
+      "ariaLabel": "Agencies list",
+      "cardsAriaLabel": "Agencies cards"
+    },
+    "details": {
+      "titleFallback": "Agency details",
+      "subtitle": "Agency details loaded from the backend.",
+      "ariaLabel": "Agency details",
+
+      "missingAriaLabel": "Agency details error",
+      "missingAsideAriaLabel": "Help and tips",
+
+      "invalidId": {
+        "badge": "400 • Invalid link",
+        "title": "This agency link doesn’t look right",
+        "description": "The ID in the URL isn’t valid. Please go back to the agencies list and open an agency from there.",
+        "requestedIdLabel": "Requested agency ID",
+        "requestedIdEmpty": "(empty)",
+        "whatYouCanDoTitle": "What you can do",
+        "tip1": "Go back to the agencies list and select an agency.",
+        "tip2": "If you came from an external link, it might be incomplete or outdated.",
+        "tip3": "Avoid editing the URL manually — open details from the list instead.",
+        "note": "Tip: returning to the list is the safest way to navigate."
+      },
+
+      "notFound": {
+        "badge": "404 • Agency not found",
+        "title": "We couldn’t find this agency",
+        "description": "It may have been removed, or the link is outdated.",
+        "requestedIdLabel": "Requested agency ID",
+        "requestedIdEmpty": "(unknown)",
+        "whatYouCanDoTitle": "What you can do",
+        "tip1": "Go back to the agencies list and try a different agency.",
+        "tip2": "Refresh if the agency was created very recently.",
+        "tip3": "If you bookmarked this page, the ID may no longer exist.",
+        "note": "If you think this is a bug, you’ll be able to report it later."
+      }
+    },
+    "card": {
+      "orgNumberLabel": "Org number",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address",
+      "openDetailsAria": "Open agency details: {name}"
+    }
+  },
+  "brokers": {
+    "list": {
+      "title": "Brokers",
+      "subtitle": "Browse brokers from the backend. Filtering and paging will be added next."
+    },
+    "details": {
+      "titleFallback": "Broker details",
+      "subtitle": "Broker details loaded from the backend."
+    }
+  },
+  "blog": {
+    "list": {
+      "title": "Blog",
+      "subtitle": "Articles are loaded from Sanity CMS."
+    },
+    "details": {
+      "titleFallback": "Article",
+      "subtitle": "Article content is loaded from Sanity CMS."
+    }
+  },
   "home": {
     "title": "Frontend OK",
     "backendHealthLabel": "Backend health",
@@ -20,26 +88,6 @@
       },
       "titleFallback": "Property details",
       "subtitle": "Property details loaded from the backend."
-    }
-  },
-  "brokers": {
-    "list": {
-      "title": "Brokers",
-      "subtitle": "Browse brokers from the backend. Filtering and paging will be added next."
-    },
-    "details": {
-      "titleFallback": "Broker details",
-      "subtitle": "Broker details loaded from the backend."
-    }
-  },
-  "blog": {
-    "list": {
-      "title": "Blog",
-      "subtitle": "Articles are loaded from Sanity CMS."
-    },
-    "details": {
-      "titleFallback": "Article",
-      "subtitle": "Article content is loaded from Sanity CMS."
     }
   },
   "leads": {
@@ -83,20 +131,20 @@
     "error": "Something went wrong. Please try again.",
     "note": "We’ll use your contact details only to respond to this request."
   },
-  "system": {
-    "notFound": {
-      "badge": "404 • Page not found",
-      "title": "We couldn’t find that page",
-      "description": "The page you’re looking for doesn’t exist or may have been moved. Check the URL or use the navigation below.",
-      "requestedPathLabel": "Requested path",
-      "requestedPathUnknown": "(unknown)",
-      "whatYouCanDoTitle": "What you can do",
-      "tips": {
-        "checkUrl": "Double-check the URL for typos.",
-        "useNavigation": "Use the main navigation at the top.",
-        "startFromProperties": "Start from Properties and refine filters."
-      },
-      "note": "If you believe this is a bug, you will be able to send us a report eventually."
-    }
+  "notFound": {
+    "ariaLabel": "Page not found",
+    "badge": "404 • Page not found",
+    "title": "We couldn’t find that page",
+    "description": "The page you’re looking for doesn’t exist or may have been moved. Check the URL or use the navigation below.",
+    "requestedPathLabel": "Requested path",
+    "requestedPathUnknown": "(unknown)",
+    "goHome": "Go to Home",
+    "goHomeAria": "Go to the Home page",
+    "asideAriaLabel": "Help and tips",
+    "whatYouCanDoTitle": "What you can do",
+    "tip1": "Double-check the URL for typos.",
+    "tip2": "Use the main navigation at the top.",
+    "tip3": "Start from Properties and refine filters.",
+    "note": "If you think this is a bug, you’ll be able to report it later."
   }
 }

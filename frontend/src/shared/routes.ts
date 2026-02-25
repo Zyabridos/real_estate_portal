@@ -1,7 +1,9 @@
-import {id} from "zod/v4/locales";
-
 const apiRoutes = {
   health: (): string => ["health"].join("/"),
+  agencies: {
+    list: (): string => ["agencies"].join("/"),
+    getById: (id: string): string => ["agencies", id].join("/"),
+  },
   properties: {
     list: (): string => ["properties"].join("/"),
     getById: (id: string): string => ["properties", id].join("/"),
@@ -12,17 +14,24 @@ const apiRoutes = {
   },
   leads: {
     create: (): string => ["leads"].join("/"),
-    getById: (leadId: string): string => ["/leads", leadId].join("/"),
+    getById: (id: string): string => ["/leads", id].join("/"),
   },
 };
 
 const pagesRoutes = {
   home: (): string => "/",
+  agencies: {
+    list: (): string => "/agencies",
+    details: (id: string): string => ["/agencies", id].join("/"),
+  },
   brokers: {
     list: (): string => "/brokers",
     details: (id: string): string => ["/brokers", id].join("/"),
   },
-  blog: (): string => "/blog",
+  blog: {
+    list: (): string => "/blog",
+    details: (slug: string): string => ["/blog", slug].join("/"),
+  },
   properties: {
     list: (): string => "/properties",
     details: (id: string): string => ["/properties", id].join("/"),

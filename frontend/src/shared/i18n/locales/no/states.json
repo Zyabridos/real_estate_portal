@@ -1,15 +1,16 @@
 {
   "loading": {
     "genericTitle": "Laster…",
-    "propertyDetailsTitle": "Laster bolig…",
-    "brokerDetailsTitle": "Laster megler…"
+    "propertyDetailsTitle": "Laster boligdetaljer…",
+    "brokerDetailsTitle": "Laster meglerdetaljer…",
+    "ariaLabel": "Laster"
   },
   "empty": {
     "title": "Ingen resultater",
-    "message": "Fant ingen elementer for gjeldende valg."
+    "message": "Vi fant ingen treff som matcher valget ditt."
   },
   "error": {
-    "title": "Noe gikk galt",
-    "message": "Vennligst prøv igjen."
+    "title": "Vi kunne ikke laste dette",
+    "message": "Prøv igjen, eller oppdater siden."
   }
 }

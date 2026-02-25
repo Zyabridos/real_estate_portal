@@ -5,6 +5,9 @@ import routes from "@/shared/routes.ts"
 import HomePage from "@/app/HomePage.vue";
 import NotFoundPage from "@/features/system/not-found/page/NotFoundPage.vue";
 
+import AgencyDetailsPage from "@/features/agencies/details/page/AgencyDetailsPage.vue";
+import AgenciesListPage from "@/features/agencies/list/page/AgenciesListPage.vue";
+
 import BlogListPage from "@/features/blog/list/page/BlogListPage.vue";
 import BlogDetailsPage from "@/features/blog/details/page/BlogDetailsPage.vue";
 
@@ -20,16 +23,19 @@ import PropertyDetailsPage from "@/features/properties/details/page/PropertyDeta
 const routeRecords: RouteRecordRaw[] = [
   { path: "/", name: "home", component: HomePage },
 
-  { path: "/blog", name: "blog", component: BlogListPage },
+  { path: routes.app.agencies.list(), name: "agencies", component: AgenciesListPage },
+  { path: "/agencies/:id", name: "agency-details", component: AgencyDetailsPage },
+
+  { path: routes.app.blog.list(), component: BlogListPage },
   { path: "/blog/:slug", name: "blog-details", component: BlogDetailsPage },
 
-  { path: "/brokers", name: "brokers", component: BrokersListPage },
+  { path: routes.app.brokers.list(), name: "brokers", component: BrokersListPage },
   { path: "/brokers/:id", name: "broker-details", component: BrokerDetailsPage },
 
-  { path: "/properties/:id/lead/", name: "leads-form", component: PropertyLeadCreatePage },
   { path: routes.app.leads.list(), name: "leads-list", component: LeadsListPage },
+  { path: "/properties/:id/lead/", name: "leads-form", component: PropertyLeadCreatePage },
 
-  { path: "/properties", name: "properties", component: PropertiesListPage },
+  { path: routes.app.properties.list(), name: "properties", component: PropertiesListPage },
   { path: "/properties/:id", name: "property-details", component: PropertyDetailsPage },
 
   { path: "/:pathMatch(.*)*", name: "notFound", component: NotFoundPage },

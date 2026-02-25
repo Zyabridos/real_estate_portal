@@ -6,14 +6,11 @@ source "${SCRIPT_DIR}/../../lib/config.sh"
 source "${SCRIPT_DIR}/../../lib/log.sh"
 
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
+BROKERS_ENDPOINT="/api/brokers"
 HEALTH_PATH="${HEALTH_PATH:-/api/health}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
 
 SEED_BROKERS_COUNT="${SEED_BROKERS_COUNT:-22}"
-
-AGENCY1_ID="${SEED_AGENCY1_ID:-aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa}"
-AGENCY2_ID="${SEED_AGENCY2_ID:-bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb}"
-AGENCY3_ID="${SEED_AGENCY3_ID:-cccccccc-cccc-cccc-cccc-cccccccccccc}"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || { error "Missing required command: $1"; exit 1; }
@@ -25,6 +22,16 @@ require_cmd python3
 seed_dir="${SCRIPT_DIR}/../../.seed"
 seed_env="${seed_dir}/seed.env"
 mkdir -p "${seed_dir}"
+
+# аккуратно source при set -u
+source_seed_env_if_exists() {
+  if [[ -f "${seed_env}" ]]; then
+    set +u
+    # shellcheck disable=SC1090
+    source "${seed_env}"
+    set -u
+  fi
+}
 
 assert_json() {
   local label="$1"
@@ -71,13 +78,40 @@ http_post_json() {
   return 22
 }
 
-neutral "Seeding brokers (3 agencies)"
+http_delete() {
+  local url="$1"
+  local resp status
+  resp="$(curl -sS -i -X DELETE "$url" || true)"
+  status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
+  if [[ "$status" =~ ^2 ]] || [[ "$status" == "404" ]]; then
+    return 0
+  fi
+  warn "[seed] DELETE failed: $url (status=$status)"
+  printf '%s\n' "$resp" | head -n 80
+  return 0
+}
+
+# ---- main ----
+
+neutral "Seeding brokers (distributed across 3 agencies)"
 neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
+# Берём реальные agency ids из seed.env
+source_seed_env_if_exists
+
+: "${AGENCY1_ID:?Missing AGENCY1_ID. Run seed_agencies.sh first (or make seed).}"
+: "${AGENCY2_ID:?Missing AGENCY2_ID. Run seed_agencies.sh first (or make seed).}"
+: "${AGENCY3_ID:?Missing AGENCY3_ID. Run seed_agencies.sh first (or make seed).}"
+
+# (необязательно, но полезно) Проверяем, что agencies реально существуют
+curl -fsS "${BACKEND_URL}/api/agencies/${AGENCY1_ID}" >/dev/null || { error "[seed] AGENCY1_ID not found: ${AGENCY1_ID}"; exit 1; }
+curl -fsS "${BACKEND_URL}/api/agencies/${AGENCY2_ID}" >/dev/null || { error "[seed] AGENCY2_ID not found: ${AGENCY2_ID}"; exit 1; }
+curl -fsS "${BACKEND_URL}/api/agencies/${AGENCY3_ID}" >/dev/null || { error "[seed] AGENCY3_ID not found: ${AGENCY3_ID}"; exit 1; }
+
 neutral "Clearing existing brokers"
-brokers_json="$(curl -fsS "${BACKEND_URL}/api/brokers?page=1&pageSize=${PAGE_SIZE}" || true)"
+brokers_json="$(curl -fsS "${BACKEND_URL}${BROKERS_ENDPOINT}?page=1&pageSize=${PAGE_SIZE}" || true)"
 
 broker_ids=""
 if [[ -n "${brokers_json}" ]] && printf '%s' "$brokers_json" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
@@ -89,7 +123,7 @@ fi
 if [[ -n "${broker_ids}" ]]; then
   while IFS= read -r id; do
     [[ -z "$id" ]] && continue
-    curl -fsS -X DELETE "${BACKEND_URL}/api/brokers/${id}" >/dev/null || true
+    http_delete "${BACKEND_URL}${BROKERS_ENDPOINT}/${id}" || true
   done <<< "${broker_ids}"
   success "[seed] Brokers cleared: $(echo "${broker_ids}" | wc -l | tr -d ' ')"
 else
@@ -126,11 +160,10 @@ while [[ "${i}" -le "${SEED_BROKERS_COUNT}" ]]; do
   email="broker${i}.seed@broker.no"
   phone=$(printf "+47 900 %02d %03d" $(((i-1) / 100)) $(((i-1) % 1000)))
 
-  # distribute across agencies by round-robin: 1,2,3,1,2,3...
   agency_id="${agencies[$(((i-1) % ${#agencies[@]}))]}"
 
-  resp="$(http_post_json "${BACKEND_URL}/api/brokers" "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${email}" "${phone}")")"
-  assert_json "POST /api/brokers #${i}" "${resp}"
+  resp="$(http_post_json "${BACKEND_URL}${BROKERS_ENDPOINT}" "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${email}" "${phone}")")"
+  assert_json "POST ${BROKERS_ENDPOINT} #${i}" "${resp}"
 
   id="$(printf '%s' "${resp}" | json_field "id")"
   created_ids+=("${id}")
@@ -140,16 +173,17 @@ done
 
 success "[seed] Brokers created: ${#created_ids[@]}"
 
-broker1_id="${created_ids[0]}"
-broker2_id="${created_ids[1]}"
-broker3_id="${created_ids[2]}"
-
+broker1_id="${created_ids[0]:-}"
+broker2_id="${created_ids[1]:-}"
+broker3_id="${created_ids[2]:-}"
 all_ids_csv="$(IFS=,; echo "${created_ids[*]}")"
+all_agency_ids_csv="$(IFS=,; echo "${AGENCY1_ID},${AGENCY2_ID},${AGENCY3_ID}")"
 
 {
   echo "AGENCY1_ID=${AGENCY1_ID}"
   echo "AGENCY2_ID=${AGENCY2_ID}"
   echo "AGENCY3_ID=${AGENCY3_ID}"
+  echo "ALL_AGENCY_IDS=${all_agency_ids_csv}"
   echo "BROKER1_ID=${broker1_id}"
   echo "BROKER2_ID=${broker2_id}"
   echo "BROKER3_ID=${broker3_id}"

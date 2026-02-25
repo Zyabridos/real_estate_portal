@@ -6,10 +6,9 @@ source "${SCRIPT_DIR}/../../lib/config.sh"
 source "${SCRIPT_DIR}/../../lib/log.sh"
 
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
+AGENCIES_ENDPOINT="/api/agencies"
 HEALTH_PATH="${HEALTH_PATH:-/api/health}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
-
-SEED_BROKERS_PER_AGENCY="${SEED_BROKERS_PER_AGENCY:-6}"
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || { error "Missing required command: $1"; exit 1; }
@@ -80,13 +79,12 @@ http_delete() {
   return 0
 }
 
-neutral "Seeding agencies + brokers (3 agencies)"
+neutral "Seeding agencies (3 agencies)"
 neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
-
-
+# Чтобы можно было удалить agencies без “хвостов” — чистим brokers
 neutral "Clearing existing brokers"
 brokers_json="$(curl -fsS "${BACKEND_URL}/api/brokers?page=1&pageSize=${PAGE_SIZE}" || true)"
 broker_ids=""
@@ -106,10 +104,8 @@ else
   warn "[seed] No brokers to clear"
 fi
 
-
-
 neutral "Clearing existing agencies"
-agencies_json="$(curl -fsS "${BACKEND_URL}/api/agencies?page=1&pageSize=${PAGE_SIZE}" || true)"
+agencies_json="$(curl -fsS "${BACKEND_URL}${AGENCIES_ENDPOINT}?page=1&pageSize=${PAGE_SIZE}" || true)"
 agency_ids=""
 if [[ -n "${agencies_json}" ]] && printf '%s' "$agencies_json" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
   agency_ids="$(printf '%s' "${agencies_json}" | extract_ids_from_paged || true)"
@@ -120,7 +116,7 @@ fi
 if [[ -n "${agency_ids}" ]]; then
   while IFS= read -r id; do
     [[ -z "$id" ]] && continue
-    http_delete "${BACKEND_URL}/api/agencies/${id}" || true
+    http_delete "${BACKEND_URL}${AGENCIES_ENDPOINT}/${id}" || true
   done <<< "${agency_ids}"
   success "[seed] Agencies cleared: $(echo "${agency_ids}" | wc -l | tr -d ' ')"
 else
@@ -144,19 +140,19 @@ PY
 
 neutral "Creating 3 agencies"
 
-a1_resp="$(http_post_json "${BACKEND_URL}/api/agencies" "$(create_agency_payload \
+a1_resp="$(http_post_json "${BACKEND_URL}${AGENCIES_ENDPOINT}" "$(create_agency_payload \
   "Nordic Homes AS" "912345678" "+47 73 10 00 01" "Trondheim" "Kjøpmannsgata 10" "7013")")"
-assert_json "POST /api/agencies #1" "${a1_resp}"
+assert_json "POST ${AGENCIES_ENDPOINT} #1" "${a1_resp}"
 AGENCY1_ID="$(printf '%s' "${a1_resp}" | json_field "id")"
 
-a2_resp="$(http_post_json "${BACKEND_URL}/api/agencies" "$(create_agency_payload \
+a2_resp="$(http_post_json "${BACKEND_URL}${AGENCIES_ENDPOINT}" "$(create_agency_payload \
   "Fjord Realty AS" "923456789" "+47 55 20 00 02" "Bergen" "Bryggen 5" "5003")")"
-assert_json "POST /api/agencies #2" "${a2_resp}"
+assert_json "POST ${AGENCIES_ENDPOINT} #2" "${a2_resp}"
 AGENCY2_ID="$(printf '%s' "${a2_resp}" | json_field "id")"
 
-a3_resp="$(http_post_json "${BACKEND_URL}/api/agencies" "$(create_agency_payload \
+a3_resp="$(http_post_json "${BACKEND_URL}${AGENCIES_ENDPOINT}" "$(create_agency_payload \
   "Oslo Living AS" "934567890" "+47 22 30 00 03" "Oslo" "Karl Johans gate 1" "0154")")"
-assert_json "POST /api/agencies #3" "${a3_resp}"
+assert_json "POST ${AGENCIES_ENDPOINT} #3" "${a3_resp}"
 AGENCY3_ID="$(printf '%s' "${a3_resp}" | json_field "id")"
 
 success "[seed] Agencies created"
@@ -164,85 +160,13 @@ success "  agency1=${AGENCY1_ID}"
 success "  agency2=${AGENCY2_ID}"
 success "  agency3=${AGENCY3_ID}"
 
-# Create brokers per agency
-create_broker_payload() {
-  local agency_id="$1" first="$2" last="$3" email="$4" phone="$5"
-  python3 - <<PY
-import json
-print(json.dumps({
-  "agencyId": "${agency_id}",
-  "firstName": "${first}",
-  "lastName": "${last}",
-  "email": "${email}",
-  "phoneNumber": "${phone}",
-  "photoUrl": None
-}))
-PY
-}
-
-first_names=("Ola" "Kari" "Anders" "Ingrid" "Erik" "Nora" "Jonas" "Maja" "Lars" "Emma" "Sindre" "Hanna")
-last_names=("Nordmann" "Hansen" "Johansen" "Olsen" "Larsen" "Andersen" "Nilsen" "Berg" "Haugen" "Moen" "Dahl" "Solberg")
-
-neutral "Creating brokers: ${SEED_BROKERS_PER_AGENCY} per agency (total: $((SEED_BROKERS_PER_AGENCY * 3)))"
-
-created_ids=()
-agency1_broker_ids=()
-agency2_broker_ids=()
-agency3_broker_ids=()
-
-global_i=1
-
-create_n_brokers_for_agency() {
-  local agency_id="$1"
-  local agency_label="$2"
-
-  local j=1
-  while [[ "${j}" -le "${SEED_BROKERS_PER_AGENCY}" ]]; do
-    local first last email phone resp id
-
-    first="${first_names[$(((global_i-1) % ${#first_names[@]}))]}"
-    last="${last_names[$(((global_i-1) % ${#last_names[@]}))]}"
-    email="broker${global_i}.${agency_label}.seed@broker.no"
-    phone=$(printf "+47 9%02d %02d %03d" $(((global_i-1) / 100)) $(((global_i-1) % 100)) $(((global_i-1) % 1000)))
-
-    resp="$(http_post_json "${BACKEND_URL}/api/brokers" "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${email}" "${phone}")")"
-    assert_json "POST /api/brokers (${agency_label}) #${j}" "${resp}"
-
-    id="$(printf '%s' "${resp}" | json_field "id")"
-    created_ids+=("${id}")
-
-    printf '%s\n' "${id}"
-
-    global_i=$((global_i+1))
-    j=$((j+1))
-  done
-}
-
-create_n_brokers_for_agency "${AGENCY1_ID}" "agency1" agency1_broker_ids
-create_n_brokers_for_agency "${AGENCY2_ID}" "agency2" agency2_broker_ids
-create_n_brokers_for_agency "${AGENCY3_ID}" "agency3" agency3_broker_ids
-
-success "[seed] Brokers created: ${#created_ids[@]}"
-success "  agency1 brokers: ${#agency1_broker_ids[@]}"
-success "  agency2 brokers: ${#agency2_broker_ids[@]}"
-success "  agency3 brokers: ${#agency3_broker_ids[@]}"
-
-# Save IDs to .seed/seed.env
 all_agency_ids_csv="$(IFS=,; echo "${AGENCY1_ID},${AGENCY2_ID},${AGENCY3_ID}")"
-all_broker_ids_csv="$(IFS=,; echo "${created_ids[*]}")"
-while IFS= read -r id; do agency1_broker_ids+=("$id"); done < <(create_n_brokers_for_agency "${AGENCY1_ID}" "agency1")
-while IFS= read -r id; do agency2_broker_ids+=("$id"); done < <(create_n_brokers_for_agency "${AGENCY2_ID}" "agency2")
-while IFS= read -r id; do agency3_broker_ids+=("$id"); done < <(create_n_brokers_for_agency "${AGENCY3_ID}" "agency3")
 
 {
   echo "AGENCY1_ID=${AGENCY1_ID}"
   echo "AGENCY2_ID=${AGENCY2_ID}"
   echo "AGENCY3_ID=${AGENCY3_ID}"
   echo "ALL_AGENCY_IDS=${all_agency_ids_csv}"
-  echo "ALL_BROKER_IDS=${all_broker_ids_csv}"
-  echo "AGENCY1_BROKER_IDS=$(IFS=,; echo "${agency1_broker_ids[*]}")"
-  echo "AGENCY2_BROKER_IDS=$(IFS=,; echo "${agency2_broker_ids[*]}")"
-  echo "AGENCY3_BROKER_IDS=$(IFS=,; echo "${agency3_broker_ids[*]}")"
 } > "${seed_env}"
 
-success "[seed] Saved ids to ${seed_env}"
+success "[seed] Saved agency ids to ${seed_env}"

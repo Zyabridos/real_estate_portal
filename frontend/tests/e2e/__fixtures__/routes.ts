@@ -6,6 +6,11 @@ const withQuery = (path: string, query?: string): string => {
 };
 
 export const routes = {
+  agencies: {
+    list: (query?: string) => withQuery([pathBase, "agencies"].join("/"), query),
+    details: (id: string) => [pathBase, "agencies", id].join("/"),
+  },
+
   blog: {
     list: (query?: string) => withQuery([pathBase, "blog"].join("/"), query),
     details: (slug: string) => [pathBase, "blog", slug].join("/"),

@@ -1,4 +1,26 @@
 export const testIds = {
+  states: {
+    errorTitle: "error-title",
+    errorMessage: "error-message",
+    retryButton: "retry-button",
+  },
+
+  agencies: {
+    listPage: "agencies-list-page",
+    detailsPage: "agency-details-page",
+    errorState: "error-state",
+
+    pageTitle: "page-title",
+    detailsCard: "agency-details-card",
+
+    refreshButton: "refresh-button",
+    backToListButton: "back-to-list-button",
+
+    viewDetails: "agency-view-details",
+
+    card: (id: string) => `agency-card-${id}`,
+  },
+
   blog: {
     list: "blog-articles-list",
     categorySelect: "blog-category-select",

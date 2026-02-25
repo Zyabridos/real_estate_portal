@@ -13,6 +13,11 @@ export const apiRoutes = {
   health: {
     path: () => "/api/health",
   },
+  agencies: {
+    path: () => "/api/agencies",
+    byId: (id: string) => `/api/agencies/${id}`,
+    pattern: () => /\/api\/agencies(\/[^/?]+)?(\?.*)?$/,
+  },
   leads: {
     path: () => "/api/leads",
     byId: (id: string) => `/api/leads/${id}`,
