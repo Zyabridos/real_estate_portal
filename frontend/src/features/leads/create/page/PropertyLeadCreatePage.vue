@@ -67,10 +67,10 @@ async function onSubmit(values: LeadFormValues) {
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="lead-create-title">
-            {{ $t("pages:properties.details.leads.pageTitle") }}
+            {{ $t("pages:leads.title") }}
           </h1>
           <p class="mt-1 text-sm text-slate-600" data-testid="lead-create-subtitle">
-            {{ $t("pages:properties.details.leads.pageSubtitle") }}
+            {{ $t("pages:leads.subtitle") }}
           </p>
         </div>
 
@@ -80,9 +80,9 @@ async function onSubmit(values: LeadFormValues) {
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-details-button"
             @click="goBackToDetails"
-            :aria-label="$t('pages:properties.details.leads.actions.backAria')"
+            :aria-label="$t('pages:leads.actions.backArea')"
           >
-            {{ $t("pages:properties.details.leads.actions.back") }}
+            {{ $t("pages:leads.actions.back") }}
           </button>
         </div>
       </div>

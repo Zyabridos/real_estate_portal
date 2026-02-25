@@ -43,10 +43,10 @@ defineExpose({
   >
     <header class="mb-4">
       <h3 class="text-lg font-semibold text-slate-900" data-testid="lead-form-title">
-        {{ $t("pages:leads.title") }}
+        {{ $t("forms:lead.title") }}
       </h3>
       <p class="mt-1 text-sm text-slate-600" data-testid="lead-form-subtitle">
-        {{ $t("pages:leads.subtitle") }}
+        {{ $t("forms:lead.subtitle") }}
       </p>
     </header>
 
