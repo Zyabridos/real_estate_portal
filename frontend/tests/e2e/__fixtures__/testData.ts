@@ -1,4 +1,19 @@
 export const testData = {
+  agencies: {
+    missing: {
+      ids: {
+        whitespaceEncoded: "%20",
+        nonGuid: "21",
+        missingGuid: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+      },
+
+      backendLeakPhrases: [
+        "Agency id must be a valid GUID",
+        "valid GUID",
+      ],
+    }
+  },
+
   blog: {
     article: {
       knownSlug: "how-to-buy-an-apartment-in-norway-a-practical-checklist",
