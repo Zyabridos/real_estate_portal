@@ -59,8 +59,9 @@ const address = computed(() => formatAddress(props.agency));
         class="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 hover:bg-slate-50"
         :to="detailsTo"
         :aria-label="$t('pages:agencies.card.openDetailsAria', { name: props.agency.name })"
+        data-testid="agency-view-details"
       >
-        {{ $t("common:actions.view") }}
+        {{ $t("common:actions.viewDetails") }}
       </RouterLink>
     </div>
   </article>

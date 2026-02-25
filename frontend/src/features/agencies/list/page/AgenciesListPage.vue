@@ -34,7 +34,6 @@ async function onGoToPage(nextPage: number): Promise<void> {
   await setPage(nextPage);
 }
 
-// stable totals
 const stableTotals = ref<{ totalItems: number; totalPages: number } | null>(null);
 
 watch(
@@ -55,7 +54,6 @@ const paging = computed(() => ({
 
 const showMeta = computed(() => stableTotals.value !== null);
 
-// ✅ показываем лоадер и на idle тоже, чтобы не “мигало”
 const showFullLoading = computed(
   () => (state.value === "idle" || state.value === "loading") && agencies.value.length === 0
 );

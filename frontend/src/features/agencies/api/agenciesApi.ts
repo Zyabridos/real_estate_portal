@@ -24,7 +24,7 @@ export const agenciesApi = {
     const params = buildQuery(normalized);
 
     return http.get<PagedResultDto<AgencyListItemDto>>(
-      routes.api.brokers.list(),
+      routes.api.agencies.list(),
       { ...(config ?? {}), params }
     );
   },

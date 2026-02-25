@@ -2,6 +2,8 @@
 import { computed, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import AgencyDetailsMissingState from "@/features/agencies/details/ui/AgencyDetailsMissingState.vue";
+
 import i18n from "@/shared/i18n";
 import routes from "@/shared/routes";
 import { ErrorState, LoadingState } from "@/shared/ui/states";
@@ -40,6 +42,20 @@ const errorMessage = computed(() => {
   if (error.value?.kind === "BadRequest") return i18n.t("errors:messages.invalidAgencyId");
   return error.value?.message ?? i18n.t("errors:messages.unexpected");
 });
+
+const rawId = computed(() => String(route.params.id ?? ""));
+
+const showInvalidId = computed(() =>
+  !id.value || (status.value === "error" && error.value?.kind === "BadRequest")
+);
+
+const showNotFound = computed(() =>
+  status.value === "error" && error.value?.kind === "NotFound"
+);
+
+const showGenericError = computed(() =>
+  status.value === "error" && !showInvalidId.value && !showNotFound.value
+);
 
 async function load(force = false): Promise<void> {
   if (!id.value) return;
@@ -95,12 +111,10 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="mt-8" aria-live="polite">
-        <ErrorState
-          v-if="!id"
-          data-testid="error-state"
-          :title="$t('errors:titles.badRequest')"
-          :message="$t('errors:messages.invalidAgencyId')"
-          :onRetry="() => load(true)"
+        <AgencyDetailsMissingState
+          v-if="showInvalidId"
+          variant="invalidId"
+          :requestedId="rawId"
         />
 
         <LoadingState
@@ -108,8 +122,15 @@ onBeforeUnmount(() => {
           data-testid="loading-state"
         />
 
+        <AgencyDetailsMissingState
+          v-else-if="showNotFound"
+          variant="notFound"
+          :requestedId="id"
+          :onRefresh="() => load(true)"
+        />
+
         <ErrorState
-          v-else-if="status === 'error'"
+          v-else-if="showGenericError"
           data-testid="error-state"
           :title="errorTitle"
           :message="errorMessage"
