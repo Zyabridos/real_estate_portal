@@ -1,15 +1,16 @@
 {
   "loading": {
     "genericTitle": "Loading…",
-    "propertyDetailsTitle": "Loading property…",
-    "brokerDetailsTitle": "Loading broker…"
+    "propertyDetailsTitle": "Loading property details…",
+    "brokerDetailsTitle": "Loading broker details…",
+    "ariaLabel": "Loading"
   },
   "empty": {
-    "title": "Nothing here yet",
-    "message": "No items were found for the current selection."
+    "title": "No results",
+    "message": "We couldn’t find anything that matches your selection."
   },
   "error": {
-    "title": "Something went wrong",
-    "message": "Please try again."
+    "title": "We couldn’t load this",
+    "message": "Please try again, or refresh the page."
   }
 }

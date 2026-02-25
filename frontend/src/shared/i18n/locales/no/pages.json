@@ -9,7 +9,36 @@
     "details": {
       "titleFallback": "Detaljer for meglerkontor",
       "subtitle": "Detaljer er lastet fra backend.",
-      "ariaLabel": "Detaljer for meglerkontor"
+      "ariaLabel": "Detaljer for meglerkontor",
+
+      "missingAriaLabel": "Feil ved lasting av meglerkontor",
+      "missingAsideAriaLabel": "Hjelp og tips",
+
+      "invalidId": {
+        "badge": "400 • Ugyldig lenke",
+        "title": "Lenken til meglerkontoret ser ikke riktig ut",
+        "description": "ID-en i URL-en er ugyldig. Gå tilbake til listen og åpne et meglerkontor derfra.",
+        "requestedIdLabel": "Forespurt meglerkontor-ID",
+        "requestedIdEmpty": "(tom)",
+        "whatYouCanDoTitle": "Hva du kan gjøre",
+        "tip1": "Gå tilbake til listen og velg et meglerkontor på nytt.",
+        "tip2": "Hvis du kom fra en ekstern lenke, kan den være ufullstendig eller utdatert.",
+        "tip3": "Unngå å redigere URL-en manuelt — åpne detaljer fra listen.",
+        "note": "Tips: Å gå via listen er den tryggeste måten å navigere på."
+      },
+
+      "notFound": {
+        "badge": "404 • Meglerkontor ikke funnet",
+        "title": "Vi fant ikke dette meglerkontoret",
+        "description": "Det kan ha blitt fjernet, eller lenken kan være utdatert.",
+        "requestedIdLabel": "Forespurt meglerkontor-ID",
+        "requestedIdEmpty": "(ukjent)",
+        "whatYouCanDoTitle": "Hva du kan gjøre",
+        "tip1": "Gå tilbake til listen og prøv et annet meglerkontor.",
+        "tip2": "Oppdater siden hvis meglerkontoret ble opprettet nylig.",
+        "tip3": "Hvis du har bokmerket siden, kan ID-en ikke lenger eksistere.",
+        "note": "Hvis du tror dette er en feil, kan du rapportere det senere."
+      }
     },
     "card": {
       "orgNumberLabel": "Org.nr",
@@ -102,5 +131,21 @@
     "success": "Takk! Forespørselen er sendt.",
     "error": "Noe gikk galt. Prøv igjen.",
     "note": "Vi bruker kontaktinformasjonen din kun for å svare på denne forespørselen."
+  },
+  "notFound": {
+    "ariaLabel": "Siden ble ikke funnet",
+    "badge": "404 • Siden ble ikke funnet",
+    "title": "Vi fant ikke siden",
+    "description": "Siden du leter etter finnes ikke, eller den kan ha blitt flyttet. Sjekk URL-en eller bruk navigasjonen nedenfor.",
+    "requestedPathLabel": "Forespurt sti",
+    "requestedPathUnknown": "(ukjent)",
+    "goHome": "Gå til forsiden",
+    "goHomeAria": "Gå til forsiden",
+    "asideAriaLabel": "Hjelp og tips",
+    "whatYouCanDoTitle": "Hva du kan gjøre",
+    "tip1": "Sjekk URL-en for skrivefeil.",
+    "tip2": "Bruk hovedmenyen øverst.",
+    "tip3": "Start fra Boliger og bruk filtrene.",
+    "note": "Hvis du tror dette er en feil, kan du rapportere det senere."
   }
 }
