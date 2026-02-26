@@ -1,6 +1,6 @@
 :80 {
   handle /lb-health {
-    rewrite * /api/health
+    rewrite * /api/health/readiness
     reverse_proxy backend:5000
   }
 
@@ -19,7 +19,7 @@ realestateproject.casa, www.realestateproject.casa {
   }
 
   handle /lb-health {
-    rewrite * /api/health
+    rewrite * /api/health/readiness
     reverse_proxy backend:5000
   }
 

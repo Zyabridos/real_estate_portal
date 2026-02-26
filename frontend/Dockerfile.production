@@ -8,15 +8,13 @@ RUN npm ci || npm install
 COPY . .
 
 # Build-time env for Vite
-ARG VITE_API_ORIGIN
-ARG VITE_API_PREFIX
+ARG VITE_API_BASE_URL
 ARG VITE_SANITY_PROJECT_ID
 ARG VITE_SANITY_DATASET
 ARG VITE_SANITY_API_VERSION
 ARG VITE_SANITY_USE_CDN
 
-ENV VITE_API_ORIGIN=$VITE_API_ORIGIN
-ENV VITE_API_PREFIX=$VITE_API_PREFIX
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_SANITY_PROJECT_ID=$VITE_SANITY_PROJECT_ID
 ENV VITE_SANITY_DATASET=$VITE_SANITY_DATASET
 ENV VITE_SANITY_API_VERSION=$VITE_SANITY_API_VERSION
@@ -26,6 +24,9 @@ RUN npm run build
 
 # serve
 FROM nginx:alpine AS runtime
+
+RUN apk add --no-cache curl # I am more used to curl
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
 RUN printf '%s\n' \
@@ -41,4 +42,4 @@ RUN printf '%s\n' \
 
 EXPOSE 80
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=10 \
-  CMD wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1
+  CMD curl -fsS http://localhost/ >/dev/null 2>&1 || exit 1

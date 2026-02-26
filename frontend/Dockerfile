@@ -10,6 +10,7 @@ COPY . .
 
 # Not-root user
 RUN chown -R node:node /app
+RUN apk add --no-cache curl
 USER node
 
 EXPOSE 3000

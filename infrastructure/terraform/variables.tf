@@ -43,6 +43,7 @@ variable "location" {
   default     = "hel1"
 }
 
+# --- Shared Load Balancer (owner-only) ---
 variable "load_balancer_type" {
   description = "Hetzner Load Balancer type (e.g., lb11, lb21)."
   type        = string
@@ -67,7 +68,7 @@ variable "load_balancer_owner_stack" {
 
   validation {
     condition     = contains(["blue", "green"], var.load_balancer_owner_stack)
-    error_message = "load_balancer_owner_stack must be either 'blue' or 'green'"
+    error_message = "load_balancer_owner_stack must be either 'blue' or 'green'."
   }
 }
 
@@ -78,11 +79,11 @@ variable "load_balancer_target_stack" {
 
   validation {
     condition     = contains(["blue", "green"], var.load_balancer_target_stack)
-    error_message = "load_balancer_target_stack must be either 'blue' or 'green'"
+    error_message = "load_balancer_target_stack must be either 'blue' or 'green'."
   }
 }
 
-# k3s / k8s
+# --- k3s / k8s ---
 variable "k8s_enabled" {
   description = "Enable provisioning of k3s-ready nodes (k3s server/agent groups) and related outputs."
   type        = bool
@@ -101,7 +102,7 @@ variable "k3s_server_count" {
 }
 
 variable "k3s_workers_count" {
-  description = "Number of k3s agents nodes"
+  description = "Number of k3s agents nodes."
   type        = number
   default     = 1
 
@@ -112,13 +113,13 @@ variable "k3s_workers_count" {
 }
 
 variable "k3s_api_port" {
-  description = "Kubernetes API port for k3s"
+  description = "Kubernetes API port for k3s."
   type        = number
   default     = 6443
 }
 
 variable "ssh_allowed_cidrs" {
-  description = "List of CIDR blocks allowed to SSH into servers (tcp/22). Use this to restrict admin access to known IPs."
+  description = "List of CIDR blocks allowed to SSH into servers (tcp/22)."
   type        = list(string)
 
   validation {
@@ -127,50 +128,21 @@ variable "ssh_allowed_cidrs" {
   }
 }
 
-# for internal traffic and private IP outputs
+# Private network (per-workspace)
 variable "k3s_network_ip_range" {
-  description = "Main private network CIDR for k3s nodes"
+  description = "Main private network CIDR for k3s nodes."
   type        = string
-  default     = "10.50.0.0/16" # 10.50.0.0 – 10.50.255.255
+  default     = "10.50.0.0/16"
 }
 
 variable "k3s_subnet_ip_range" {
-  description = "Subnet CIDR inside main network"
+  description = "Subnet CIDR inside main network."
   type        = string
-  default     = "10.50.1.0/24" # 10.50.1.0 – 10.50.1.255
+  default     = "10.50.1.0/24"
 }
 
 variable "k3s_network_zone" {
-  description = "Hetzner network zone for the k3s private subnet (e.g. eu-central)"
+  description = "Hetzner network zone for the k3s private subnet (e.g. eu-central)."
   type        = string
   default     = "eu-central"
-}
-
-variable "enable_green_stack" {
-  description = "When enabled, Terraform creates a second isolated private network/subnet and a separate set of nodes."
-  type        = bool
-  default     = true
-}
-
-variable "k3s_network_ip_range_green" {
-  description = "Private network CIDR for GREEN k3s nodes"
-  type        = string
-  default     = "10.51.0.0/16"
-}
-
-variable "k3s_subnet_ip_range_green" {
-  description = "Private subnet CIDR for GREEN k3s nodes"
-  type        = string
-  default     = "10.51.1.0/24"
-}
-
-variable "k3s_workers_count_green" {
-  description = "Number of GREEN k3s workers (pre-prod). I have limit of 3 servers, so green worker is not enabled yet (1 blue server, 1 blue worker, 1 green server)"
-  type        = number
-  default     = 0
-
-  validation {
-    condition     = var.k3s_workers_count_green >= 0
-    error_message = "k3s_workers_count_green must be >= 0."
-  }
 }

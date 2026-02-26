@@ -14,7 +14,7 @@ The project is inspired by data-driven listing systems used for managing propert
 [![Backend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml) \
 [![Frontend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml) \
 [![Frontend E2E (Playwright) Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml) \
-[![Push images to Docker Hub](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml)
+[![Push images to Docker Hub](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml) \
 [![Deployment to production](https://github.com/Zyabridos/real_estate_portal/actions/workflows/deploy-prod.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/deploy-prod.yml)
 
 
@@ -52,17 +52,18 @@ The project is inspired by data-driven listing systems used for managing propert
 
 ## Repository Structure
 
-```bash
-backend/           # .NET Web API (business logic, database)
-frontend/          # Vue 3 application (UI, routing, state management)
-cms/               # Sanity Studio (editorial content)
-k8s/               # Kubernetes manifests (kustomize base + overlays)
-infrastructure/    # Terraform + Ansible (provisioning + k3s bootstrap + deploy)
-
-docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
-Makefile           # Entry point for common dev/prod commands
-LICENSE
-````
+```
+  frontend/          # Vue application (UI, routing, state management)
+  backend/           # .NET Web API (business logic, database)
+  cms/               # Sanity Studio (editorial content)
+  infrastructure /   # Terraform + Ansible (provisioning + deployment)
+ 
+  make/              # Makefile modules (e.g., docker targets)
+  scripts/           # Utilities and automation (seed scripts, helpers)
+  
+  docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
+  Makefile           # Entry point for common dev commands
+```
 
 ## Prerequisites
 
@@ -97,23 +98,6 @@ Deployment is triggered **automatically on every merge to `main`** and follows a
 
 If one server becomes unavailable (e.g., crash or failed deployment), the **other server stays online** behind the Load Balancer, so the application remains accessible.
 
-## Project Structure
-
-```
-  frontend/          # Vue application (UI, routing, state management)
-  backend/           # .NET Web API (business logic, database)
-  cms/               # Sanity Studio (editorial content)
-  infrastructure /   # Terraform + Ansible (provisioning + deployment)
-  
-  make/              # Makefile modules (e.g., docker targets)
-  scripts/           # Utilities and automation (seed scripts, helpers)
-  docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
-  Makefile           # Entry point for common dev commands
- 
-  docker-compose.yml
-  Makefile
-  LICENSE
-```
 ## Environment Variables
 
 This repo uses separate env templates depending on the workflow.

@@ -1,6 +1,16 @@
 services:
   mongodb:
     image: mongo:7
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval 'db.runCommand({ ping: 1 }).ok' localhost:27017 | grep 1 >/dev/null"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     container_name: realestate_mongodb
     restart: unless-stopped
     environment:
@@ -21,11 +31,12 @@ services:
       MONGO__DATABASE: ${MONGO_DATABASE}
       MONGO__CONNECTIONSTRING: "mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     expose:
       - "5000"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:5000/api/health >/dev/null 2>&1 || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:5000/api/health/readiness > /dev/null || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -47,7 +58,7 @@ services:
     expose:
       - "80"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost/ >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10

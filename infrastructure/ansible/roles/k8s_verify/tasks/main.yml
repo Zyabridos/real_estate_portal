@@ -20,7 +20,7 @@
 - name: In-cluster API health check via Service DNS
   vars:
     curl_image: "curlimages/curl:8.5.0"
-    api_url: "http://realestate-api-svc/api/health"
+    api_url: "http://realestate-api-svc/api/health/readiness"
     check_pod_name: "api-check-{{ stack_id }}-{{ lookup('pipe','date +%s') }}"
   ansible.builtin.shell: |
     set -euo pipefail
@@ -74,7 +74,7 @@
   vars:
     host_header: "realestateproject.casa"
     lb_ip: "{{ (lb_ip_out.stdout | default('') | trim) }}"
-    url: "https://{{ lb_ip }}/api/health"
+    url: "https://{{ lb_ip }}/api/health/readiness"
   ansible.builtin.shell: |
     set -euo pipefail
     if [ -z "{{ lb_ip }}" ]; then

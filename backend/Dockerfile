@@ -13,7 +13,7 @@ RUN dotnet restore ./src/Api/Api.csproj
 
 COPY . .
 
-RUN dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish
+RUN dotnet publish ./src/Api/Api.csproj -c Release -o /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
@@ -30,6 +30,6 @@ ENV ASPNETCORE_URLS=http://0.0.0.0:5000
 EXPOSE 5000
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=8 \
-  CMD curl -fsS http://localhost:5000/api/health || exit 1
+  CMD curl -fsS http://localhost:5000/api/health/liveness || exit 1
 
 CMD ["dotnet", "Api.dll"]

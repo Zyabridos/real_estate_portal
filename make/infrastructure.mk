@@ -16,6 +16,8 @@ TF_WORKSPACE ?= $(ENV)-$(STACK)
 TFVARS       ?= terraform.$(ENV).$(STACK).tfvars
 TFVARS_PATH  := $(abspath $(TERRAFORM_DIR)/$(TFVARS))
 
+IMAGE_TAG ?= latest
+
 # Ansible options
 ANSIBLE_LIMIT   ?= all
 EXTRA_VARS      ?=
@@ -139,10 +141,10 @@ deploy-app: ansible-inventory ansible-known-hosts ansible-playbook
 	@echo -e "$(GREEN)App deploy done: workspace=$(TF_WORKSPACE)$(RESET)"
 
 deploy-app-blue:
-	@$(MAKE) deploy-app ENV=prod STACK=blue EXTRA_VARS='env=prod stack_id=blue'
+	@$(MAKE) deploy-app ENV=prod STACK=blue EXTRA_VARS='env=prod stack_id=blue image_tag=$(IMAGE_TAG)'
 
 deploy-app-green:
-	@$(MAKE) deploy-app ENV=prod STACK=green EXTRA_VARS='env=prod stack_id=green'
+	@$(MAKE) deploy-app ENV=prod STACK=green EXTRA_VARS='env=prod stack_id=green image_tag=$(IMAGE_TAG)'
 
 # One-command deploy (terraform + ansible) - I might delete servers at some point, so nice to have
 .PHONY: deploy deploy-blue deploy-green

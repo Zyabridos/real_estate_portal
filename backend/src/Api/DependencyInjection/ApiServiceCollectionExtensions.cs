@@ -4,6 +4,8 @@ using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MongoDB.Driver;
 using RealEstate.Application;
 using RealEstate.Application.Features.Properties.Services;
@@ -63,7 +65,34 @@ public static class ApiServiceCollectionExtensions
     private static IServiceCollection AddApiAutoMapper(this IServiceCollection services)
     {
         // Same: registrates all AutoMappers - PropertyService is used only as an assembly anchor.
-        services.AddAutoMapper(typeof(PropertyService).Assembly);
+        var assemblies = new[]
+        {
+            typeof(PropertyService).Assembly
+        };
+
+        services.AddSingleton(sp =>
+        {
+            var loggerFactory = sp.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
+
+            var config = new AutoMapper.MapperConfiguration(cfg =>
+            {
+                cfg.AddMaps(assemblies);
+            }, loggerFactory);
+
+            var logger = sp.GetService<ILoggerFactory>()
+                             ?.CreateLogger("AutoMapper") 
+                         ?? NullLoggerFactory.Instance.CreateLogger("AutoMapper");
+
+            return config;
+        });
+
+        services.AddSingleton<AutoMapper.IConfigurationProvider>(sp =>
+            sp.GetRequiredService<AutoMapper.MapperConfiguration>()
+        );
+
+        services.AddSingleton<AutoMapper.IMapper>(sp =>
+            sp.GetRequiredService<AutoMapper.MapperConfiguration>().CreateMapper(sp.GetService)
+        );
 
         return services;
     }

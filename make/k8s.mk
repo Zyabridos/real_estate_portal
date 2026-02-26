@@ -15,7 +15,8 @@ K8S_LOG_TAIL      ?= 200
 K8S_TIMEOUT       ?= 300
 
 # Ingress / hosts (smoke)
-API_HEALTH_PATH ?= /api/health
+API_LIVENESS_PATH  ?= /api/health/liveness
+API_READINESS_PATH ?= /api/health/readiness
 
 DEV_FRONT_HOST    ?= localhost
 DEV_CMS_HOST      ?= cms.localhost
@@ -169,7 +170,8 @@ show-k8s-config:
 	@echo -e "$(BOLD)K8S_KUSTOMIZE_DIR$(RESET)=$(K8S_KUSTOMIZE_DIR)"
 	@echo -e "$(BOLD)K8S_LOG_TAIL$(RESET)=$(K8S_LOG_TAIL)"
 	@echo -e "$(BOLD)K8S_TIMEOUT$(RESET)=$(K8S_TIMEOUT)"
-	@echo -e "$(BOLD)API_HEALTH_PATH$(RESET)=$(API_HEALTH_PATH)"
+	@echo -e "$(BOLD)API_LIVENESS_PATH$(RESET)=$(API_LIVENESS_PATH)"
+	@echo -e "$(BOLD)API_READINESS_PATH$(RESET)=$(API_READINESS_PATH)"
 	@echo -e "$(BOLD)DEV_FRONT_HOST$(RESET)=$(DEV_FRONT_HOST)"
 	@echo -e "$(BOLD)DEV_CMS_HOST$(RESET)=$(DEV_CMS_HOST)"
 	@echo -e "$(BOLD)PROD_FRONT_HOST$(RESET)=$(PROD_FRONT_HOST)"

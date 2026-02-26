@@ -25,7 +25,7 @@ frontend-clean-install:
 	rm -rf node_modules package-lock.json && \
 	npm install
 
-test-back:
+test-backend:
 	@echo "$(LIGHT_BLUE)Starting tests for backend...$(RESET)"
 	cd backend && dotnet test RealEstate.slnx
 

@@ -1,5 +1,5 @@
 output "stack" {
-  description = "Stack id (blue/green)"
+  description = "Stack id (blue/green)."
   value       = var.stack_id
 }
 
@@ -18,7 +18,7 @@ output "k3s_server_public_ips" {
 }
 
 output "k3s_worker_public_ips" {
-  description = "Public IPv4 addresses of k3s worker (worker) nodes."
+  description = "Public IPv4 addresses of k3s worker nodes."
   value       = hcloud_server.k3s_worker[*].ipv4_address
 }
 
@@ -64,49 +64,22 @@ ${s.ipv4_address} ansible_user=root private_ipv4=${try(hcloud_server_network.k3s
 %{for i, s in hcloud_server.k3s_worker~}
 ${s.ipv4_address} ansible_user=root private_ipv4=${try(hcloud_server_network.k3s_worker[i].ip, "")}
 %{endfor~}
-
-[k3s_server_green]
-%{for i, s in hcloud_server.k3s_server_green~}
-${s.ipv4_address} ansible_user=root private_ipv4=${try(hcloud_server_network.k3s_server_green[i].ip, "")}
-%{endfor~}
-
-[k3s_workers_green]
-%{for i, s in hcloud_server.k3s_worker_green~}
-${s.ipv4_address} ansible_user=root private_ipv4=${try(hcloud_server_network.k3s_worker_green[i].ip, "")}
-%{endfor~}
 EOT
 }
 
-
-output "k3s_green_server_public_ips" {
-  value = hcloud_server.k3s_server_green[*].ipv4_address
-}
-
-output "k3s_green_worker_public_ips" {
-  value = hcloud_server.k3s_worker_green[*].ipv4_address
-}
-
-output "k3s_green_server_private_ips" {
-  value = hcloud_server_network.k3s_server_green[*].ip
-}
-
-output "k3s_green_worker_private_ips" {
-  value = hcloud_server_network.k3s_worker_green[*].ip
-}
-
 output "load_balancer_id" {
-  value = hcloud_load_balancer.shared.id
+  value = try(hcloud_load_balancer.shared[0].id, null)
 }
 
 output "load_balancer_name" {
-  value = hcloud_load_balancer.shared.name
+  value = try(hcloud_load_balancer.shared[0].name, null)
 }
 
 output "load_balancer_ipv4" {
-  value = hcloud_load_balancer.shared.ipv4
+  value = try(hcloud_load_balancer.shared[0].ipv4, null)
 }
 
 output "k3s_lb_public_ip" {
   description = "Public IPv4 of the shared Load Balancer (entrypoint for k8s ingress)."
-  value       = hcloud_load_balancer.shared.ipv4
+  value       = try(hcloud_load_balancer.shared[0].ipv4, null)
 }

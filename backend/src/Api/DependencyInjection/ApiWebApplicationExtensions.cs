@@ -26,7 +26,7 @@ public static class ApiWebApplicationExtensions
 
     private static void MapHealthEndpoints(WebApplication app)
     {
-        app.MapHealthChecks("/api/health/live", new HealthCheckOptions
+        app.MapHealthChecks("/api/health/liveness", new HealthCheckOptions
         {
             Predicate = r => r.Tags.Contains("live"),
             ResponseWriter = HealthResponseWriter.WriteLiveAsync,
@@ -39,20 +39,7 @@ public static class ApiWebApplicationExtensions
         });
 
         // Mongo ok ? 200 : 503
-        app.MapHealthChecks("/api/health/ready", new HealthCheckOptions
-        {
-            Predicate = r => r.Tags.Contains("ready"),
-            ResponseWriter = HealthResponseWriter.WriteReadyAsync,
-            ResultStatusCodes =
-            {
-                [HealthStatus.Healthy] = StatusCodes.Status200OK,
-                [HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
-                [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
-            }
-        });
-
-        // keep it for now - some services still using it. TODO: move everything to /ready and /live, then delete code
-        app.MapHealthChecks("/api/health", new HealthCheckOptions
+        app.MapHealthChecks("/api/health/readiness", new HealthCheckOptions
         {
             Predicate = r => r.Tags.Contains("ready"),
             ResponseWriter = HealthResponseWriter.WriteReadyAsync,

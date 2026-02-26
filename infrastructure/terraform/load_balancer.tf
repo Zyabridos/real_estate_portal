@@ -1,11 +1,16 @@
 locals {
+  is_lb_owner = var.load_balancer_owner_stack == var.stack_id
+
   lb_name = "${local.base_name}-${var.env}-lb"
 
-  # IMPORTANT: this selector must match ONLY ONE stack at a time (blue OR green).
+  # IMPORTANT: should match ONLY ONE stack at a time (blue OR green)
   lb_label_selector = "project=${local.base_name},env=${var.env},stack=${var.load_balancer_target_stack},k8s=true"
+
+  green_network_name = "${local.base_name}-${var.env}-green-k3s-net"
 }
 
 resource "hcloud_load_balancer" "shared" {
+  count              = local.is_lb_owner ? 1 : 0
   name               = local.lb_name
   load_balancer_type = var.load_balancer_type
   location           = var.location
@@ -25,29 +30,36 @@ resource "hcloud_load_balancer" "shared" {
   }
 }
 
-# Attach LB to only one private network (active stack).
+# Needed when LB targets GREEN: the GREEN network is created in prod-green workspace,
+# but LB is owned by prod-blue. So we look it up by name.
+data "hcloud_network" "k3s_green" {
+  count = local.is_lb_owner && var.load_balancer_target_stack == "green" ? 1 : 0
+  name  = local.green_network_name
+}
+
 resource "hcloud_load_balancer_network" "lb_blue" {
-  count                  = var.load_balancer_target_stack == "blue" ? 1 : 0
-  load_balancer_id        = hcloud_load_balancer.shared.id
-  network_id              = hcloud_network.k3s[0].id
+  count                  = local.is_lb_owner && var.load_balancer_target_stack == "blue" ? 1 : 0
+  load_balancer_id       = hcloud_load_balancer.shared[0].id
+  network_id             = hcloud_network.k3s[0].id
   enable_public_interface = true
 }
 
 resource "hcloud_load_balancer_network" "lb_green" {
-  count                  = (var.enable_green_stack && var.load_balancer_target_stack == "green") ? 1 : 0
-  load_balancer_id        = hcloud_load_balancer.shared.id
-  network_id              = hcloud_network.k3s_green[0].id
+  count                  = local.is_lb_owner && var.load_balancer_target_stack == "green" ? 1 : 0
+  load_balancer_id       = hcloud_load_balancer.shared[0].id
+  network_id             = data.hcloud_network.k3s_green[0].id
   enable_public_interface = true
 }
 
 resource "hcloud_load_balancer_target" "targets" {
-  load_balancer_id = hcloud_load_balancer.shared.id
-  type             = "label_selector" # "all servers that match label_selector are targets"
+  count            = local.is_lb_owner ? 1 : 0
+  load_balancer_id = hcloud_load_balancer.shared[0].id
+  type             = "label_selector"
   label_selector   = local.lb_label_selector
 
   # LB -> nodes over private IP
   use_private_ip = true
-  
+
   depends_on = [
     hcloud_load_balancer_network.lb_blue,
     hcloud_load_balancer_network.lb_green
@@ -55,7 +67,8 @@ resource "hcloud_load_balancer_target" "targets" {
 }
 
 resource "hcloud_load_balancer_service" "http" {
-  load_balancer_id = hcloud_load_balancer.shared.id
+  count            = local.is_lb_owner ? 1 : 0
+  load_balancer_id = hcloud_load_balancer.shared[0].id
   protocol         = "tcp"
   listen_port      = 80
   destination_port = 80
@@ -70,7 +83,8 @@ resource "hcloud_load_balancer_service" "http" {
 }
 
 resource "hcloud_load_balancer_service" "https_tcp" {
-  load_balancer_id = hcloud_load_balancer.shared.id
+  count            = local.is_lb_owner ? 1 : 0
+  load_balancer_id = hcloud_load_balancer.shared[0].id
   protocol         = "tcp"
   listen_port      = 443
   destination_port = 443
