@@ -28,3 +28,17 @@ frontend-clean-install:
 test-back:
 	@echo "$(LIGHT_BLUE)Starting tests for backend...$(RESET)"
 	cd backend && dotnet test RealEstate.slnx
+
+test-backend-coverage:
+	@echo "$(LIGHT_BLUE)Running backend tests with coverage...$(RESET)"
+	cd backend && \
+		rm -rf ./TestResults ./coverage-report && \
+		dotnet test ./RealEstate.slnx -c Release \
+			--collect:"XPlat Code Coverage;Format=cobertura" \
+			--results-directory ./TestResults && \
+		reportgenerator \
+			-reports:"TestResults/**/coverage.cobertura.xml" \
+			-targetdir:"coverage-report" \
+			-reporttypes:"Html;HtmlSummary" && \
+		( command -v open >/dev/null 2>&1 && open coverage-report/index.html || true ) && \
+		( command -v xdg-open >/dev/null 2>&1 && xdg-open coverage-report/index.html || true )

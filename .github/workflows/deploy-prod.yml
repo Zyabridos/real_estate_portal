@@ -1,10 +1,11 @@
 name: Deploy prod (green, then blue) via Ansible (inventory from Terraform)
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: ["Push Docker image (after tests)"]
+    types: [completed]
   workflow_dispatch: {}
-  
+
 concurrency:
   group: deploy-prod
   cancel-in-progress: false
@@ -18,13 +19,32 @@ env:
   INVENTORY_GREEN: inventories/generated/inventory.prod-green.ini
   INVENTORY_BLUE: inventories/generated/inventory.prod-blue.ini
   ANSIBLE_PLAYBOOK: playbooks/site.yml
-
   TF_IN_AUTOMATION: "true"
 
 jobs:
+  prepare:
+    name: Prepare image tag
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - name: Compute SHA tag
+        id: tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          SHORT="${SHA:0:7}"
+          echo "image_tag=sha-${SHORT}" >> "$GITHUB_OUTPUT"
+          echo "Will deploy image tag: sha-${SHORT}"
+
   deploy_green:
     name: Deploy GREEN
     runs-on: ubuntu-latest
+    needs: [prepare]
     timeout-minutes: 60
 
     steps:
@@ -130,19 +150,20 @@ jobs:
         run: |
           set -euo pipefail
           ansible-playbook -i "${{ env.INVENTORY_GREEN }}" "${{ env.ANSIBLE_PLAYBOOK }}" \
-            --vault-password-file "${RUNNER_TEMP}/vault-pass"
+            --vault-password-file "${RUNNER_TEMP}/vault-pass" \
+            -e "image_tag=${{ needs.prepare.outputs.image_tag }}"
 
   deploy_blue:
     name: Deploy BLUE
     runs-on: ubuntu-latest
-    needs: [deploy_green]
+    needs: [prepare, deploy_green]
     timeout-minutes: 60
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # --- Terraform  ---
+      # --- Terraform ---
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -241,4 +262,5 @@ jobs:
         run: |
           set -euo pipefail
           ansible-playbook -i "${{ env.INVENTORY_BLUE }}" "${{ env.ANSIBLE_PLAYBOOK }}" \
-            --vault-password-file "${RUNNER_TEMP}/vault-pass"
+            --vault-password-file "${RUNNER_TEMP}/vault-pass" \
+            -e "image_tag=${{ needs.prepare.outputs.image_tag }}"
