@@ -1,3 +1,33 @@
-hcloud_token = "123qwertyTheMostSecreteveInformation"
-ssh_key_name = "name-of-ssh-key"
-ssh_allowed_cidrs  = ["192.0.0.1/24"]
+hcloud_token       = "123qwertyTheMostSecreteveInformation"
+ssh_key_name       = "your-ssh-key-name" # existing Hetzner SSH key name
+ssh_allowed_cidrs  = ["192.0.0.1/24"]    # replace with your real admin IP/CIDR
+
+env       = "prod"
+base_name = "real-estate-hub"
+
+server_type = "cx23"
+image       = "ubuntu-24.04"
+location    = "hel1"
+
+
+load_balancer_type      = "lb11"
+load_balancer_algorithm = "least_connections"
+
+load_balancer_owner_stack  = "blue"
+load_balancer_target_stack = "blue"
+
+k8s_enabled       = true
+k3s_server_count  = 1
+k3s_workers_count = 1
+k3s_api_port      = 6443
+
+# Private networking (examples use placeholders; set your own ranges)
+k3s_network_ip_range = "CHANGEME"
+k3s_subnet_ip_range  = "CHANGEME"
+k3s_network_zone     = "eu-central"
+
+enable_green_stack        = true
+k3s_network_ip_range_green = "CHANGEME"
+k3s_subnet_ip_range_green  = "CHANGEME"
+k3s_network_zone_green     = "eu-central"
+k3s_workers_count_green    = 0

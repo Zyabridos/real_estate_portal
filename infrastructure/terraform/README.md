@@ -71,32 +71,6 @@ make ansible-inventory ENV=prod STACK=blue
 Expected file:
 `infrastructure/ansible/inventories/generated/inventory.prod-blue.ini`
 
-## Load Balancer model (Hetzner + k3s ingress)
-
-This repo uses a shared public Hetzner Load Balancer as the public entry point.
-The LB forwards traffic to the cluster nodes over private network (recommended):
-
-- nodes do NOT need to expose 80/443 publicly
-- firewall allows 80/443 only from the private subnet
-- LB is attached to private networks via hcloud_load_balancer_network
-
-Ingress (ingress-nginx) terminates TLS inside Kubernetes (cert-manager issues certs).
-
-### Traffic switching (Blue/Green)
-The LB selects targets using a label selector:
-
-- servers are labelled with stack=blue or stack=green
-- LB target selector matches ONLY one stack at a time
-
-Traffic switch is done by updating the selector to the desired stack and applying Terraform.
-
-Practical checklist:
-
-1) Deploy new app to green
-2) Verify health inside green cluster and via LB host header
-3) Change LB target stack to green (tfvars) and terraform apply in the workspace that owns LB
-4) Verify production traffic now hits green
-
 ## Common issues
 ### 1) “Ansible runs but no hosts matched”
 Cause: inventory groups don’t match the Ansible playbook.

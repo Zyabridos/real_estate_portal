@@ -48,7 +48,6 @@ const useHealthStore = defineStore("health", {
 
   actions: {
     async fetchHealth() {
-      // cancel previous request (same pattern as brokersStore)
       activeController?.abort();
       const controller = new AbortController();
       activeController = controller;
@@ -73,6 +72,7 @@ const useHealthStore = defineStore("health", {
             try {
               const res = await fetch(c.url, { method: "GET", signal: controller.signal });
               const text = await res.text();
+              console.log(text);
 
               return {
                 ...c,
