@@ -1,27 +1,22 @@
-ENV_FILE ?= .env.development
-
-FRONTEND_IMAGE ?= zyabridos/real_estate_prod_frontend:latest
-BACKEND_IMAGE ?= zyabridos/real_estate_prod_backend:latest
-CMS_IMAGE ?= zyabridos/real_estate_prod_cms:latest
-
-DOCKERFILE_PATH_FRONTEND = ./frontend/Dockerfile.production
-DOCKERFILE_PATH_BACKEND = ./backend/Dockerfile.production
-DOCKERFILE_PATH_CMS = ./cms/Dockerfile 
-
-# Requires variables: CORE_SERVICES, CMS_SERVICE, BACKEND, FRONTEND
-COMPOSE = docker compose --env-file $(ENV_FILE)
-
 build:
 	@echo "$(LIGHT_BLUE)Building Docker images...$(RESET)"
-	$(COMPOSE) build
+	$(COMPOSE) build $(CORE_SERVICES)
 
 up:
-	@echo "$(LIGHT_BLUE)Starting all services...$(RESET)"
-	$(COMPOSE) up
+	@echo "$(LIGHT_BLUE)Starting services: $(CORE_SERVICES)$(RESET)"
+	$(COMPOSE) up $(CORE_SERVICES)
 
 up-d:
+	@echo "$(LIGHT_BLUE)Starting $(CORE_SERVICES) services in background...$(RESET)"
+	$(COMPOSE) up -d $(CORE_SERVICES)
+
+up-with-cms:
+	@echo "$(LIGHT_BLUE)Starting all services...$(RESET)"
+	$(COMPOSE) up $(CORE_SERVICES) $(SERVICE_CMS)
+
+up-with-cms-d:
 	@echo "$(LIGHT_BLUE)Starting all services in background...$(RESET)"
-	$(COMPOSE) up -d
+	$(COMPOSE) up -d $(CORE_SERVICES) $(SERVICE_CMS)
 
 down:
 	@echo "$(YELLOW)Stopping and removing all containers...$(RESET)"
@@ -30,6 +25,14 @@ down:
 down-v:
 	@echo "$(YELLOW)Stopping and removing all containers + volumes...$(RESET)"
 	$(COMPOSE) down -v
+
+clean:
+	@echo "$(RED) This will remove ALL Docker data: containers, images, volumes, cache.$(RESET)"
+	@echo -n "Type 'yes' to continue. Only yes will be accepted" && read ans && \
+	"$$ans" = "yes" || \
+	( echo "Cancelled."; exit 1 )
+	@echo "Cleaning Docker system..."
+	docker system prune -a --volumes -f
 
 restart:
 	@echo "$(YELLOW)Restarting core Docker services (no cms)...$(RESET)"
@@ -83,19 +86,34 @@ sh-frontend:
 	@echo "$(GREEN)Opening shell in frontend...$(RESET)"
 	$(COMPOSE) exec $(FRONTEND) sh
 
-# Build and push to Docker Hub Single Services:
+# Build and push to Docker Hub:
+
 push-frontend:
-	@echo "$(PURPLE)Building frontend image...$(RESET)"
-	docker build -f $(DOCKERFILE_PATH_FRONTEND) -t $(FRONTEND_IMAGE) ./frontend
-	@echo "$(PURPLE)Pushing frontend image to Docker Hub...$(RESET)"
-	docker push $(FRONTEND_IMAGE)
+	@echo "$(PURPLE)Building frontend image: $(FRONTEND_IMAGE)$(RESET)"
+	@test -f "$(FRONTEND_ENV_FILE)" || (echo "$(RED)Missing $(FRONTEND_ENV_FILE). Create it or override FRONTEND_ENV_FILE=...$(RESET)"; exit 1)
+	@set -e; \
+	set -a; . "$(FRONTEND_ENV_FILE)"; set +a; \
+	docker build -f frontend/Dockerfile.production \
+	  --build-arg VITE_API_BASE_URL="/api" \
+	  --build-arg VITE_SANITY_PROJECT_ID="$$VITE_SANITY_PROJECT_ID" \
+	  --build-arg VITE_SANITY_DATASET="$$VITE_SANITY_DATASET" \
+	  --build-arg VITE_SANITY_API_VERSION="$$VITE_SANITY_API_VERSION" \
+	  --build-arg VITE_SANITY_USE_CDN="$$VITE_SANITY_USE_CDN" \
+	  -t "$(FRONTEND_IMAGE)" frontend
+	@echo "$(PURPLE)Pushing frontend image...$(RESET)"
+	docker push "$(FRONTEND_IMAGE)"
 	
 push-backend:
-	docker build -f $(DOCKERFILE_PATH_BACKEND) -t $(BACKEND_IMAGE) ./backend && \
-	@echo "$(PURPLE)Pushing backend image to Docker Hub...$(RESET)"
-	docker push $(BACKEND_IMAGE)
+	@echo "$(PURPLE)Building backend image: $(BACKEND_IMAGE)$(RESET)"
+	docker build -f backend/Dockerfile -t "$(BACKEND_IMAGE)" backend
+	@echo "$(PURPLE)Pushing backend image...$(RESET)"
+	docker push "$(BACKEND_IMAGE)"
 
-push-cmsd:
-	docker build -f $(DOCKERFILE_PATH_CMS)e -t $(CMS_IMAGE) ./cms && \
-	@echo "$(PURPLE)Pushing CMS image to Docker Hub...$(RESET)"
-	docker push $(CMS_IMAGE)
+push-cms:
+	@echo "$(PURPLE)Building cms image: $(CMS_IMAGE)$(RESET)"
+	docker build -f cms/Dockerfile -t "$(CMS_IMAGE)" cms
+	@echo "$(PURPLE)Pushing cms image...$(RESET)"
+	docker push "$(CMS_IMAGE)"
+
+push-images: push-backend push-frontend push-cms
+	@echo "$(GREEN)All images pushed with tag $(IMAGE_TAG)$(RESET)"
