@@ -68,13 +68,27 @@
     }
   },
   "home": {
-    "title": "Frontend OK",
-    "backendHealthLabel": "Backend health",
-    "loading": "Loading…",
-    "health": {
-      "emptyBody": "(empty body)",
-      "errorPrefix": "error"
-    }
+    "title": "Hi, my name is Nina",
+    "subtitle": "Real Estate Portal · an educational production-like project",
+    "aboutTitle": "About me",
+    "aboutText": "I’m a fullstack developer building this as a production-like monorepo: Vue 3 SPA + .NET 10 Web API + MongoDB + Sanity CMS. My focus is quality (unit/integration/e2e), clean architecture, and a DevOps mindset (Docker, Kubernetes, IaC).",
+    "ctaBrowseProperties": "Browse properties",
+    "ctaBrowseBrokers": "Browse brokers",
+    "ctaBrowseBlog": "Open blog",
+    "healthTitle": "Backend health",
+    "healthHint": "Readiness/Liveness for Kubernetes",
+    "readinessLabel": "Readiness",
+    "livenessLabel": "Liveness",
+    "healthOk": "Backend is healthy",
+    "healthFail": "Backend is unhealthy",
+    "healthIdle": "Status not checked",
+    "healthIdleShort": "Not checked",
+    "httpStatus": "HTTP status",
+    "responseBody": "Response body",
+    "healthNotChecked": "The check hasn’t been run yet.",
+    "emptyBody": "(empty response)",
+    "stackValue": "Vue 3 · .NET 10 Web API · MongoDB · Sanity CMS",
+    "focusValue": "Clean architecture · Tests · DevOps-ready"
   },
   "properties": {
     "list": {

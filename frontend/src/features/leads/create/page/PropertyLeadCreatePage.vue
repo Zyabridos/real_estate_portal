@@ -80,9 +80,9 @@ async function onSubmit(values: LeadFormValues) {
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-details-button"
             @click="goBackToDetails"
-            :aria-label="$t('pages:leads.actions.backArea')"
+            :aria-label="$t('common:actions.back')"
           >
-            {{ $t("pages:leads.actions.back") }}
+            {{ $t("common:actions.back") }}
           </button>
         </div>
       </div>

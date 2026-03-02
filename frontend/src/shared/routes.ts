@@ -1,5 +1,8 @@
 const apiRoutes = {
-  health: (): string => ["health"].join("/"),
+  health: {
+    liveness: (): string => ["health", "liveness"].join("/"),
+    readiness: (): string => ["health", "readiness"].join("/"),
+  },
   agencies: {
     list: (): string => ["agencies"].join("/"),
     getById: (id: string): string => ["agencies", id].join("/"),
@@ -14,7 +17,7 @@ const apiRoutes = {
   },
   leads: {
     create: (): string => ["leads"].join("/"),
-    getById: (id: string): string => ["/leads", id].join("/"),
+    getById: (id: string): string => ["leads", id].join("/"),
   },
 };
 

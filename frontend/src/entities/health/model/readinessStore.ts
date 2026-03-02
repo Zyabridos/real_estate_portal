@@ -5,7 +5,6 @@ import routes from "@/shared/routes.ts"
 
 let activeController: AbortController | null = null;
 
-// TODO: use common UIState evnt?
 type CheckState = "idle" | "loading" | "ok" | "fail";
 
 type UiHealthCheck = {
@@ -31,8 +30,8 @@ type HealthState = {
 };
 
 const CHECK: Pick<UiHealthCheck, "key" | "url"> = {
-  key: "liveness",
-  url: routes.api.health.liveness(),
+  key: "readiness",
+  url: routes.api.health.readiness(),
 };
 
 function mapUiStateToCheckState(s: UIState): CheckState {
@@ -67,7 +66,7 @@ async function ping(url: string): Promise<{ status: number; body: string }> {
   return { status: res.status, body };
 }
 
-export const useLivenessStore = defineStore("liveness", {
+export const useReadinessStore = defineStore("readiness", {
   state: (): HealthState => ({
     status: "idle",
     error: null,
@@ -105,7 +104,6 @@ export const useLivenessStore = defineStore("liveness", {
 
       try {
         const { status, body } = await ping(CHECK.url);
-
         if (myReqId !== this.reqId) return;
 
         this.lastHttpStatus = status;

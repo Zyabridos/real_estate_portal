@@ -1,5 +1,6 @@
 {
   "loading": {
+    "health": "Sjekker…",
     "genericTitle": "Laster…",
     "propertyDetailsTitle": "Laster boligdetaljer…",
     "brokerDetailsTitle": "Laster meglerdetaljer…",

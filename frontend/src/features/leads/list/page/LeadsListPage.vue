@@ -152,7 +152,7 @@ async function openMessageModal(payload: { id: string; fullName: string | null }
             Leads list
           </h1>
           <p class="mt-1 text-sm text-slate-600" data-testid="leads-list-subtitle">
-            Grouped by PropertyId (default) or List view
+            {{ $t("pages:leads.list.pageSubtitle") }}
           </p>
         </div>
 

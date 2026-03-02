@@ -68,13 +68,27 @@
     }
   },
   "home": {
-    "title": "Frontend OK",
-    "backendHealthLabel": "Backend-status",
-    "loading": "Laster…",
-    "health": {
+      "title": "Hei, jeg heter Nina",
+      "subtitle": "Real Estate Portal · et læringsprosjekt i production-like stil",
+      "aboutTitle": "Om meg",
+      "aboutText": "Jeg er fullstack-utvikler og bygger dette prosjektet som et production-like monorepo: Vue 3 SPA + .NET 10 Web API + MongoDB + Sanity CMS. Fokus: kvalitet (unit/integrasjon/e2e), ren arkitektur og DevOps-tilnærming (Docker, Kubernetes, IaC).",
+      "ctaBrowseProperties": "Se boliger",
+      "ctaBrowseBrokers": "Se meglere",
+      "ctaBrowseBlog": "Åpne bloggen",
+      "healthTitle": "Backend health",
+      "healthHint": "Readiness/Liveness for Kubernetes",
+      "readinessLabel": "Readiness",
+      "livenessLabel": "Liveness",
+      "healthOk": "Backend er tilgjengelig",
+      "healthFail": "Backend er ikke tilgjengelig",
+      "healthIdle": "Status ikke sjekket",
+      "healthIdleShort": "Ikke sjekket",
+      "httpStatus": "HTTP-status",
+      "responseBody": "Svar-body",
+      "healthNotChecked": "Sjekken er ikke kjørt ennå.",
       "emptyBody": "(tomt svar)",
-      "errorPrefix": "feil"
-    }
+      "stackValue": "Vue 3 · .NET 10 Web API · MongoDB · Sanity CMS",
+      "focusValue": "Ren arkitektur · Tester · DevOps-klar"
   },
   "properties": {
     "title": {

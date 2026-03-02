@@ -3,6 +3,8 @@ import { computed } from "vue";
 
 import RealEstatePortal from "@/assets/RealEstateProtal.png";
 
+import routes from "../../routes.ts"
+
 import GuestNavbar from "@/shared/ui/layout/navbar/GuestNavbar.vue";
 import Footer from "@/shared/ui/layout/Footer.vue"
 
@@ -17,24 +19,27 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const hasError = computed(() => Boolean(props.errorMessage));
-
-const year = new Date().getFullYear();
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-    <!-- Header -->
     <header
       class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur"
       :aria-label="$t('layout:header.ariaLabel')"
     >
       <div class="flex w-full items-center justify-between px-6 py-3">
         <div class="flex items-center gap-3">
-          <img
-            :src="RealEstatePortal"
-            :alt="$t('layout:header.logoAlt')"
-            class="h-20 w-40 rounded-xl object-contain"
-          />
+          <RouterLink
+            :to="routes.app.home()"
+            class="rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300"
+            :aria-label="$t('layout:header.logoLinkAria')"
+          >
+            <img
+              :src="RealEstatePortal"
+              :alt="$t('layout:header.logoAlt')"
+              class="h-20 w-40 rounded-xl object-contain"
+            />
+          </RouterLink>
         </div>
 
         <GuestNavbar />
