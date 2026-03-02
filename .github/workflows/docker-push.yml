@@ -1,31 +1,53 @@
-name: Push docker image to Docker Hub
+name: Push Docker image (after tests)
 
 on:
-  pull_request:
-    branches: [ "main" ]
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch: {}
 
-env:
-  TEST_DB_HOST: localhost
-  TEST_DB_PORT: 5433
-  TEST_DB_USER: ${{ secrets.TEST_DB_USER }}
-  TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
-  TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
-
-  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-  INTERNAL_API_URL: ${{ secrets.INTERNAL_API_URL }}
+concurrency:
+  group: docker-push-after-tests-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  backend_unit:
+    name: backend-unit-tests
+    uses: ./.github/workflows/backend-unit-tests.yml
+    secrets: inherit
 
-      - name: Install Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose
+  backend_integration:
+    name: backend-integration-tests
+    uses: ./.github/workflows/backend-integration-tests.yml
+    secrets: inherit
+
+  frontend_unit:
+    name: frontend-unit
+    uses: ./.github/workflows/frontend-unit.yml
+    secrets: inherit
+
+  frontend_checks:
+    name: frontend-checks
+    uses: ./.github/workflows/frontend-types-checks.yml
+    secrets: inherit
+
+  frontend_e2e:
+    name: frontend-e2e
+    uses: ./.github/workflows/frontend-e2e.yml
+    secrets: inherit
+
+  docker_push:
+    name: Build & push Docker images to Docker Hub
+    runs-on: ubuntu-latest
+    needs:
+      - backend_unit
+      - backend_integration
+      - frontend_unit
+      - frontend_checks
+      - frontend_e2e
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -36,37 +58,63 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push backend Docker image
+      - name: Docker meta (backend)
+        id: meta_backend
+        uses: docker/metadata-action@v5
+        with:
+          images: zyabridos/real_estate_prod_backend
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short,prefix=sha-
+
+      - name: Build & push backend
         uses: docker/build-push-action@v5
         with:
-          push: true
           context: ./backend
           file: ./backend/Dockerfile.production
-          tags: zyabridos/real_estate_prod_backend:latest
-          build-args: |
-            .env
+          push: true
+          tags: ${{ steps.meta_backend.outputs.tags }}
+          labels: ${{ steps.meta_backend.outputs.labels }}
 
-      - name: Build and push frontend Docker image
+      - name: Docker meta (frontend)
+        id: meta_frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: zyabridos/real_estate_prod_frontend
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short,prefix=sha-
+
+      - name: Build & push frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          push: true
           file: ./frontend/Dockerfile.production
-          tags: zyabridos/real_estate_prod_frontend:latest
+          push: true
+          tags: ${{ steps.meta_frontend.outputs.tags }}
+          labels: ${{ steps.meta_frontend.outputs.labels }}
           build-args: |
-            .env
-            
-      - name: Build and push CMS Docker image
+            VITE_API_ORIGIN=
+            VITE_API_PREFIX=/api
+            VITE_SANITY_PROJECT_ID=${{ secrets.VITE_SANITY_PROJECT_ID }}
+            VITE_SANITY_DATASET=${{ secrets.VITE_SANITY_DATASET }}
+            VITE_SANITY_API_VERSION=2025-01-01
+            VITE_SANITY_USE_CDN=true
+
+      - name: Docker meta (cms)
+        id: meta_cms
+        uses: docker/metadata-action@v5
+        with:
+          images: zyabridos/real_estate_prod_cms
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short,prefix=sha-
+
+      - name: Build & push CMS
         uses: docker/build-push-action@v5
         with:
           context: ./cms
-          push: true
           file: ./cms/Dockerfile
-          tags: zyabridos/real_estate_prod_cms:latest
-          build-args: |
-            .env
-            
-# TODO: there should be a way to avoid running each test before pushing images.
-# Intead it should be possible to run tests on separate job and if tests pass then
-# only push images. But last time I tried to do that... was not successful :(
-# Investigate later.
+          push: true
+          tags: ${{ steps.meta_cms.outputs.tags }}
+          labels: ${{ steps.meta_cms.outputs.labels }}

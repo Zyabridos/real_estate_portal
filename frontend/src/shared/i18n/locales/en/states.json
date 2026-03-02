@@ -1,5 +1,6 @@
 {
   "loading": {
+    "health": "Checking…",
     "genericTitle": "Loading…",
     "propertyDetailsTitle": "Loading property details…",
     "brokerDetailsTitle": "Loading broker details…",

@@ -1,0 +1,962 @@
+{
+  "version": 4,
+  "terraform_version": "1.5.7",
+  "serial": 90,
+  "lineage": "88bbb0be-3d5f-dfc0-11ae-6e710baa6aa5",
+  "outputs": {
+    "ansible_inventory_hosts": {
+      "value": {
+        "k3s_server": [
+          {
+            "name": "real-estate-hub-prod-blue-k3s-server-1",
+            "private_ipv4": "10.50.1.2",
+            "public_ipv4": "89.167.61.6"
+          }
+        ],
+        "k3s_worker": [
+          {
+            "name": "real-estate-hub-prod-blue-k3s-worker-1",
+            "private_ipv4": "10.50.1.1",
+            "public_ipv4": "65.108.220.126"
+          }
+        ]
+      },
+      "type": [
+        "object",
+        {
+          "k3s_server": [
+            "tuple",
+            [
+              [
+                "object",
+                {
+                  "name": "string",
+                  "private_ipv4": "string",
+                  "public_ipv4": "string"
+                }
+              ]
+            ]
+          ],
+          "k3s_worker": [
+            "tuple",
+            [
+              [
+                "object",
+                {
+                  "name": "string",
+                  "private_ipv4": "string",
+                  "public_ipv4": "string"
+                }
+              ]
+            ]
+          ]
+        }
+      ]
+    },
+    "ansible_inventory_ini": {
+      "value": "[k3s_server]\n89.167.61.6 ansible_user=root private_ipv4=10.50.1.2\n\n[k3s_workers]\n65.108.220.126 ansible_user=root private_ipv4=10.50.1.1\n\n[k3s_server_green]\n89.167.60.95 ansible_user=root private_ipv4=10.51.1.1\n\n[k3s_workers_green]\n",
+      "type": "string"
+    },
+    "k3s_green_server_private_ips": {
+      "value": [
+        "10.51.1.1"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "k3s_green_server_public_ips": {
+      "value": [
+        "89.167.60.95"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "k3s_green_worker_private_ips": {
+      "value": [],
+      "type": [
+        "tuple",
+        []
+      ]
+    },
+    "k3s_green_worker_public_ips": {
+      "value": [],
+      "type": [
+        "tuple",
+        []
+      ]
+    },
+    "k3s_lb_public_ip": {
+      "value": "65.109.222.249",
+      "type": "string"
+    },
+    "k3s_server_private_ips": {
+      "value": [
+        "10.50.1.2"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "k3s_server_public_ips": {
+      "value": [
+        "89.167.61.6"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "k3s_worker_private_ips": {
+      "value": [
+        "10.50.1.1"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "k3s_worker_public_ips": {
+      "value": [
+        "65.108.220.126"
+      ],
+      "type": [
+        "tuple",
+        [
+          "string"
+        ]
+      ]
+    },
+    "load_balancer_id": {
+      "value": "5809087",
+      "type": "string"
+    },
+    "load_balancer_ipv4": {
+      "value": "65.109.222.249",
+      "type": "string"
+    },
+    "load_balancer_name": {
+      "value": "real-estate-hub-prod-lb",
+      "type": "string"
+    },
+    "load_balancer_owner_stack": {
+      "value": "blue",
+      "type": "string"
+    },
+    "load_balancer_target_stack": {
+      "value": "blue",
+      "type": "string"
+    },
+    "stack": {
+      "value": "blue",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "hcloud_ssh_key",
+      "name": "main",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "fingerprint": "fa:62:9d:42:a7:f2:64:e2:92:d8:ec:af:4d:da:f1:07",
+            "id": 106122968,
+            "labels": {
+              "env": "prod",
+              "project": "real-estate-hub",
+              "stack": "8bfb"
+            },
+            "name": "realestate-prod-ssh-key",
+            "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKcfs0lPfQdofH0Lht7zszNOQuzF5mKcp726lOHzHUUf zyabrina95@gmail.com",
+            "selector": null,
+            "with_selector": null
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_firewall",
+      "name": "k3s_fw",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "apply_to": [
+              {
+                "label_selector": "",
+                "server": 120807297
+              },
+              {
+                "label_selector": "",
+                "server": 120863313
+              }
+            ],
+            "id": "10522451",
+            "labels": {
+              "env": "prod",
+              "project": "real-estate-hub",
+              "role": "k3s-fw",
+              "stack": "blue"
+            },
+            "name": "real-estate-hub-prod-blue-k3s-fw",
+            "rule": [
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "10250",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "22",
+                "protocol": "tcp",
+                "source_ips": [
+                  "84.52.243.200/32"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "443",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "6443",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24",
+                  "84.52.243.200/32"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "80",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "8472",
+                "protocol": "udp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "9345",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_firewall",
+      "name": "k3s_fw_green",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "apply_to": [
+              {
+                "label_selector": "",
+                "server": 120862013
+              }
+            ],
+            "id": "10525494",
+            "labels": {
+              "env": "prod",
+              "project": "real-estate-hub",
+              "role": "k3s-fw",
+              "stack": "green"
+            },
+            "name": "real-estate-hub-prod-green-k3s-fw",
+            "rule": [
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "10250",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.51.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "22",
+                "protocol": "tcp",
+                "source_ips": [
+                  "84.52.243.200/32"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "443",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "6443",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.51.1.0/24",
+                  "84.52.243.200/32"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "80",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.50.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "8472",
+                "protocol": "udp",
+                "source_ips": [
+                  "10.51.1.0/24"
+                ]
+              },
+              {
+                "description": "",
+                "destination_ips": [],
+                "direction": "in",
+                "port": "9345",
+                "protocol": "tcp",
+                "source_ips": [
+                  "10.51.1.0/24"
+                ]
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_load_balancer",
+      "name": "shared",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "algorithm": [
+              {
+                "type": "least_connections"
+              }
+            ],
+            "delete_protection": false,
+            "id": "5809087",
+            "ipv4": "65.109.222.249",
+            "ipv6": "2a01:4f9:c01d:59::1",
+            "labels": {
+              "env": "prod",
+              "project": "real-estate-hub",
+              "role": "public-entry"
+            },
+            "load_balancer_type": "lb11",
+            "location": "hel1",
+            "name": "real-estate-hub-prod-lb",
+            "network_id": 11928050,
+            "network_ip": "10.50.1.3",
+            "network_zone": "eu-central",
+            "target": [
+              {
+                "server_id": 0,
+                "type": "label_selector",
+                "use_private_ip": false
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_load_balancer_network",
+      "name": "lb_blue",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "enable_public_interface": true,
+            "id": "5809087-11928050",
+            "ip": "10.50.1.3",
+            "load_balancer_id": 5809087,
+            "network_id": 11928050,
+            "subnet_id": null
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "hcloud_load_balancer.shared",
+            "hcloud_network.k3s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_load_balancer_service",
+      "name": "http",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "destination_port": 80,
+            "health_check": [
+              {
+                "http": [],
+                "interval": 10,
+                "port": 80,
+                "protocol": "tcp",
+                "retries": 3,
+                "timeout": 5
+              }
+            ],
+            "http": null,
+            "id": "5809087__80",
+            "listen_port": 80,
+            "load_balancer_id": "5809087",
+            "protocol": "tcp",
+            "proxyprotocol": false
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "hcloud_load_balancer.shared"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_load_balancer_service",
+      "name": "https_tcp",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "destination_port": 443,
+            "health_check": [
+              {
+                "http": [],
+                "interval": 10,
+                "port": 443,
+                "protocol": "tcp",
+                "retries": 3,
+                "timeout": 5
+              }
+            ],
+            "http": [],
+            "id": "5809087__443",
+            "listen_port": 443,
+            "load_balancer_id": "5809087",
+            "protocol": "tcp",
+            "proxyprotocol": false
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "hcloud_load_balancer.shared"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_load_balancer_target",
+      "name": "targets",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "lb-label-selector-tgt-a742fb20bf4b1f2057169451a4befb6ed2d7fc6d4733d436138f99714432a2b7-5809087",
+            "ip": null,
+            "label_selector": "project=real-estate-hub,env=prod,stack=blue,k8s=true",
+            "load_balancer_id": 5809087,
+            "server_id": null,
+            "type": "label_selector",
+            "use_private_ip": true
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "hcloud_load_balancer.shared",
+            "hcloud_load_balancer_network.lb_blue",
+            "hcloud_load_balancer_network.lb_green",
+            "hcloud_network.k3s",
+            "hcloud_network.k3s_green"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_network",
+      "name": "k3s",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "delete_protection": false,
+            "expose_routes_to_vswitch": false,
+            "id": "11928050",
+            "ip_range": "10.50.0.0/16",
+            "labels": {
+              "env": "prod",
+              "project": "real-estate-hub",
+              "role": "k3s-net",
+              "stack": "blue"
+            },
+            "name": "real-estate-hub-prod-blue-k3s-net"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_network",
+      "name": "k3s_green",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "delete_protection": false,
+            "expose_routes_to_vswitch": false,
+            "id": "11930095",
+            "ip_range": "10.51.0.0/16",
+            "labels": {
+              "env": "prod",
+              "project": "real-estate-hub",
+              "role": "k3s-net",
+              "stack": "green"
+            },
+            "name": "real-estate-hub-prod-green-k3s-net"
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_network_subnet",
+      "name": "k3s",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway": "10.50.0.1",
+            "id": "11928050-10.50.1.0/24",
+            "ip_range": "10.50.1.0/24",
+            "network_id": 11928050,
+            "network_zone": "eu-central",
+            "type": "cloud",
+            "vswitch_id": null
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "hcloud_network.k3s"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_network_subnet",
+      "name": "k3s_green",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "gateway": "10.51.0.1",
+            "id": "11930095-10.51.1.0/24",
+            "ip_range": "10.51.1.0/24",
+            "network_id": 11930095,
+            "network_zone": "eu-central",
+            "type": "cloud",
+            "vswitch_id": null
+          },
+          "sensitive_attributes": [],
+          "private": "bnVsbA==",
+          "dependencies": [
+            "hcloud_network.k3s_green"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_server",
+      "name": "k3s_server",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "allow_deprecated_images": false,
+            "backup_window": "",
+            "backups": false,
+            "datacenter": "hel1-dc2",
+            "delete_protection": false,
+            "firewall_ids": [
+              10522451
+            ],
+            "id": "120807297",
+            "ignore_remote_firewall_ids": false,
+            "image": "ubuntu-24.04",
+            "ipv4_address": "89.167.61.6",
+            "ipv6_address": "",
+            "ipv6_network": "\u003cnil\u003e",
+            "iso": null,
+            "keep_disk": false,
+            "labels": {
+              "env": "prod",
+              "k8s": "true",
+              "project": "real-estate-hub",
+              "role": "k3s-server",
+              "stack": "blue"
+            },
+            "location": "hel1",
+            "name": "real-estate-hub-prod-blue-k3s-server-1",
+            "network": [],
+            "placement_group_id": 0,
+            "primary_disk_size": 40,
+            "public_net": [
+              {
+                "ipv4": 0,
+                "ipv4_enabled": true,
+                "ipv6": 0,
+                "ipv6_enabled": false
+              }
+            ],
+            "rebuild_protection": false,
+            "rescue": null,
+            "server_type": "cx23",
+            "shutdown_before_deletion": false,
+            "ssh_keys": [
+              "106122968"
+            ],
+            "status": "running",
+            "timeouts": null,
+            "user_data": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "data.hcloud_ssh_key.main",
+            "hcloud_firewall.k3s_fw"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_server",
+      "name": "k3s_server_green",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "allow_deprecated_images": false,
+            "backup_window": "",
+            "backups": false,
+            "datacenter": "hel1-dc2",
+            "delete_protection": false,
+            "firewall_ids": [
+              10525494
+            ],
+            "id": "120862013",
+            "ignore_remote_firewall_ids": false,
+            "image": "ubuntu-24.04",
+            "ipv4_address": "89.167.60.95",
+            "ipv6_address": "",
+            "ipv6_network": "\u003cnil\u003e",
+            "iso": null,
+            "keep_disk": false,
+            "labels": {
+              "env": "prod",
+              "k8s": "true",
+              "project": "real-estate-hub",
+              "role": "k3s-server",
+              "stack": "green"
+            },
+            "location": "hel1",
+            "name": "real-estate-hub-prod-green-k3s-server-1",
+            "network": [],
+            "placement_group_id": 0,
+            "primary_disk_size": 40,
+            "public_net": [
+              {
+                "ipv4": 0,
+                "ipv4_enabled": true,
+                "ipv6": 0,
+                "ipv6_enabled": false
+              }
+            ],
+            "rebuild_protection": false,
+            "rescue": null,
+            "server_type": "cx23",
+            "shutdown_before_deletion": false,
+            "ssh_keys": [
+              "106122968"
+            ],
+            "status": "running",
+            "timeouts": null,
+            "user_data": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "data.hcloud_ssh_key.main",
+            "hcloud_firewall.k3s_fw_green"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_server",
+      "name": "k3s_worker",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "allow_deprecated_images": false,
+            "backup_window": "",
+            "backups": false,
+            "datacenter": "hel1-dc2",
+            "delete_protection": false,
+            "firewall_ids": [
+              10522451
+            ],
+            "id": "120863313",
+            "ignore_remote_firewall_ids": false,
+            "image": "ubuntu-24.04",
+            "ipv4_address": "65.108.220.126",
+            "ipv6_address": "",
+            "ipv6_network": "\u003cnil\u003e",
+            "iso": null,
+            "keep_disk": false,
+            "labels": {
+              "env": "prod",
+              "k8s": "true",
+              "project": "real-estate-hub",
+              "role": "k3s-worker",
+              "stack": "blue"
+            },
+            "location": "hel1",
+            "name": "real-estate-hub-prod-blue-k3s-worker-1",
+            "network": [],
+            "placement_group_id": 0,
+            "primary_disk_size": 40,
+            "public_net": [
+              {
+                "ipv4": 0,
+                "ipv4_enabled": true,
+                "ipv6": 0,
+                "ipv6_enabled": false
+              }
+            ],
+            "rebuild_protection": false,
+            "rescue": null,
+            "server_type": "cx23",
+            "shutdown_before_deletion": false,
+            "ssh_keys": [
+              "106122968"
+            ],
+            "status": "running",
+            "timeouts": null,
+            "user_data": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "data.hcloud_ssh_key.main",
+            "hcloud_firewall.k3s_fw"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_server_network",
+      "name": "k3s_server",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "alias_ips": [],
+            "id": "120807297-11928050",
+            "ip": "10.50.1.2",
+            "mac_address": "86:00:00:7a:84:8e",
+            "network_id": 11928050,
+            "server_id": 120807297,
+            "subnet_id": "11928050-10.50.1.0/24"
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "data.hcloud_ssh_key.main",
+            "hcloud_firewall.k3s_fw",
+            "hcloud_network.k3s",
+            "hcloud_network_subnet.k3s",
+            "hcloud_server.k3s_server"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_server_network",
+      "name": "k3s_server_green",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "alias_ips": [],
+            "id": "120862013-11930095",
+            "ip": "10.51.1.1",
+            "mac_address": "86:00:00:7a:4f:d4",
+            "network_id": 11930095,
+            "server_id": 120862013,
+            "subnet_id": "11930095-10.51.1.0/24"
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "data.hcloud_ssh_key.main",
+            "hcloud_firewall.k3s_fw_green",
+            "hcloud_network.k3s_green",
+            "hcloud_network_subnet.k3s_green",
+            "hcloud_server.k3s_server_green"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "hcloud_server_network",
+      "name": "k3s_worker",
+      "provider": "provider[\"registry.terraform.io/hetznercloud/hcloud\"]",
+      "instances": [
+        {
+          "index_key": 0,
+          "schema_version": 0,
+          "attributes": {
+            "alias_ips": [],
+            "id": "120863313-11928050",
+            "ip": "10.50.1.1",
+            "mac_address": "86:00:00:7a:4e:c6",
+            "network_id": 11928050,
+            "server_id": 120863313,
+            "subnet_id": "11928050-10.50.1.0/24"
+          },
+          "sensitive_attributes": [],
+          "dependencies": [
+            "data.hcloud_ssh_key.main",
+            "hcloud_firewall.k3s_fw",
+            "hcloud_network.k3s",
+            "hcloud_network_subnet.k3s",
+            "hcloud_server.k3s_worker"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

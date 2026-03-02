@@ -1,0 +1,59 @@
+name: Buuild Docker Container
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+env:
+  TEST_DB_HOST: localhost
+  TEST_DB_PORT: 5433
+  TEST_DB_USER: ${{ secrets.TEST_DB_USER }}
+  TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+  TEST_DB_NAME: ${{ secrets.TEST_DB_NAME }}
+
+  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+  INTERNAL_API_URL: ${{ secrets.INTERNAL_API_URL }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          context: ./backend
+          file: ./backend/Dockerfile.production
+          tags: zyabridos/real_estate_prod_backend:pr-build
+          build-args: |
+            TEST_DB_HOST=${{ env.TEST_DB_HOST }}
+            TEST_DB_PORT=${{ env.TEST_DB_PORT }}
+            TEST_DB_USER=${{ env.TEST_DB_USER }}
+            TEST_DB_PASSWORD=${{ env.TEST_DB_PASSWORD }}
+            TEST_DB_NAME=${{ env.TEST_DB_NAME }}
+
+      - name: Build frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          context: ./frontend
+          file: ./frontend/Dockerfile.production
+          tags: zyabridos/real_estate_prod_frontend:pr-build
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
+            INTERNAL_API_URL=${{ env.INTERNAL_API_URL }}
+
+      - name: Build CMS Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          context: ./cms
+          file: ./cms/Dockerfile
+          tags: zyabridos/real_estate_prod_cms:pr-build

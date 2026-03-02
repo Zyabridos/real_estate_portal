@@ -6,7 +6,7 @@ source "${SCRIPT_DIR}/../../lib/config.sh"
 source "${SCRIPT_DIR}/../../lib/log.sh"
 
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
-HEALTH_PATH="${HEALTH_PATH:-/api/health}"
+HEALTH_PATH="${HEALTH_PATH:-/api/health/readiness}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
 
 require_cmd() {

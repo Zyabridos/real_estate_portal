@@ -2,7 +2,9 @@
 
 # Real Estate Mini Portal
 
-Educational full-stack project for learning **Vue 3**, **.NET Web API (C#)**, and **Sanity CMS** in a real estate domain.
+Educational full-stack project for learning **Vue 3**, **.NET Web API (C#)**, and **Sanity CMS** in a real estate domain. 
+
+This is as well a playground for automation—because turning “do it manually” into “make it run itself” is oddly satisfying.
 
 The project is inspired by data-driven listing systems used for managing property inventories, brokers, and customer inquiries.
 
@@ -14,187 +16,157 @@ The project is inspired by data-driven listing systems used for managing propert
 [![Backend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/backend-unit-tests.yml) \
 [![Frontend Unit Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-unit.yml) \
 [![Frontend E2E (Playwright) Tests](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/frontend-e2e.yml) \
-[![Push images to Docker Hub](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml)
+[![Push images to Docker Hub](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/docker-push.yml) \
 [![Deployment to production](https://github.com/Zyabridos/real_estate_portal/actions/workflows/deploy-prod.yml/badge.svg)](https://github.com/Zyabridos/real_estate_portal/actions/workflows/deploy-prod.yml)
 
 
 
 ## Tech Stack
 
-### Frontend
-- Vue 3
-- Vue Router
-- Pinia
+**Frontend**
+- Vue 3, TypeScript, Vite
+- Vue Router, Pinia
 - Tailwind CSS
-- TypeScript
-- Vitest (unit tests)
-- Playwright (E2E tests)
+- Vitest (unit), Playwright (E2E)
 
-### Backend
+**Backend**
 - .NET 10 (ASP.NET Core Web API)
 - MongoDB
-- xUnit
-- Testcontainers (integration tests)
+- FluentValidation, AutoMapper
+- xUnit + Testcontainers (integration tests)
 
-### CMS
-- Sanity v3
-- GROQ
-- Portable Text
+**CMS**
+- Sanity v3 (Portable Text + GROQ)
 
-### Infrastructure
+**Infrastructure / Delivery**
 - Docker / Docker Compose (local dev)
-- Kubernetes (k3s) + Helm (addons) + Kustomize (manifests)
-- Terraform (Hetzner Cloud: servers, networking, firewall, load balancer)
-- Ansible (k3s bootstrap + addons + kustomize deploy + verification)
-- Makefile as a single entry point for local + production workflows
+- Kubernetes (k3s) + Kustomize (source of truth for prod manifests)
+- Terraform (Hetzner Cloud)
+- Ansible (k3s bootstrap, addons, deploy + verification)
+- Blue/Green: `prod-blue` and `prod-green`
+
 ---
 
-
 ## Repository Structure
+```
+- frontend/ — Vue 3 SPA
+- backend/ — .NET 10 API (clean-ish layers)
+- cms/ — Sanity Studio
+- k8s/ — Kubernetes manifests (kustomize base + overlays)
+- infrastructure/ — Terraform + Ansible (provisioning + deploy)
+- scripts/ — automation utilities (seed, pings, helpers)
+- make/ + root Makefile — the main entry point for workflows
+```
+---
 
-```bash
-backend/           # .NET Web API (business logic, database)
-frontend/          # Vue 3 application (UI, routing, state management)
-cms/               # Sanity Studio (editorial content)
-k8s/               # Kubernetes manifests (kustomize base + overlays)
-infrastructure/    # Terraform + Ansible (provisioning + k3s bootstrap + deploy)
+## Fast access to other documentation:
+### Backend:
 
-docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
-Makefile           # Entry point for common dev/prod commands
-LICENSE
-````
+- [Backend core](https://github.com/Zyabridos/real_estate_portal/blob/main/backend/README.md)
+- [Backend tests](https://github.com/Zyabridos/real_estate_portal/blob/main/backend/RealEstate.Tests/README.md)
+### Frontend
+- [Frontend core](https://github.com/Zyabridos/real_estate_portal/blob/main/frontend/README.md)
+- [Frontend e2e tests](https://github.com/Zyabridos/real_estate_portal/blob/main/frontend/tests/e2e/README.md)
+### CMS:
+- [CMS](https://github.com/Zyabridos/real_estate_portal/blob/main/cms/README.md)
+### Infrastructure
+- [Infrastructure core](https://github.com/Zyabridos/real_estate_portal/blob/main/infrastructure/README.md)
+- [Kubernetes](https://github.com/Zyabridos/real_estate_portal/blob/main/k8s/README.md)
+- [Ansible](https://github.com/Zyabridos/real_estate_portal/blob/main/infrastructure/ansible/README.md)
+- [Terraform](https://github.com/Zyabridos/real_estate_portal/blob/main/infrastructure/terraform/README.md)
+## Local Development
 
-## Prerequisites
-
-### For local development:
+### Prerequisites
 - Docker + Docker Compose
+- `make` (optional, but recommended)
 
-### For provisioning/deployment (infrastructure):
-- Terraform
-- Ansible
-- kubectl + helm
-- SSH access to provisioned hosts (SSH key)
-- Ansible Vault password file: infrastructure/ansible/vault-password
-
-Optional but recommended:
-- `make`
-
-## Deployment & High Availability (Blue/Green)
-
-Production infrastructure uses **1 Load Balancer** and **2 application servers**:
-
-- **Load Balancer:** single entry point for all traffic (HTTP/HTTPS).
-- **Two servers:** `blue` and `green`, running identical stack.
-
-### Automatic deployment on merge to `main`
-
-Deployment is triggered **automatically on every merge to `main`** and follows a **blue/green rollout**:
-
-1. Deploy to green server first (warm-up / health check).
-2. If green is healthy, deploy to **blue** server next.
-
-### Fault tolerance
-
-If one server becomes unavailable (e.g., crash or failed deployment), the **other server stays online** behind the Load Balancer, so the application remains accessible.
-
-## Project Structure
-
-```
-  frontend/          # Vue application (UI, routing, state management)
-  backend/           # .NET Web API (business logic, database)
-  cms/               # Sanity Studio (editorial content)
-  infrastructure /   # Terraform + Ansible (provisioning + deployment)
-  
-  make/              # Makefile modules (e.g., docker targets)
-  scripts/           # Utilities and automation (seed scripts, helpers)
-  docker-compose.yml # Local dev stack (MongoDB + API + UI + optional CMS)
-  Makefile           # Entry point for common dev commands
- 
-  docker-compose.yml
-  Makefile
-  LICENSE
-```
-## Environment Variables
-
-This repo uses separate env templates depending on the workflow.
-
-Rename one of the templates and adjust values:
+### 1) Configure environment variables
+This repo ships env templates in the root:
+- `.env.dev.example` — main local dev values (Mongo credentials, DB name)
+- `.env.e2e.example` — isolated values for E2E runs
 
 ```bash
-mv .env.dev.example .env.dev     # default Docker dev environment
+cp .env.development.example .env.development
 ```
+
+2) Start the stack (MongoDB + API + Frontend)
 ```bash
-mv .env.e2e.example .env.e2e     # local E2E environment (isolated DB)
+make up-d
 ```
+URLs (default):
+
+- Frontend: http://localhost:3000
+- Backend (host): http://localhost:5055
+- Backend health: http://localhost:5055/api/health/liveness
+- Mongo check: http://localhost:5055/api/health/readiness
+
+3) Start Sanity Studio (optional)
+
+The CMS is optional and runs via Docker Compose profile:
 ```bash
-mv .env.local.example .env.local # optional: run apps on host (non-Docker). Recommended: run everything via Docker for consistency.
+docker compose --env-file .env.development --profile cms up -d --build
 ```
-## Which one should I use?
+CMS Studio:
 
-`.env.dev` — main local development with Docker Compose
+- http://localhost:3333
 
-`.env.e2e` — isolated environment for E2E runs (safe to reseed/reset)
+4) Seed demo data (optional)
 
-`.env.local` — optional overrides when running frontend/backend on the host machine
-
-## Development Commands
-
-Common development tasks are automated via `Makefile`.
-
-To see the full list of available commands:
+Seed scripts expect backend URL/port:
 ```bash
-make help
+BACKEND_PORT=5055 BACKEND_URL=http://localhost:5055 make seed
 ```
-
-Typical workflow:
-```bash
-make up-d    # Start all services in detached mode
-make down    # Stop services 
-make restart # Restart services 
-make logs    # View service logs
-```
-
 ## Testing
-Run all backend tests:
+### Backend
 ```bash
-make test-back
+make test-backend
 ```
-Or directly:
+Generate coverage report:
 ```bash
-dotnet test backend/RealEstate.slnx
-```
-
-## Production Deployment (Blue/Green)
-Production deploy is designed as Blue/Green stacks (prod-blue, prod-green) to reduce downtime and make rollbacks safe.
-
-High-level idea:
-
-1) Deploy a new version to green
-2) Verify health
-3) Switch traffic to green (Load Balancer target selector)
-4) Optionally deploy the same version to blue (or keep as fallback)
-
-**One-command deploy (recommended)**
-
-**Blue:**
-```bash
-make deploy-blue
+make test-backend-coverage
 ```
 
-**Green:**
+### Frontend
+Unit-tests:
+```bash
+make test-frontend-unit
+```
+E2E-tests:
+```bash
+make test-frontend-e2e
+```
+
+## Production: Kubernetes is the source of truth
+
+Production runtime is Kubernetes (k3s). Manifests live in k8s/ and are managed via kustomize overlays:
+
+- k8s/overlays/prod-blue
+- k8s/overlays/prod-green
+
+Provisioning + deployments are orchestrated by Terraform + Ansible in infrastructure/.
+Typical rollout is Blue/Green:
+
+1) deploy to green
+2) verify health
+3) switch traffic (Load Balancer)
+4) optionally deploy the same version to blue (or keep as fallback)
+
+One-command deploy:
 ```bash
 make deploy-green
 ```
+or
+```bash
+make deploy-blue
+```
+## Note about *production* Docker files
 
-What it does:
+This repo contains docker-compose.production.yml and Dockerfile.production variants.
+They are not used as the production runtime path (production runs on Kubernetes).
+They are intentionally kept as:
 
-1. Terraform init/apply in workspace $(ENV)-$(STACK) (defaults: prod-blue)
-2. Generate Ansible inventory from Terraform outputs 
-3. Refresh ~/.ssh/known_hosts 
-4. Run Ansible playbook: install/upgrade k3s, fetch kubeconfig, install addons (ingress-nginx/cert-manager/metrics-server), apply kustomize overlay, verify rollout
+- a reference for production-like container builds,
+- a convenient single-node smoke/debug option outside Kubernetes,
+- a fallback deployment path for environments where Kubernetes is not available.
 
-## Notes on Configuration
-- Frontend API calls are proxied via Vite (/api → backend)
-- Backend communicates with MongoDB via Docker network
-- MongoDB runs only once per test suite (Testcontainers)
-- CMS is optional and started via Docker profiles
+Local development uses the non-production Dockerfiles referenced by `docker-compose.yml`.

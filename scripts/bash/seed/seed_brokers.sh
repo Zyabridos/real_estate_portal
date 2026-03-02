@@ -7,7 +7,7 @@ source "${SCRIPT_DIR}/../../lib/log.sh"
 
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
 BROKERS_ENDPOINT="/api/brokers"
-HEALTH_PATH="${HEALTH_PATH:-/api/health}"
+HEALTH_PATH="${HEALTH_PATH:-/api/health/readiness}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
 
 SEED_BROKERS_COUNT="${SEED_BROKERS_COUNT:-22}"

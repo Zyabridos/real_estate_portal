@@ -68,13 +68,34 @@
     }
   },
   "home": {
-    "title": "Фронтенд работает",
-    "backendHealthLabel": "Состояние бэкенда",
-    "loading": "Загрузка…",
-    "health": {
-      "emptyBody": "(пустое тело ответа)",
-      "errorPrefix": "ошибка"
-    }
+    "title": "Привет, меня зовут Нина",
+    "subtitle": "Real Estate Portal · учебный production-like проект",
+
+    "aboutTitle": "Обо мне",
+    "aboutText":
+    "Я fullstack-разработчик и строю этот проект как production-like монорепо: Vue 3 SPA + .NET 10 Web API + MongoDB + Sanity CMS. Фокус — качество (unit/integration/e2e), чистая архитектура и DevOps-подход (Docker, Kubernetes, IaC).",
+
+    "ctaBrowseProperties": "Смотреть объекты",
+    "ctaBrowseBrokers": "Смотреть брокеров",
+    "ctaBrowseBlog": "Открыть блог",
+
+    "healthTitle": "Backend health",
+    "healthHint": "Readiness/Liveness для Kubernetes",
+
+    "readinessLabel": "Readiness",
+    "livenessLabel": "Liveness",
+
+    "healthOk": "Backend доступен",
+    "healthFail": "Backend недоступен",
+    "healthIdle": "Статус не проверен",
+    "healthIdleShort": "Не проверено",
+
+    "httpStatus": "HTTP статус",
+    "responseBody": "Тело ответа",
+    "healthNotChecked": "Проверка ещё не запускалась.",
+    "emptyBody": "(пустой ответ)",
+    "stackValue": "Vue 3 · .NET 10 Web API · MongoDB · Sanity CMS",
+    "focusValue": "Чистая архитектура · Тесты · DevOps-ready"
   },
   "properties": {
     "list": {

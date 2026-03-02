@@ -49,6 +49,7 @@ build/
 **/*.cache
 **/*.log
 TestResults
+/backend/coverage*
 
 # Sanity
 .pnp

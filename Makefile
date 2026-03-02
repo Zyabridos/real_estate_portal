@@ -1,6 +1,7 @@
 include make/_vars.mk
 include make/_help.mk
 
+include make/debug.mk
 include make/dev.mk
 include make/docker.mk
 include make/infrastructure.mk

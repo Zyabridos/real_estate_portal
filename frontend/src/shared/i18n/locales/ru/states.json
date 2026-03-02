@@ -1,5 +1,6 @@
 {
   "loading": {
+    "health": "Проверяем…",
     "genericTitle": "Загрузка…",
     "propertyDetailsTitle": "Загружаем детали объекта…",
     "brokerDetailsTitle": "Загружаем детали брокера…",

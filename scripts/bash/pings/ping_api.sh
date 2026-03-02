@@ -6,5 +6,5 @@ source "${SCRIPT_DIR}/../../lib/config.sh"
 source "${SCRIPT_DIR}/../../lib/log.sh"
 
 info "Pinging backend API health..."
-curl -i "${BACKEND_URL}/api/health"
+curl -i "${BACKEND_URL}/api/health/readiness"
 

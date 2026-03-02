@@ -4,12 +4,13 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 COPY package*.json ./
-RUN npm ci || npm install
+RUN npm ci
 
 COPY . .
 
 # Not-root user
 RUN chown -R node:node /app
+RUN apk add --no-cache curl
 USER node
 
 EXPOSE 3000

@@ -1,0 +1,23 @@
+debug-env:
+	@echo "ENV=$(ENV)"
+	@echo "STACK=$(STACK)"
+	@echo "TF_WORKSPACE=$(TF_WORKSPACE)"
+	@echo "TFVARS_PATH=$(TFVARS_PATH)"
+
+debug-images:
+	@echo "GIT_SHA=$(GIT_SHA)"
+	@echo "IMAGE_TAG=$(IMAGE_TAG)"
+	@echo "BACKEND_IMAGE=$(BACKEND_IMAGE)"
+	@echo "FRONTEND_IMAGE=$(FRONTEND_IMAGE)"
+	@echo "CMS_IMAGE=$(CMS_IMAGE)"
+
+debug-ansible:
+	@echo "ANSIBLE_DIR=$(ANSIBLE_DIR)"
+	@echo "ANSIBLE_CONFIG_FILE=$(ANSIBLE_CONFIG_FILE)"
+	@echo "ANSIBLE_MAIN_PLAYBOOK=$(ANSIBLE_MAIN_PLAYBOOK)"
+	@echo "ANSIBLE_INVENTORY_PATH=$(ANSIBLE_INVENTORY_PATH)"
+	@echo "ANSIBLE_LIMIT=$(ANSIBLE_LIMIT)"
+	@echo "ANSIBLE_BASE_VARS=$(ANSIBLE_BASE_VARS)"
+	@echo "EXTRA_VARS=$(EXTRA_VARS)"
+
+debug-all: debug-env debug-images debug-ansible

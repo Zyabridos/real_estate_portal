@@ -29,7 +29,8 @@ help-local:
 	@$(PRINT) "  $(GREEN)make frontend-clean-install$(RESET)  - Full frontend reset (node_modules reinstall)"
 	@$(PRINT) ""
 	@$(PRINT) "$(YELLOW)Testing:$(RESET)"
-	@$(PRINT) "  $(GREEN)make test-back$(RESET)               - Run backend test suite"
+	@$(PRINT) "  $(GREEN)make test-backend$(RESET)             - Run backend test suite"
+	@$(PRINT) "  $(GREEN)test-backend-coverage$(RESET)         - Run backend test suite and generate coverage report"
 	@$(PRINT) ""
 
 help-api:
