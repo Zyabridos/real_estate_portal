@@ -19,6 +19,7 @@ env:
   INVENTORY_GREEN: inventories/generated/inventory.prod-green.ini
   INVENTORY_BLUE: inventories/generated/inventory.prod-blue.ini
   ANSIBLE_PLAYBOOK: playbooks/site.yml
+  DEPLOY_ENV: prod,
   TF_IN_AUTOMATION: "true"
 
 jobs:
@@ -135,23 +136,23 @@ jobs:
         shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_FORCE_COLOR: "True"
         run: |
           set -euo pipefail
+          ANSIBLE_CONFIG="${PWD}/ansible.cfg" \
           ansible -i "${{ env.INVENTORY_GREEN }}" all -m ping
 
       - name: Deploy (GREEN)
         shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_FORCE_COLOR: "True"
         run: |
           set -euo pipefail
+          ANSIBLE_CONFIG="${PWD}/ansible.cfg" \
           ansible-playbook -i "${{ env.INVENTORY_GREEN }}" "${{ env.ANSIBLE_PLAYBOOK }}" \
             --vault-password-file "${RUNNER_TEMP}/vault-pass" \
-            -e "image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -e "env=${{ env.DEPLOY_ENV }}  stack_id=green image_tag=${{ needs.prepare.outputs.image_tag }}"
 
   deploy_blue:
     name: Deploy BLUE
@@ -247,20 +248,20 @@ jobs:
         shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_FORCE_COLOR: "True"
         run: |
           set -euo pipefail
+          ANSIBLE_CONFIG="${PWD}/ansible.cfg" \
           ansible -i "${{ env.INVENTORY_BLUE }}" all -m ping
 
       - name: Deploy (BLUE)
         shell: bash
         working-directory: ${{ env.ANSIBLE_DIR }}
         env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_FORCE_COLOR: "True"
         run: |
           set -euo pipefail
+          ANSIBLE_CONFIG="${PWD}/ansible.cfg" \
           ansible-playbook -i "${{ env.INVENTORY_BLUE }}" "${{ env.ANSIBLE_PLAYBOOK }}" \
             --vault-password-file "${RUNNER_TEMP}/vault-pass" \
-            -e "image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -e "env=${{ env.DEPLOY_ENV }}  stack_id=blue image_tag=${{ needs.prepare.outputs.image_tag }}"
