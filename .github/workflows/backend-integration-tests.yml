@@ -52,5 +52,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-test-results
+          name: backend-test-results-${{ github.run_id }}-${{ github.job }}
           path: backend/**/TestResults/*.trx
+          if-no-files-found: warn
