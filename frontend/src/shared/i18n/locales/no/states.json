@@ -13,5 +13,6 @@
   "error": {
     "title": "Vi kunne ikke laste dette",
     "message": "Prøv igjen, eller oppdater siden."
-  }
+  },
+  "noImage": "No image available"
 }

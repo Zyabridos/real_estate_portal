@@ -13,5 +13,6 @@
   "error": {
     "title": "We couldn’t load this",
     "message": "Please try again, or refresh the page."
-  }
+  },
+  "noImage": "Ingen bilde tilgjengelig"
 }

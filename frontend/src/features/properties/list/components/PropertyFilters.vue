@@ -62,8 +62,12 @@ function normalizeNumber(input: string): number | undefined {
   return n;
 }
 
+function normalizeCity(input: string): string {
+  return input.trim().replace(/\s+/g, " ");
+}
+
 function buildPayload(): PropertyFiltersValue {
-  const cityValue = city.value.trim();
+  const cityValue = normalizeCity(city.value);
   const payload: PropertyFiltersValue = {};
 
   if (cityValue) payload.city = cityValue;

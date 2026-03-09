@@ -105,7 +105,8 @@
     "details": {
       "actions": {
         "createLead": "Создать заявку",
-        "createLeadAria": "Создать заявку по этому объекту"
+        "createLeadAria": "Создать заявку по этому объекту",
+        "ariaLabel": "Детали объекта недвижимости"
       },
       "leads": {
         "ariaLabel": "Создать заявку",

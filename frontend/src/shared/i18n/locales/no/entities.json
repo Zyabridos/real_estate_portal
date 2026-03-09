@@ -9,29 +9,43 @@
     "brokerIdLabel": "Megler-ID"
   },
   "property": {
-    "typeLabel": "Type",
-    "statusLabel": "Status",
-    "cityLabel": "By",
-    "propertyIdLabel": "Eiendoms-ID",
-    "descriptionTitle": "Beskrivelse",
-
-    "filtersTitle": "Filtre",
-    "filtersAriaLabel": "Filtre for eiendommer",
-    "anyType": "Alle typer",
-    "anyStatus": "Alle statuser",
-    "cityPlaceholder": "f.eks. Oslo",
-    "priceRangeLabel": "Prisintervall",
-    "minPriceLabel": "Min",
-    "maxPriceLabel": "Maks",
-
+    "detailsCard": {
+      "detailsCardAriaLabel": "Kort med eiendomsdetaljer",
+      "priceValueAriaLabel": "Eiendomspris: {value}",
+      "metaSectionAriaLabel": "Hovedinformasjon om eiendommen",
+      "descriptionSectionAriaLabel": "Beskrivelse av eiendommen",
+      "descriptionTitle": "Beskrivelse",
+      "metaTitle": "Eiendomsinformasjon",
+      "typeLabel": "Type",
+      "statusLabel": "Status",
+      "cityLabel": "By",
+      "propertyIdLabel": "Eiendoms-ID",
+      "createdAtLabel": "Opprettet",
+      "bedroomsLabel": "Soverom",
+      "bathroomsLabel": "Bad",
+      "areaLabel": "Areal",
+      "brokerTitle": "Megler",
+      "brokerSubtitle": "Se meglerprofilen og utforsk flere boliger fra samme megler."
+    },
     "type": {
       "apartment": "Leilighet",
       "house": "Hus",
-      "commercial": "Næring"
+      "commercial": "Næringseiendom"
     },
     "status": {
       "active": "Aktiv",
       "sold": "Solgt"
-    }
+    },
+    "filtersAriaLabel": "Filtre for eiendommer",
+    "cityLabel": "By",
+    "cityPlaceholder": "Skriv inn by",
+    "typeLabel": "Type",
+    "statusLabel": "Status",
+    "anyType": "Alle typer",
+    "anyStatus": "Alle statuser",
+    "priceRangeLabel": "Prisklasse",
+    "minPriceLabel": "Min pris",
+    "maxPriceLabel": "Maks pris",
+    "priceValueAriaLabel": "Eiendomspris: {value}"
   }
 }

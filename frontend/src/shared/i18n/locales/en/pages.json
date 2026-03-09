@@ -93,7 +93,8 @@
   "properties": {
     "list": {
       "title": "Properties",
-      "subtitle": "Browse properties from the backend. Filtering and paging will be added next."
+      "subtitle": "Browse properties from the backend. Filtering and paging will be added next.",
+      "ariaLabel": "Property details"
     },
     "details": {
       "actions": {

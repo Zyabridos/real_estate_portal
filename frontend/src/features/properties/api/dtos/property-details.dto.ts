@@ -13,7 +13,7 @@ export type PropertyDetailsDto = {
   bedrooms: number;
   bathrooms: number;
   area: number;
-  mainImageUrl?: string;
+  mainImageUrl?: string | null;
   brokerId: string;
   createdAt?: string;
   // TODO: add UpdatedAt

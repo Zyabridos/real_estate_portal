@@ -179,7 +179,7 @@ watch(
       <!-- List -->
       <div v-else class="mt-8">
         <div
-          class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+          class="flex flex-col gap-5"
           data-testid="properties-list"
           role="list"
           :aria-label="$t('pages:properties.list.cardsAriaLabel')"

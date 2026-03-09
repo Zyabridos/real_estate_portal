@@ -49,9 +49,11 @@ const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") {
     return i18n.t("errors:message.notFound.property");
   }
+
   if (error.value?.kind === "BadRequest") {
     return i18n.t("errors:message.invalidPropertyId");
   }
+
   return error.value?.message ?? i18n.t("errors:message.unexpected");
 });
 
@@ -62,7 +64,10 @@ async function load(): Promise<void> {
 
   if (!id.value) {
     state.value = "error";
-    error.value = { kind: "BadRequest", message: i18n.t("errors:message.invalidPropertyId") } as ApiError;
+    error.value = {
+      kind: "BadRequest",
+      message: i18n.t("errors:message.invalidPropertyId"),
+    } as ApiError;
     return;
   }
 
@@ -75,7 +80,6 @@ async function load(): Promise<void> {
     state.value = "error";
 
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.error("Failed to fetch property details", e);
     }
   }
@@ -100,8 +104,9 @@ watch(id, () => {
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="page-title">
             {{ pageTitle }}
           </h1>
+
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t('pages:properties.details.subtitle') }}
+            {{ $t("pages:properties.details.subtitle") }}
           </p>
         </div>
 
@@ -113,7 +118,7 @@ watch(id, () => {
             @click="goBack"
             :aria-label="$t('common:actions.backToListAria')"
           >
-            {{ $t('common:actions.backToList') }}
+            {{ $t("common:actions.backToList") }}
           </button>
 
           <button
@@ -127,15 +132,14 @@ watch(id, () => {
             {{ $t("pages:properties.details.actions.createLead") }}
           </button>
 
-
           <button
             type="button"
-            class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="refresh-button"
             @click="load"
             :aria-label="$t('common:actions.refreshAria')"
           >
-            {{ $t('common:actions.refresh') }}
+            {{ $t("common:actions.refresh") }}
           </button>
         </div>
       </div>
