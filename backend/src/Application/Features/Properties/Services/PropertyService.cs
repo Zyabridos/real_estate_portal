@@ -1,6 +1,7 @@
 using AutoMapper;
 using RealEstate.Application.Common;
 using RealEstate.Application.Common.Abstractions;
+using RealEstate.Application.Features.Brokers.Contracts;
 using RealEstate.Application.Features.Properties.Create;
 using RealEstate.Application.Features.Properties.GetById;
 using RealEstate.Application.Features.Properties.List;
@@ -13,15 +14,18 @@ namespace RealEstate.Application.Features.Properties.Services;
 public sealed class PropertyService : IPropertyService
 {
     private readonly IPropertyRepository _propertyRepository;
+    private readonly IBrokerRepository _brokerRepository;
     private readonly IMapper _mapper;
     private readonly ISequenceGenerator _sequenceGenerator;
 
     public PropertyService(
         IPropertyRepository propertyRepository,
+        IBrokerRepository brokerRepository,
         IMapper mapper,
         ISequenceGenerator sequenceGenerator)
     {
         _propertyRepository = propertyRepository;
+        _brokerRepository = brokerRepository;
         _mapper = mapper;
         _sequenceGenerator = sequenceGenerator;
     }
@@ -52,9 +56,15 @@ public sealed class PropertyService : IPropertyService
 
     public async Task<PropertyDetailsDto> CreateAsync(CreatePropertyRequest request, CancellationToken ct)
     {
+        var broker = await _brokerRepository.GetById(request.BrokerId, ct);
+        if (broker is null)
+            throw new InvalidOperationException($"Broker with id {request.BrokerId} was not found.");
+
         var entity = _mapper.Map<Property>(request);
 
         entity.Id = await _sequenceGenerator.GetNextValueAsync("properties", ct);
+        entity.BrokerId = broker.Id;
+        entity.AgencyId = broker.AgencyId;
         entity.CreatedAt = DateTime.UtcNow;
 
         await _propertyRepository.CreateAsync(entity, ct);

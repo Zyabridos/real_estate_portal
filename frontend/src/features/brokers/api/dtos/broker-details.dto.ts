@@ -1,8 +1,9 @@
 export type BrokerDetailsDto = {
-  id: string
-  agencyId: string
+  id: number
+  agencyId: number
   firstName: string
   lastName: string
+  gender: string
   email?: string
   phoneNumber?: string
   photoUrl?: string

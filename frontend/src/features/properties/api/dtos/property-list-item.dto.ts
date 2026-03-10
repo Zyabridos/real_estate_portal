@@ -2,7 +2,7 @@ import type { PropertyType} from "@/entities/properties/model/types";
 import type { PropertyStatus } from "@/entities/properties/model/types";
 
 export type PropertyListItemDto = {
-  id: string;
+  id: number;
   title: string;
   description: string;
   city: string;

@@ -5,19 +5,19 @@ const apiRoutes = {
   },
   agencies: {
     list: (): string => ["agencies"].join("/"),
-    getById: (id: string): string => ["agencies", id].join("/"),
+    getById: (id: number): string => ["agencies", id].join("/"),
   },
   properties: {
     list: (): string => ["properties"].join("/"),
-    getById: (id: string): string => ["properties", id].join("/"),
+    getById: (id: number): string => ["properties", id].join("/"),
   },
   brokers: {
     list: (): string => ["brokers"].join("/"),
-    getById: (id: string): string => ["brokers", id].join("/"),
+    getById: (id: number): string => ["brokers", id].join("/"),
   },
   leads: {
     create: (): string => ["leads"].join("/"),
-    getById: (id: string): string => ["leads", id].join("/"),
+    getById: (id: number): string => ["leads", id].join("/"),
   },
 };
 
@@ -25,11 +25,11 @@ const pagesRoutes = {
   home: (): string => "/",
   agencies: {
     list: (): string => "/agencies",
-    details: (id: string): string => ["/agencies", id].join("/"),
+    details: (id: number): string => ["/agencies", id].join("/"),
   },
   brokers: {
     list: (): string => "/brokers",
-    details: (id: string): string => ["/brokers", id].join("/"),
+    details: (id: number): string => ["/brokers", id].join("/"),
   },
   blog: {
     list: (): string => "/blog",
@@ -37,10 +37,10 @@ const pagesRoutes = {
   },
   properties: {
     list: (): string => "/properties",
-    details: (id: string): string => ["/properties", id].join("/"),
+    details: (id: number): string => ["/properties", id].join("/"),
   },
   leads: {
-    create: (propertyId: string) => ["/properties", propertyId, "lead"].join("/"),
+    create: (propertyId: number) => ["/properties", propertyId, "lead"].join("/"),
     list: (): string => "/leads",
   },
 };

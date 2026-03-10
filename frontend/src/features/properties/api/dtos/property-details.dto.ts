@@ -2,7 +2,7 @@ import type { PropertyType} from "@/entities/properties/model/types";
 import type { PropertyStatus } from "@/entities/properties/model/types";
 
 export type PropertyDetailsDto = {
-  id: string;
+  id: number;
   title: string;
   description: string;
   address: string;
@@ -16,6 +16,6 @@ export type PropertyDetailsDto = {
   mainImageUrl?: string | null;
   brokerId: string;
   createdAt?: string;
-  // TODO: add UpdatedAt
+  updatedAt?: string;
   // TODO: add imagesUrls: string[] - both for front and back
 }

@@ -7,16 +7,24 @@ using RealEstate.Domain.Entities;
 
 namespace RealEstate.Application.Features.Properties.Mapping;
 
-public sealed class PropertiesMappingProfile : Profile
+public sealed class PropertyMappingProfile : Profile
 {
-    public PropertiesMappingProfile()
+    public PropertyMappingProfile()
     {
-        CreateMap<Property, PropertyListItemDto>()
-            .ForCtorParam("Type", opt => opt.MapFrom(x => x.Type.ToString()))
-            .ForCtorParam("Status", opt => opt.MapFrom(x => x.Status.ToString()));
+        CreateMap<Property, PropertyDetailsDto>();
 
-        CreateMap<Property, PropertyDetailsDto>()
-            .ForCtorParam("Type", opt => opt.MapFrom(x => x.Type.ToString()))
-            .ForCtorParam("Status", opt => opt.MapFrom(x => x.Status.ToString()));
+        CreateMap<Property, PropertyListItemDto>();
+
+        CreateMap<CreatePropertyRequest, Property>()
+            .ForMember(d => d.Id, opt => opt.Ignore())
+            .ForMember(d => d.AgencyId, opt => opt.Ignore())
+            .ForMember(d => d.BrokerId, opt => opt.Ignore())
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+
+        CreateMap<UpdatePropertyRequest, Property>()
+            .ForMember(d => d.Id, opt => opt.Ignore())
+            .ForMember(d => d.AgencyId, opt => opt.Ignore())
+            .ForMember(d => d.BrokerId, opt => opt.Ignore())
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
     }
 }

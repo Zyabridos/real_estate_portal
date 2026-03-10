@@ -20,7 +20,8 @@ const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PropertyDetailsDto | null>(null);
 
-const id = computed(() => String(route.params.id ?? "").trim());
+const id = computed<number>(() => Number(route.params.id ?? ""));
+const isValidId = computed<boolean>(() => Number.isInteger(id.value) && id.value > 0);
 
 const pageTitle = computed(() => {
   const fallback = i18n.t("pages:properties.details.titleFallback");
@@ -28,13 +29,19 @@ const pageTitle = computed(() => {
   return title ? title : fallback;
 });
 
-const canCreateLead = computed(() => state.value === "success" && !!data.value?.id?.trim());
+const canCreateLead = computed<boolean>(() => {
+  return state.value === "success" && !!data.value && Number.isInteger(data.value.id) && data.value.id > 0;
+});
 
 function goCreateLead(): void {
-  const propertyId = data.value?.id?.trim();
-  if (!propertyId) return;
+  if (!data.value || !Number.isInteger(data.value.id) || data.value.id <= 0) {
+    return;
+  }
 
-  router.push({ path: routes.app.leads.create(propertyId), query: route.query });
+  router.push({
+    path: routes.app.leads.create(data.value.id),
+    query: route.query,
+  });
 }
 
 const errorTitle = computed(() => {
@@ -62,7 +69,7 @@ async function load(): Promise<void> {
   error.value = null;
   data.value = null;
 
-  if (!id.value) {
+  if (!isValidId.value) {
     state.value = "error";
     error.value = {
       kind: "BadRequest",

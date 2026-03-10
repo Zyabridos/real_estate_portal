@@ -1,10 +1,10 @@
 export type LeadListItemDto = {
-  id: string;
-  propertyId: string;
+  id: number;
+  propertyId: number;
   fullName: string;
   email: string | null;
   phoneNumber: string | null;
   status: string;
-  createdAt: string; // ISO
-  updatedAt: string | null; // ISO
+  createdAt: string;
+  updatedAt: string | null;
 };

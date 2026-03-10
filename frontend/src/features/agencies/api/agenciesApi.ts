@@ -11,7 +11,6 @@ import type { AgenciesListQuery } from "@/shared/types/queries"
 import type {RequestConfig} from "@/shared/api/client/types.ts";
 
 export const agenciesApi = {
-  // GET /api/agencies
   async list(
     query: AgenciesListQuery = {},
     config?: RequestConfig
@@ -29,8 +28,7 @@ export const agenciesApi = {
     );
   },
 
-  // GET /api/agencies/{id}
-  async getById(id: string, config?: RequestConfig): Promise<AgencyDetailsDto> {
+  async getById(id: number, config?: RequestConfig): Promise<AgencyDetailsDto> {
     if (!id) throw new Error("agenciesApi.getById: id is required");
     return http.get<AgencyDetailsDto>(routes.api.agencies.getById(id), config);
   },
