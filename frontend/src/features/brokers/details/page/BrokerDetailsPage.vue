@@ -23,10 +23,12 @@ const data = ref<BrokerDetailsDto | null>(null);
 const id = computed(() => String(route.params.id ?? "").trim());
 
 const pageTitle = computed(() => {
-  // TODO: fix it later... (I am tired not)
   const fallback = i18n.t("pages:brokers.details.titleFallback");
-  const name = data.value?.firstName?.trim();
-  return name ? name : fallback;
+  const firstName = data.value?.firstName?.trim() ?? "";
+  const lastName = data.value?.lastName?.trim() ?? "";
+  const fullName = `${firstName} ${lastName}`.trim();
+
+  return fullName || fallback;
 });
 
 const errorTitle = computed(() => {

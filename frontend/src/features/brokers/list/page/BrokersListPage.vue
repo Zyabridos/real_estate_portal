@@ -32,12 +32,8 @@ async function load(): Promise<void> {
 
 async function onGoToPage(nextPage: number): Promise<void> {
   await setPage(nextPage);
-  // load() вызовется watch'ем ниже
 }
 
-/**
- * ✅ Stable totals (без blinking)
- */
 const stableTotals = ref<{ totalItems: number; totalPages: number } | null>(null);
 
 watch(
@@ -61,12 +57,10 @@ const paging = computed(() => ({
 
 const showMeta = computed(() => stableTotals.value !== null);
 
-// ✅ loader: показываем на первом заходе и когда нет items
 const showFullLoading = computed(
   () => state.value === "loading" && brokers.value.length === 0
 );
 
-// ✅ автоматическая загрузка на входе и при смене page/pageSize
 watch(
   () => [page.value, pageSize.value],
   () => {
@@ -89,7 +83,11 @@ watch(
           </p>
         </div>
 
-        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
+        <div
+          class="flex items-center gap-3"
+          role="group"
+          :aria-label="$t('common:aria.pageActions')"
+        >
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
@@ -111,7 +109,6 @@ watch(
       />
       <div v-else class="mt-4 h-5 w-48 animate-pulse rounded bg-slate-100" />
 
-      <!-- States -->
       <LoadingState v-if="showFullLoading" />
       <ErrorState
         v-else-if="state === 'error'"
@@ -120,17 +117,19 @@ watch(
       />
       <EmptyState v-else-if="state === 'empty'" />
 
-      <!-- List -->
       <div v-else class="mt-8">
         <div
-          class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+          class="flex flex-col gap-4"
           role="list"
           :aria-label="$t('pages:brokers.list.cardsAriaLabel')"
         >
           <BrokerCard v-for="b in brokers" :key="b.id" :broker="b" />
         </div>
 
-        <div v-if="state === 'loading' && brokers.length > 0" class="mt-4 h-1 w-24 animate-pulse rounded bg-slate-100" />
+        <div
+          v-if="state === 'loading' && brokers.length > 0"
+          class="mt-4 h-1 w-24 animate-pulse rounded bg-slate-100"
+        />
       </div>
 
       <Pagination
