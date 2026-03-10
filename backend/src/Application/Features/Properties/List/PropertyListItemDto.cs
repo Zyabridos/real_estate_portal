@@ -3,12 +3,14 @@ using RealEstate.Domain.Enums.Properties;
 namespace RealEstate.Application.Features.Properties.List;
 
 public sealed record PropertyListItemDto(
-    Guid Id,
+    int Id,
+    int? AgencyId,
+    int? BrokerId,
     string Title,
     string City,
     decimal Price,
+    string? MainImageUrl,
     PropertyType Type,
     PropertyStatus Status,
-    string? MainImageUrl,
     DateTime CreatedAt
 );

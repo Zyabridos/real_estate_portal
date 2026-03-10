@@ -1,8 +1,8 @@
 namespace RealEstate.Application.Features.Brokers.Update;
 
-// It is server`s job to assign BrokerId and CreatedAt
+// It is server`s job to assign CreatedAt and UpdatedAt
 public sealed record UpdateBrokerRequest(
-    Guid AgencyId,
+    int AgencyId,
     string FirstName,
     string LastName,
     string Email,

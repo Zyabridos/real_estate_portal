@@ -9,8 +9,10 @@ public sealed class LeadDetailsResponseExample : IExamplesProvider<LeadDetailsDt
     public LeadDetailsDto GetExamples()
     {
         return new LeadDetailsDto(
-            Id: Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            PropertyId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            Id: 1,
+            AgencyId: 1,
+            BrokerId: 1002,
+            PropertyId: 123,
             FullName: "Bran Stark",
             Email: "bran.stark@winterfale.com",
             PhoneNumber: "+47 111 22 333",

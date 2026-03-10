@@ -2,8 +2,8 @@ namespace RealEstate.Domain.Entities;
 
 public sealed class Broker
 {
-    public Guid Id { get; set; }
-    public Guid AgencyId { get; set; }
+    public int Id { get; set; }
+    public int AgencyId { get; set; }
 
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;

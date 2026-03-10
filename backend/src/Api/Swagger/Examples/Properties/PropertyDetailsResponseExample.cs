@@ -9,22 +9,24 @@ public sealed class PropertyDetailsResponseExample : IExamplesProvider<PropertyD
     public PropertyDetailsDto GetExamples()
     {
         return new PropertyDetailsDto(
-            Id: Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+            Id: 123,
+            BrokerId: 1001,
+            AgencyId: 1,
             Title: "Spacious family house",
             Description: "A bright house with a large garden.",
             Address: "Example street 10",
             City: "Trondheim",
             Price: 7_900_000m,
-            Type: PropertyType.House,
             Bedrooms: 4,
             Bathrooms: 2,
             Area: 180m,
-            Status: PropertyStatus.Active,
             MainImageUrl: "https://example.com/house.jpg",
-            BrokerId: Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+            Status: PropertyStatus.Active,
+            Type: PropertyType.House,
             CreatedAt: DateTime.SpecifyKind(
                 DateTime.Parse("2025-12-15T12:00:00Z"),
-                DateTimeKind.Utc)
+                DateTimeKind.Utc),
+            UpdatedAt: DateTime.Parse("2026-01-11T12:00:00Z")
         );
     }
 }

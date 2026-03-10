@@ -6,10 +6,11 @@ namespace RealEstate.Domain.Entities;
 // TODO: eventually add (uncomment):
 public sealed class Lead
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public Guid PropertyId { get; set; }
-    // public Guid AssignedBrokerId { get; set; }
+    public int AgencyId { get; set; }
+    public int BrokerId { get; set; }
+    public int PropertyId { get; set; }
     public string FullName { get; set; } = default!;
     public string? PhoneNumber { get; set; }
     public string? Email { get; set; }

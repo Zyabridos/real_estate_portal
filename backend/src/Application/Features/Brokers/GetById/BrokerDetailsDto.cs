@@ -1,8 +1,8 @@
 namespace RealEstate.Application.Features.Brokers.GetById;
 
 public sealed record BrokerDetailsDto(
-    Guid Id,
-    Guid AgencyId,
+    int Id,
+    int AgencyId,
     string FirstName,
     string LastName,
     string Email,

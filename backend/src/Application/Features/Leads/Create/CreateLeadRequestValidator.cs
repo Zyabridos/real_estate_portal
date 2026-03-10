@@ -8,7 +8,7 @@ public sealed class CreateLeadRequestValidator : AbstractValidator<CreateLeadReq
     public CreateLeadRequestValidator()
     {
         RuleFor(x => x.PropertyId)
-            .NotEmpty();
+            .GreaterThan(0);
 
         RuleFor(x => x.FullName)
             .NotEmpty()

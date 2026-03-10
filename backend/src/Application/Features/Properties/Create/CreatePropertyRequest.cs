@@ -8,11 +8,10 @@ public sealed record CreatePropertyRequest(
     string Address,
     string City,
     decimal Price,
-    PropertyType Type,
+    decimal Area,
     int Bedrooms,
     int Bathrooms,
-    decimal Area,
+    PropertyType Type,
     PropertyStatus Status,
-    string? MainImageUrl,
-    Guid BrokerId
+    string? MainImageUrl
 );

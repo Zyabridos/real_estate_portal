@@ -9,10 +9,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 using MongoDB.Driver;
 using RealEstate.Application;
 using RealEstate.Application.Features.Properties.Services;
+using RealEstate.Application.Common.Abstractions;
 using RealEstate.Infrastructure.HealthChecks;
 using RealEstate.Infrastructure.Mongo;
 using RealEstate.Infrastructure.Mongo.Conventions;
 using RealEstate.Infrastructure.Mongo.Indexes;
+using RealEstate.Infrastructure.Persistence.Sequences;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -137,6 +139,7 @@ public static class ApiServiceCollectionExtensions
             return client.GetDatabase(opt.Database);
         });
 
+        services.AddScoped<ISequenceGenerator, MongoSequenceGenerator>();
         services.AddHostedService<MongoIndexInitializer>();
 
         return services;

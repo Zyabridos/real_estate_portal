@@ -41,10 +41,12 @@ public sealed class AgencyMappingProfile : Profile
         // DTO -> Entity
         CreateMap<CreateAgencyRequest, Agency>()
             .ForMember(d => d.Id, opt => opt.Ignore())
-            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.UpdatedAt, opt => opt.Ignore());
 
         CreateMap<UpdateAgencyRequest, Agency>()
             .ForMember(d => d.Id, opt => opt.Ignore())
-            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.UpdatedAt, opt => opt.Ignore());
     }
 }

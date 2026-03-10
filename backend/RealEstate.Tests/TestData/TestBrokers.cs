@@ -1,22 +1,26 @@
+using System.Threading;
 using RealEstate.Domain.Entities;
 
 namespace RealEstate.TestData;
 
 public static class TestBrokers
 {
+    private static int _brokerId = 1000;
+
     public static Broker Create(
+        int? id = null,
+        int agencyId = 1,
         string firstName = "Alice",
         string lastName = "Agent",
         string? email = null,
         string phoneNumber = "+4744444444",
         string? photoUrl = null,
         DateTime? createdAt = null,
-        DateTime? updatedAt = null,
-        Guid? id = null)
+        DateTime? updatedAt = null)
     {
         var now = DateTime.UtcNow;
 
-        var brokerId = id ?? Guid.NewGuid();
+        var brokerId = id ?? Interlocked.Increment(ref _brokerId);
         var created = createdAt ?? now;
         var updated = updatedAt ?? created;
 
@@ -25,6 +29,7 @@ public static class TestBrokers
         return new Broker
         {
             Id = brokerId,
+            AgencyId = agencyId,
             FirstName = firstName,
             LastName = lastName,
             Email = safeEmail,

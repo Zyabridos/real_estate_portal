@@ -1,5 +1,6 @@
 using AutoMapper;
 using RealEstate.Application.Common;
+using RealEstate.Application.Common.Abstractions;
 using RealEstate.Application.Features.Agencies.Create;
 using RealEstate.Application.Features.Agencies.GetById;
 using RealEstate.Application.Features.Agencies.List;
@@ -13,11 +14,16 @@ public sealed class AgencyService : IAgencyService
 {
     private readonly IAgencyRepository _agencyRepository;
     private readonly IMapper _mapper;
+    private readonly ISequenceGenerator _sequenceGenerator;
 
-    public AgencyService(IAgencyRepository agencyRepository, IMapper mapper)
+    public AgencyService(
+        IAgencyRepository agencyRepository,
+        IMapper mapper,
+        ISequenceGenerator sequenceGenerator)
     {
         _agencyRepository = agencyRepository;
         _mapper = mapper;
+        _sequenceGenerator = sequenceGenerator;
     }
 
     public async Task<PagedResult<AgencyListItemDto>> GetListAsync(AgencyListQuery query, CancellationToken ct)
@@ -35,7 +41,7 @@ public sealed class AgencyService : IAgencyService
         };
     }
 
-    public async Task<AgencyDetailsDto?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<AgencyDetailsDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         var entity = await _agencyRepository.GetById(id, ct);
         return entity is null ? null : _mapper.Map<AgencyDetailsDto>(entity);
@@ -45,7 +51,7 @@ public sealed class AgencyService : IAgencyService
     {
         var entity = _mapper.Map<Agency>(request);
 
-        entity.Id = Guid.NewGuid();
+        entity.Id = await _sequenceGenerator.GetNextValueAsync("agencies", ct);
         entity.CreatedAt = DateTime.UtcNow;
         
         entity.PhoneNumber = new string(entity.PhoneNumber
@@ -58,7 +64,7 @@ public sealed class AgencyService : IAgencyService
     }
 
 
-    public async Task<AgencyDetailsDto?> UpdateAsync(Guid id, UpdateAgencyRequest request, CancellationToken ct)
+    public async Task<AgencyDetailsDto?> UpdateAsync(int id, UpdateAgencyRequest request, CancellationToken ct)
     {
         var entity = await _agencyRepository.GetById(id, ct);
         if (entity is null) return null;
@@ -72,6 +78,6 @@ public sealed class AgencyService : IAgencyService
         return updated ? _mapper.Map<AgencyDetailsDto>(entity) : null;
     }
 
-    public Task<bool> DeleteAsync(Guid id, CancellationToken ct) =>
+    public Task<bool> DeleteAsync(int id, CancellationToken ct) =>
         _agencyRepository.DeleteAsync(id, ct);
 }

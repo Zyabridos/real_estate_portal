@@ -5,12 +5,12 @@ namespace RealEstate.Application.Features.Agencies.Contracts;
 
 public interface IAgencyRepository
 {
-    Task<Agency?> GetById(Guid id, CancellationToken ct);
+    Task<Agency?> GetById(int id, CancellationToken ct);
     Task<IReadOnlyList<Agency>> GetAllAsync(CancellationToken ct);
 
     Task CreateAsync(Agency entity, CancellationToken ct);
     Task<bool> UpdateAsync(Agency entity, CancellationToken ct);
-    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+    Task<bool> DeleteAsync(int id, CancellationToken ct);
     
     Task<(IReadOnlyList<Agency> Items, long TotalItems)> GetListAsync(
         AgencyListQuery query,

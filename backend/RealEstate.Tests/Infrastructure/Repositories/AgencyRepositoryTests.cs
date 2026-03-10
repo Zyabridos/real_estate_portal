@@ -23,7 +23,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
     {
         var repo = CreateRepo();
 
-        var id = Guid.NewGuid();
+        var id = 1;
 
         var entity = new Agency
         {
@@ -46,7 +46,6 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
         found!.Id.Should().Be(id);
         found.Name.Should().Be("Test Agency");
         found.OrgNumber.Should().Be("123123123");
-        
         found.PhoneNumber.Should().Be("+4711122333");
     }
 
@@ -57,7 +56,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
 
         var entity = new Agency
         {
-            Id = Guid.NewGuid(),
+            Id = 2,
             Name = "Old Name",
             OrgNumber = "999999",
             PhoneNumber = "+47 999 99 999",
@@ -79,8 +78,6 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
         var found = await repo.GetById(entity.Id, CancellationToken.None);
         found.Should().NotBeNull();
         found!.Name.Should().Be("New Name");
-
-        // см. комментарий выше
         found.PhoneNumber.Should().Be("+4711122333");
     }
 
@@ -92,7 +89,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
 
         var matching = new Agency
         {
-            Id = Guid.NewGuid(),
+            Id = 3,
             Name = "Alpha",
             OrgNumber = "111111",
             PhoneNumber = "+47 111 11 111",
@@ -105,7 +102,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
 
         var other1 = new Agency
         {
-            Id = Guid.NewGuid(),
+            Id = 4,
             Name = "Alpha",
             OrgNumber = "222222",
             PhoneNumber = "+47 222 22 222",
@@ -118,7 +115,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
 
         var other2 = new Agency
         {
-            Id = Guid.NewGuid(),
+            Id = 5,
             Name = "Beta",
             OrgNumber = "111111",
             PhoneNumber = "+47 333 33 333",
@@ -161,7 +158,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
 
         var a = new Agency
         {
-            Id = Guid.NewGuid(),
+            Id = 6,
             Name = "A",
             OrgNumber = "1",
             PhoneNumber = "+47 1",
@@ -174,7 +171,7 @@ public sealed class AgencyRepositoryTests : MongoDbTestBase
 
         var b = new Agency
         {
-            Id = Guid.NewGuid(),
+            Id = 7,
             Name = "B",
             OrgNumber = "2",
             PhoneNumber = "+47 2",

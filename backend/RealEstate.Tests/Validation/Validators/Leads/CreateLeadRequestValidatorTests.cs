@@ -22,7 +22,7 @@ public sealed class CreateLeadRequestValidatorTests
     [Fact]
     public void PropertyId_is_required()
     {
-        var dto = LeadRequests.Valid() with { PropertyId = Guid.Empty };
+        var dto = LeadRequests.Valid() with { PropertyId = 0 };
 
         var result = _validator.Validate(dto);
 

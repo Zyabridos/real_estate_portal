@@ -14,7 +14,9 @@ public sealed class PropertyListResponseExample : IExamplesProvider<PagedResult<
             Items =
             [
                 new PropertyListItemDto(
-                    Id: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                    Id: 123,
+                    AgencyId: 1,
+                    BrokerId: 1001,
                     Title: "Modern apartment in city center",
                     City: "Trondheim",
                     Price: 4_500_000m,
@@ -24,11 +26,25 @@ public sealed class PropertyListResponseExample : IExamplesProvider<PagedResult<
                     CreatedAt: DateTime.SpecifyKind(
                         DateTime.Parse("2026-01-01T10:00:00Z"),
                         DateTimeKind.Utc)
+                ),
+                new PropertyListItemDto(
+                    Id: 123,
+                    AgencyId: 2,
+                    BrokerId: 1021,
+                    Title: "Modern house in city center",
+                    City: "Trondheim",
+                    Price: 4_500_000m,
+                    Type: PropertyType.House,
+                    Status: PropertyStatus.Active,
+                    MainImageUrl: "https://example.com/image.jpg",
+                    CreatedAt: DateTime.SpecifyKind(
+                        DateTime.Parse("2026-01-01T10:00:00Z"),
+                        DateTimeKind.Utc)
                 )
             ],
-            TotalItems = 1,
+            TotalItems = 2,
             Page = 1,
-            PageSize = 10
+            PageSize = 20
         };
     }
 }

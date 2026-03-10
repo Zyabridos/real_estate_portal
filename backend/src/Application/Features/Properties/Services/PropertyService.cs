@@ -1,11 +1,11 @@
 using AutoMapper;
 using RealEstate.Application.Common;
+using RealEstate.Application.Common.Abstractions;
 using RealEstate.Application.Features.Properties.Create;
 using RealEstate.Application.Features.Properties.GetById;
 using RealEstate.Application.Features.Properties.List;
 using RealEstate.Application.Features.Properties.Update;
 using RealEstate.Application.Features.Properties.Contracts;
-using RealEstate.Domain.Enums;
 using RealEstate.Domain.Entities;
 
 namespace RealEstate.Application.Features.Properties.Services;
@@ -14,11 +14,16 @@ public sealed class PropertyService : IPropertyService
 {
     private readonly IPropertyRepository _propertyRepository;
     private readonly IMapper _mapper;
+    private readonly ISequenceGenerator _sequenceGenerator;
 
-    public PropertyService(IPropertyRepository propertyRepository, IMapper mapper)
+    public PropertyService(
+        IPropertyRepository propertyRepository,
+        IMapper mapper,
+        ISequenceGenerator sequenceGenerator)
     {
         _propertyRepository = propertyRepository;
         _mapper = mapper;
+        _sequenceGenerator = sequenceGenerator;
     }
 
     public async Task<PagedResult<PropertyListItemDto>> GetListAsync(PropertyListQuery query, CancellationToken ct)
@@ -36,58 +41,38 @@ public sealed class PropertyService : IPropertyService
         };
     }
 
-    public async Task<PropertyDetailsDto?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<PropertyDetailsDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         var entity = await _propertyRepository.GetByIdAsync(id, ct);
-        return entity is null ? null : _mapper.Map<PropertyDetailsDto>(entity);
+
+        return entity is null
+            ? null
+            : _mapper.Map<PropertyDetailsDto>(entity);
     }
 
     public async Task<PropertyDetailsDto> CreateAsync(CreatePropertyRequest request, CancellationToken ct)
     {
-        var entity = new Property
-        {
-            Id = Guid.NewGuid(),
-            Title = request.Title,
-            Description = request.Description,
-            Address = request.Address,
-            City = request.City,
-            Price = request.Price,
-            Type = request.Type,
-            Bedrooms = request.Bedrooms,
-            Bathrooms = request.Bathrooms,
-            Area = request.Area,
-            Status = request.Status,
-            MainImageUrl = request.MainImageUrl,
-            BrokerId = request.BrokerId,
-            CreatedAt = DateTime.UtcNow
-        };
+        var entity = _mapper.Map<Property>(request);
+
+        entity.Id = await _sequenceGenerator.GetNextValueAsync("properties", ct);
+        entity.CreatedAt = DateTime.UtcNow;
 
         await _propertyRepository.CreateAsync(entity, ct);
+
         return _mapper.Map<PropertyDetailsDto>(entity);
     }
 
-    public async Task<PropertyDetailsDto?> UpdateAsync(Guid id, UpdatePropertyRequest request, CancellationToken ct)
+    public async Task<PropertyDetailsDto?> UpdateAsync(int id, UpdatePropertyRequest request, CancellationToken ct)
     {
         var entity = await _propertyRepository.GetByIdAsync(id, ct);
         if (entity is null) return null;
 
-        entity.Title = request.Title;
-        entity.Description = request.Description;
-        entity.Address = request.Address;
-        entity.City = request.City;
-        entity.Price = request.Price;
-        entity.Type = request.Type;
-        entity.Bedrooms = request.Bedrooms;
-        entity.Bathrooms = request.Bathrooms;
-        entity.Area = request.Area;
-        entity.Status = request.Status;
-        entity.MainImageUrl = request.MainImageUrl;
-        entity.BrokerId = request.BrokerId;
+        _mapper.Map(request, entity);
 
         var updated = await _propertyRepository.UpdateAsync(entity, ct);
         return updated ? _mapper.Map<PropertyDetailsDto>(entity) : null;
     }
 
-    public Task<bool> DeleteAsync(Guid id, CancellationToken ct)
-        => _propertyRepository.DeleteAsync(id, ct);
+    public Task<bool> DeleteAsync(int id, CancellationToken ct) =>
+        _propertyRepository.DeleteAsync(id, ct);
 }

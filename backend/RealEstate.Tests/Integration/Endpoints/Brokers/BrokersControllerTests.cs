@@ -67,13 +67,13 @@ public sealed class BrokersControllerTests : IntegrationTestBase
     [Fact]
     public async Task GetById_missing_returns_404()
     {
-        var response = await Ctx.Client.GetAsync($"/api/brokers/{Guid.NewGuid()}");
+        var response = await Ctx.Client.GetAsync("/api/brokers/999999");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Theory]
-    [InlineData("not-a-guid")]
-    public async Task GetById_invalid_guid_returns_400(string rawId)
+    [InlineData("not-an-int")]
+    public async Task GetById_invalid_id_returns_400(string rawId)
     {
         var response = await Ctx.Client.GetAsync($"/api/brokers/{rawId}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

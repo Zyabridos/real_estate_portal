@@ -1,5 +1,6 @@
 using AutoMapper;
 using RealEstate.Application.Common;
+using RealEstate.Application.Common.Abstractions;
 using RealEstate.Application.Features.Brokers.Create;
 using RealEstate.Application.Features.Brokers.GetById;
 using RealEstate.Application.Features.Brokers.List;
@@ -13,11 +14,16 @@ public sealed class BrokerService : IBrokerService
 {
     private readonly IBrokerRepository _brokerRepository;
     private readonly IMapper _mapper;
+    private readonly ISequenceGenerator _sequenceGenerator;
 
-    public BrokerService(IBrokerRepository brokerRepository, IMapper mapper)
+    public BrokerService(
+        IBrokerRepository brokerRepository,
+        IMapper mapper,
+        ISequenceGenerator sequenceGenerator)
     {
         _brokerRepository = brokerRepository;
         _mapper = mapper;
+        _sequenceGenerator = sequenceGenerator;
     }
 
     public async Task<PagedResult<BrokerListItemDto>> GetListAsync(BrokerListQuery query, CancellationToken ct)
@@ -35,7 +41,7 @@ public sealed class BrokerService : IBrokerService
         };
     }
 
-    public async Task<BrokerDetailsDto?> GetByIdAsync(Guid id, CancellationToken ct)
+    public async Task<BrokerDetailsDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         var entity = await _brokerRepository.GetById(id, ct);
         return entity is null ? null : _mapper.Map<BrokerDetailsDto>(entity);
@@ -45,35 +51,44 @@ public sealed class BrokerService : IBrokerService
     {
         var entity = _mapper.Map<Broker>(request);
 
-        entity.Id = Guid.NewGuid();
-        entity.CreatedAt = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+
+        entity.Id = await _sequenceGenerator.GetNextValueAsync("brokers", ct);
+        entity.CreatedAt = now;
+        entity.UpdatedAt = now;
 
         entity.Email = entity.Email.Trim().ToLowerInvariant();
-        entity.PhoneNumber = new string(entity.PhoneNumber
-            .Trim()
-            .Where(c => char.IsDigit(c) || c == '+')
-            .ToArray());
+        entity.PhoneNumber = new string(
+            entity.PhoneNumber
+                .Trim()
+                .Where(c => char.IsDigit(c) || c == '+')
+                .ToArray());
 
         await _brokerRepository.CreateAsync(entity, ct);
+
         return _mapper.Map<BrokerDetailsDto>(entity);
     }
 
-
-    public async Task<BrokerDetailsDto?> UpdateAsync(Guid id, UpdateBrokerRequest request, CancellationToken ct)
+    public async Task<BrokerDetailsDto?> UpdateAsync(int id, UpdateBrokerRequest request, CancellationToken ct)
     {
         var entity = await _brokerRepository.GetById(id, ct);
         if (entity is null) return null;
-        
+
         _mapper.Map(request, entity);
 
         entity.Email = entity.Email.Trim().ToLowerInvariant();
-        entity.PhoneNumber = new string(entity.PhoneNumber.Trim().Where(c => char.IsDigit(c) || c == '+').ToArray());
+        entity.PhoneNumber = new string(
+            entity.PhoneNumber
+                .Trim()
+                .Where(c => char.IsDigit(c) || c == '+')
+                .ToArray());
+        entity.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _brokerRepository.UpdateAsync(entity, ct);
 
         return updated ? _mapper.Map<BrokerDetailsDto>(entity) : null;
     }
 
-    public Task<bool> DeleteAsync(Guid id, CancellationToken ct) =>
+    public Task<bool> DeleteAsync(int id, CancellationToken ct) =>
         _brokerRepository.DeleteAsync(id, ct);
 }

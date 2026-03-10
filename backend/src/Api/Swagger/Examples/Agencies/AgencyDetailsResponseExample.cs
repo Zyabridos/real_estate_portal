@@ -8,7 +8,7 @@ public sealed class AgencyDetailsResponseExample : IExamplesProvider<AgencyDetai
     public AgencyDetailsDto GetExamples()
     {
         return new AgencyDetailsDto(
-            Id: Guid.Parse("11111111-aaaa-bbbb-1111-111111111111"),
+            Id: 1,
             Name: "Eiendommenbyrå #1 i Bodø",
             OrgNumber: "0004567891011",
             PhoneNumber: "+47 234 11 895",

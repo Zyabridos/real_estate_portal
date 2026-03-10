@@ -8,8 +8,8 @@ public sealed class BrokerDetailsResponseExample : IExamplesProvider<BrokerDetai
     public BrokerDetailsDto GetExamples()
     {
         return new BrokerDetailsDto(
-            Id: Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            AgencyId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            Id: 1000,
+            AgencyId: 1,
             FirstName: "Ola",
             LastName: "Nordmann",
             Email: "ola.nordmann@realestate.no",

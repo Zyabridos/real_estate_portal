@@ -40,10 +40,12 @@ public sealed class BrokerMappingProfile : Profile
         // DTO -> Entity
         CreateMap<CreateBrokerRequest, Broker>()
             .ForMember(d => d.Id, opt => opt.Ignore())
-            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.UpdatedAt, opt => opt.Ignore());
 
         CreateMap<UpdateBrokerRequest, Broker>()
             .ForMember(d => d.Id, opt => opt.Ignore())
-            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.UpdatedAt, opt => opt.Ignore());
     }
 }

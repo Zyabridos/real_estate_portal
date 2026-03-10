@@ -9,9 +9,9 @@ namespace RealEstate.Application.Features.Brokers.Contracts;
 public interface IBrokerService
 {
     Task<PagedResult<BrokerListItemDto>> GetListAsync(BrokerListQuery query, CancellationToken ct);
-    Task<BrokerDetailsDto?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<BrokerDetailsDto?> GetByIdAsync(int id, CancellationToken ct);
 
     Task<BrokerDetailsDto> CreateAsync(CreateBrokerRequest request, CancellationToken ct);
-    Task<BrokerDetailsDto?> UpdateAsync(Guid id, UpdateBrokerRequest request, CancellationToken ct);
-    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+    Task<BrokerDetailsDto?> UpdateAsync(int id, UpdateBrokerRequest request, CancellationToken ct);
+    Task<bool> DeleteAsync(int id, CancellationToken ct);
 }

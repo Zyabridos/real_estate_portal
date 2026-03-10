@@ -4,10 +4,10 @@ using RealEstate.Domain.Enums.Common;
 namespace RealEstate.Application.Features.Brokers.List;
 
 public sealed record BrokerListQuery(
-    Guid? BrokerId = null,
+    int? BrokerId = null,
     string? FirstName = null,
     string? LastName = null,
-    Guid? AgencyId = null,
+    int? AgencyId = null,
     string? Email = null,
     string? PhoneNumber = null,
     int Page = 1,

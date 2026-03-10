@@ -13,7 +13,7 @@ public sealed class BrokerListResponseExample : IExamplesProvider<PagedResult<Br
             Items =
             [
                 new BrokerListItemDto(
-                    Id: Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    Id: 1000,
                     FirstName: "Ola",
                     LastName: "Nordmann",
                     Email: "ola.nordmann@realestate.no",
@@ -23,7 +23,7 @@ public sealed class BrokerListResponseExample : IExamplesProvider<PagedResult<Br
                     UpdatedAt: DateTime.Parse("2026-01-10T13:00:00Z")
                 ),
                 new BrokerListItemDto(
-                    Id: Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    Id: 1001,
                     FirstName: "Kari",
                     LastName: "Nordmann",
                     Email: "kari.nordmann@realestate.no",
