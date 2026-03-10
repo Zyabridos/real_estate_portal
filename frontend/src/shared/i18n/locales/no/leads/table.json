@@ -1,0 +1,20 @@
+{
+  "captionGrouped": "Henvendelser gruppert etter eiendom",
+  "captionList": "Henvendelser (liste)",
+  "columns": {
+    "fullName": "Fullt navn",
+    "email": "E-post",
+    "phone": "Telefon",
+    "status": "Status",
+    "created": "Opprettet",
+    "updated": "Oppdatert",
+    "property": "Eiendom",
+    "actions": "Handlinger"
+  },
+  "propertyFallback": "Eiendom",
+  "openPropertyAria": "Åpne eiendom {{title}}",
+  "openMessageAria": "Åpne melding for {{name}}",
+  "actions": {
+    "comment": "Kommentar"
+  }
+}

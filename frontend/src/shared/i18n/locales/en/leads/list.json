@@ -1,0 +1,21 @@
+{
+  "pageTitle": "Leads list",
+  "pageSubtitle": "Grouped by PropertyId (default) or List view",
+  "viewToggleAria": "Leads view mode",
+  "view": {
+    "grouped": "Grouped",
+    "list": "List"
+  },
+  "total": "Total: {{count}}",
+  "message": {
+    "loadError": "Failed to load message."
+  },
+  "modal": {
+    "title": "Message",
+    "subtitleFrom": "From: {{name}}",
+    "subtitleFallback": "Message details",
+    "loading": "Loading message…",
+    "empty": "— No message provided —",
+    "close": "Close"
+  }
+}

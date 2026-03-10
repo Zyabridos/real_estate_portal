@@ -1,0 +1,15 @@
+{
+  "contactNotAvailable": "Contact details are not available.",
+  "agencyIdLabel": "Agency ID",
+  "brokerIdLabel": "Broker ID",
+  "emailLabel": "Email",
+  "phoneLabel": "Phone",
+  "openDetailsAria": "Open broker details: {{name}}",
+  "details": {
+    "emptyValue": "—",
+    "experienceTitle": "Experience at the agency",
+    "experienceSince": "Working at the agency since {{date}}",
+    "lastUpdatedTitle": "Last update",
+    "profileUpdated": "Profile updated {{date}}"
+  }
+}

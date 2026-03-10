@@ -1,0 +1,21 @@
+{
+  "pageTitle": "Заявки",
+  "pageSubtitle": "Сгруппировано по PropertyId (по умолчанию) или в виде списка",
+  "viewToggleAria": "Режим отображения заявок",
+  "view": {
+    "grouped": "Группировка",
+    "list": "Список"
+  },
+  "total": "Всего: {{count}}",
+  "message": {
+    "loadError": "Не удалось загрузить сообщение."
+  },
+  "modal": {
+    "title": "Сообщение",
+    "subtitleFrom": "От: {{name}}",
+    "subtitleFallback": "Детали сообщения",
+    "loading": "Загружаем сообщение…",
+    "empty": "— Сообщение не указано —",
+    "close": "Закрыть"
+  }
+}

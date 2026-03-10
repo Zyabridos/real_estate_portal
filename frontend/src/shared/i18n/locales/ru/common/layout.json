@@ -1,0 +1,14 @@
+{
+  "header": {
+    "ariaLabel": "Шапка приложения",
+    "logoLinkAria": "Перейти на главную страницу",
+    "logoAlt": "Логотип Real Estate Portal",
+    "loadingAria": "Глобальный индикатор загрузки"
+  },
+  "main": {
+    "ariaLabel": "Основной контент"
+  },
+  "error": {
+    "title": "Ошибка приложения"
+  }
+}

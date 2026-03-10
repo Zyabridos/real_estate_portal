@@ -1,0 +1,32 @@
+{
+  "titleFallback": "Agency details",
+  "subtitle": "Agency details loaded from the backend.",
+  "ariaLabel": "Agency details page",
+  "pageActionsAriaLabel": "Agency details page actions",
+  "missingAriaLabel": "Agency details error",
+  "missingAsideAriaLabel": "Help and tips",
+  "invalidId": {
+    "badge": "400 • Invalid link",
+    "title": "This agency link doesn’t look right",
+    "description": "The ID in the URL isn’t valid. Please go back to the agencies list and open an agency from there.",
+    "requestedIdLabel": "Requested agency ID",
+    "requestedIdEmpty": "(empty)",
+    "whatYouCanDoTitle": "What you can do",
+    "tip1": "Go back to the agencies list and select an agency.",
+    "tip2": "If you came from an external link, it might be incomplete or outdated.",
+    "tip3": "Avoid editing the URL manually — open details from the list instead.",
+    "note": "Tip: returning to the list is the safest way to navigate."
+  },
+  "notFound": {
+    "badge": "404 • Agency not found",
+    "title": "We couldn’t find this agency",
+    "description": "It may have been removed, or the link is outdated.",
+    "requestedIdLabel": "Requested agency ID",
+    "requestedIdEmpty": "(unknown)",
+    "whatYouCanDoTitle": "What you can do",
+    "tip1": "Go back to the agencies list and try a different agency.",
+    "tip2": "Refresh if the agency was created very recently.",
+    "tip3": "If you bookmarked this page, the ID may no longer exist.",
+    "note": "If you think this is a bug, you’ll be able to report it later."
+  }
+}

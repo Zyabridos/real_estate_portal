@@ -1,0 +1,15 @@
+{
+  "ariaLabel": "Page not found",
+  "badge": "404 • Page not found",
+  "title": "We couldn’t find that page",
+  "description": "The page you’re looking for doesn’t exist or may have been moved. Check the URL or use the navigation below.",
+  "requestedPathLabel": "Requested path",
+  "requestedPathUnknown": "(unknown)",
+  "goHome": "Go to Home",
+  "asideAriaLabel": "Help and tips",
+  "whatYouCanDoTitle": "What you can do",
+  "tip1": "Double-check the URL for typos.",
+  "tip2": "Use the main navigation at the top.",
+  "tip3": "Start from Properties and refine filters.",
+  "note": "If you think this is a bug, you’ll be able to report it later."
+}

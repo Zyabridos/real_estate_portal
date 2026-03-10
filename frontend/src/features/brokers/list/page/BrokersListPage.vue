@@ -23,10 +23,14 @@ const { page, pageSize, setPage } = usePagedQueryParams({
 const state = computed(() => listStatus.value);
 const error = computed(() => listError.value);
 
-const listAriaLabel = computed(() => i18n.t("pages:brokers.list.ariaLabel"));
+const listAriaLabel = computed(() => i18n.t("brokers:list.ariaLabel"));
 
 async function load(): Promise<void> {
-  const q: BrokersListQuery = { page: page.value, pageSize: pageSize.value };
+  const q: BrokersListQuery = {
+    page: page.value,
+    pageSize: pageSize.value,
+  };
+
   await store.fetchList(q);
 }
 
@@ -40,6 +44,7 @@ watch(
   () => lastPagedResult.value,
   (res) => {
     if (!res) return;
+
     stableTotals.value = {
       totalItems: res.totalItems,
       totalPages: res.totalPages,
@@ -76,23 +81,24 @@ watch(
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900">
-            {{ $t("pages:brokers.list.title") }}
+            {{ $t("brokers:list.title") }}
           </h1>
+
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t("pages:brokers.list.subtitle") }}
+            {{ $t("brokers:list.subtitle") }}
           </p>
         </div>
 
         <div
           class="flex items-center gap-3"
           role="group"
-          :aria-label="$t('common:aria.pageActions')"
+          :aria-label="$t('brokers:list.pageActionsAriaLabel')"
         >
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             @click="load"
-            :aria-label="$t('common:actions.refreshAria')"
+            :aria-label="$t('common:actions.refresh')"
             :disabled="state === 'loading'"
           >
             {{ $t("common:actions.refresh") }}
@@ -107,21 +113,24 @@ watch(
         :pageSize="paging.pageSize"
         :totalItems="paging.totalItems"
       />
+
       <div v-else class="mt-4 h-5 w-48 animate-pulse rounded bg-slate-100" />
 
       <LoadingState v-if="showFullLoading" />
+
       <ErrorState
         v-else-if="state === 'error'"
-        :message="error?.message ?? $t('errors:messages.unexpected')"
+        :message="error?.message ?? $t('errors:common.message.unexpected')"
         :onRetry="load"
       />
+
       <EmptyState v-else-if="state === 'empty'" />
 
       <div v-else class="mt-8">
         <div
           class="flex flex-col gap-4"
           role="list"
-          :aria-label="$t('pages:brokers.list.cardsAriaLabel')"
+          :aria-label="$t('brokers:list.cardsAriaLabel')"
         >
           <BrokerCard v-for="b in brokers" :key="b.id" :broker="b" />
         </div>

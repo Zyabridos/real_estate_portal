@@ -24,8 +24,9 @@ const id = computed<number>(() => Number(route.params.id ?? ""));
 const isValidId = computed<boolean>(() => Number.isInteger(id.value) && id.value > 0);
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("pages:properties.details.titleFallback");
+  const fallback = i18n.t("properties:details.titleFallback");
   const title = data.value?.title?.trim();
+
   return title ? title : fallback;
 });
 
@@ -45,23 +46,24 @@ function goCreateLead(): void {
 }
 
 const errorTitle = computed(() => {
-  if (error.value?.kind === "NotFound") return i18n.t("errors:title.notFound.property");
-  if (error.value?.kind === "Network") return i18n.t("errors:title.network");
-  if (error.value?.kind === "Timeout") return i18n.t("errors:title.timeout");
-  if (error.value?.kind === "BadRequest") return i18n.t("errors:title.badRequest");
-  return i18n.t("errors:titles.genericLoadFailed");
+  if (error.value?.kind === "NotFound") return i18n.t("errors:common.title.notFound.property");
+  if (error.value?.kind === "Network") return i18n.t("errors:common.title.network");
+  if (error.value?.kind === "Timeout") return i18n.t("errors:common.title.timeout");
+  if (error.value?.kind === "BadRequest") return i18n.t("errors:common.title.badRequest");
+
+  return i18n.t("errors:common.title.loadFailed.property");
 });
 
 const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") {
-    return i18n.t("errors:message.notFound.property");
+    return i18n.t("errors:common.message.notFound.property");
   }
 
   if (error.value?.kind === "BadRequest") {
-    return i18n.t("errors:message.invalidPropertyId");
+    return i18n.t("errors:common.message.invalidPropertyId");
   }
 
-  return error.value?.message ?? i18n.t("errors:message.unexpected");
+  return error.value?.message ?? i18n.t("errors:common.message.unexpected");
 });
 
 async function load(): Promise<void> {
@@ -73,8 +75,9 @@ async function load(): Promise<void> {
     state.value = "error";
     error.value = {
       kind: "BadRequest",
-      message: i18n.t("errors:message.invalidPropertyId"),
+      message: i18n.t("errors:common.message.invalidPropertyId"),
     } as ApiError;
+
     return;
   }
 
@@ -104,7 +107,11 @@ watch(id, () => {
 </script>
 
 <template>
-  <section class="w-full" data-testid="property-details-page" :aria-label="$t('pages:properties.details.ariaLabel')">
+  <section
+    class="w-full"
+    data-testid="property-details-page"
+    :aria-label="$t('properties:details.ariaLabel')"
+  >
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
@@ -113,17 +120,21 @@ watch(id, () => {
           </h1>
 
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t("pages:properties.details.subtitle") }}
+            {{ $t("properties:details.subtitle") }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
+        <div
+          class="flex items-center gap-3"
+          role="group"
+          :aria-label="$t('properties:details.pageActionsAriaLabel')"
+        >
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
             @click="goBack"
-            :aria-label="$t('common:actions.backToListAria')"
+            :aria-label="$t('common:actions.backToList')"
           >
             {{ $t("common:actions.backToList") }}
           </button>
@@ -134,9 +145,9 @@ watch(id, () => {
             data-testid="create-lead-button"
             @click="goCreateLead"
             :disabled="!canCreateLead"
-            :aria-label="$t('pages:properties.details.actions.createLeadAria')"
+            :aria-label="$t('properties:details.actions.createLeadAria')"
           >
-            {{ $t("pages:properties.details.actions.createLead") }}
+            {{ $t("properties:details.actions.createLead") }}
           </button>
 
           <button
@@ -144,7 +155,7 @@ watch(id, () => {
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="refresh-button"
             @click="load"
-            :aria-label="$t('common:actions.refreshAria')"
+            :aria-label="$t('common:actions.refresh')"
           >
             {{ $t("common:actions.refresh") }}
           </button>

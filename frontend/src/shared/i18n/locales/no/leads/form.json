@@ -1,0 +1,30 @@
+{
+  "ariaLabel": "Skjema for henvendelse",
+  "pageAriaLabel": "Side for å opprette henvendelse",
+  "pageActionsAriaLabel": "Handlinger for siden for å opprette henvendelse",
+  "title": "Kontakt megler",
+  "subtitle": "Send en forespørsel om denne boligen. Vi tar kontakt snart.",
+  "fields": {
+    "fullName": {
+      "label": "Navn",
+      "placeholder": "Ditt navn"
+    },
+    "email": {
+      "label": "E-post",
+      "placeholder": "you@example.com"
+    },
+    "phoneNumber": {
+      "label": "Telefonnummer",
+      "placeholder": "+47 123 45 678"
+    },
+    "message": {
+      "label": "Melding",
+      "placeholder": "Fortell oss hva du lurer på…"
+    }
+  },
+  "submit": "Send forespørsel",
+  "submitLoading": "Sender…",
+  "success": "Takk! Forespørselen er sendt.",
+  "error": "Noe gikk galt. Prøv igjen.",
+  "note": "Vi bruker kontaktinformasjonen din kun for å svare på denne forespørselen."
+}

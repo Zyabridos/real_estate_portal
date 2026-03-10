@@ -13,8 +13,6 @@ import {
   PHONE_SEPARATORS_MAX,
 } from "@/features/leads/create/validation/leadSchema";
 
-// TODO: in React I normally would keep it in /hooks - find out where it is correct to keep "hooks" in Vue
-
 type FieldKey = keyof LeadFormValues;
 
 const serverFieldMap: Record<string, FieldKey> = {
@@ -25,7 +23,7 @@ const serverFieldMap: Record<string, FieldKey> = {
 };
 
 export type FieldError = {
-  key: string; // i18n key (e.g. errors:validation.lead.email.required)
+  key: string;
   params?: Record<string, string | number>;
 };
 
@@ -95,7 +93,6 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
   function applyServerErrors(pd?: ProblemDetails): void {
     if (!pd?.errors || typeof pd.errors !== "object") return;
 
-    // reset existing field errors first (server-side)
     (Object.keys(errors) as FieldKey[]).forEach((k) => (errors[k] = null));
 
     for (const [key, val] of Object.entries(pd.errors)) {
@@ -138,7 +135,6 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
   }
 
   function setFieldError(field: FieldKey, code: string): void {
-    // zod issue.message -> i18n key + params
     const base = `errors:validation.lead.${field}.`;
 
     const map: Record<string, () => FieldError> = {
@@ -146,7 +142,10 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
       invalid: () => ({ key: `${base}invalid` }),
       min: () => ({ key: `${base}min`, params: { min: MIN_BY_FIELD[field] ?? 3 } }),
       max: () => ({ key: `${base}max`, params: { max: MAX_BY_FIELD[field] } }),
-      tokenMin: () => ({ key: `errors:validation.lead.fullName.tokenMin`, params: { min: FULL_NAME_MIN } }),
+      tokenMin: () => ({
+        key: `errors:validation.lead.fullName.tokenMin`,
+        params: { min: FULL_NAME_MIN },
+      }),
       separatorsMax: () => ({
         key: `errors:validation.lead.phoneNumber.separatorsMax`,
         params: { max: PHONE_SEPARATORS_MAX },
@@ -162,7 +161,6 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
 
     showFormError.value = true;
 
-    // Show under both fields
     if (!errors.email) setFieldError("email", "eitherEmailOrPhone");
     if (!errors.phoneNumber) setFieldError("phoneNumber", "eitherEmailOrPhone");
   }
@@ -174,7 +172,6 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
     const parsed = leadSchema.safeParse(values);
     if (parsed.success) return true;
 
-    // 1) handle issues
     for (const issue of parsed.error.issues) {
       if (!issue.path?.length) {
         if (issue.message === "eitherEmailOrPhone") {
@@ -193,11 +190,11 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
       }
     }
 
-    // 2) if there are field errors, show banner
     const hasFieldErrors = Object.values(errors).some(Boolean);
     if (hasFieldErrors) {
       const onlyContactRequired =
-        (errors.email?.key === ERROR_KEY.eitherEmailOrPhone || errors.phoneNumber?.key === ERROR_KEY.eitherEmailOrPhone) &&
+        (errors.email?.key === ERROR_KEY.eitherEmailOrPhone ||
+          errors.phoneNumber?.key === ERROR_KEY.eitherEmailOrPhone) &&
         !errors.fullName &&
         !errors.message;
 
@@ -208,7 +205,6 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
   }
 
   function validateField(_field: FieldKey): void {
-    // cheap enough: validate all, then display relevant messages, evnt add fetures (?)
     validateAll();
   }
 
@@ -235,21 +231,16 @@ export function useLeadFormValidation(args: UseLeadFormValidationArgs) {
   }
 
   return {
-    // state
     values,
     touched,
     errors,
     showFormError,
-
-    // flags
     isLoading,
     isSuccess,
     isError,
     isFormDisabled,
     isValid,
     isSubmitDisabled,
-
-    // handlers
     onBlur,
     onInput,
     validateAll,

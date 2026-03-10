@@ -34,8 +34,13 @@ function normalizeFilters(input: PropertyFiltersValue): PropertyFiltersValue {
   if (input.type) out.type = input.type;
   if (input.status) out.status = input.status;
 
-  if (typeof input.minPrice === "number" && Number.isFinite(input.minPrice)) out.minPrice = input.minPrice;
-  if (typeof input.maxPrice === "number" && Number.isFinite(input.maxPrice)) out.maxPrice = input.maxPrice;
+  if (typeof input.minPrice === "number" && Number.isFinite(input.minPrice)) {
+    out.minPrice = input.minPrice;
+  }
+
+  if (typeof input.maxPrice === "number" && Number.isFinite(input.maxPrice)) {
+    out.maxPrice = input.maxPrice;
+  }
 
   return out;
 }
@@ -49,10 +54,13 @@ const paging = computed(() => ({
 }));
 
 const items = computed(() => data.value?.items ?? []);
-const listAriaLabel = computed(() => i18n.t("pages:properties.list.ariaLabel"));
+const listAriaLabel = computed(() => i18n.t("properties:list.ariaLabel"));
 
 // ----- actions
-const { page, pageSize, setPage, setQuery } = usePagedQueryParams({ defaultPage: 1, defaultPageSize: 20 });
+const { page, pageSize, setPage, setQuery } = usePagedQueryParams({
+  defaultPage: 1,
+  defaultPageSize: 20,
+});
 
 async function onGoToPage(nextPage: number): Promise<void> {
   await setPage(nextPage);
@@ -60,11 +68,13 @@ async function onGoToPage(nextPage: number): Promise<void> {
 
 function filtersToQuery(f: PropertyFiltersValue): Record<string, string> {
   const q: Record<string, string> = {};
+
   if (f.city?.trim()) q.city = f.city.trim();
   if (f.type) q.type = f.type;
   if (f.status) q.status = f.status;
   if (typeof f.minPrice === "number") q.minPrice = String(f.minPrice);
   if (typeof f.maxPrice === "number") q.maxPrice = String(f.maxPrice);
+
   return q;
 }
 
@@ -132,20 +142,24 @@ watch(
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900">
-            {{ $t("pages:properties.list.title") }}
+            {{ $t("properties:list.title") }}
           </h1>
 
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t("pages:properties.list.subtitle") }}
+            {{ $t("properties:list.subtitle") }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
+        <div
+          class="flex items-center gap-3"
+          role="group"
+          :aria-label="$t('properties:list.pageActionsAriaLabel')"
+        >
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             @click="load"
-            :aria-label="$t('common:actions.refreshAria')"
+            :aria-label="$t('common:actions.refresh')"
           >
             {{ $t("common:actions.refresh") }}
           </button>
@@ -166,23 +180,23 @@ watch(
         :totalItems="paging.totalItems"
       />
 
-      <!-- States -->
       <LoadingState v-if="state === 'loading'" data-testid="properties-loading" />
+
       <ErrorState
         v-else-if="state === 'error'"
         data-testid="properties-error"
-        :message="error?.message ?? $t('errors:messages.unexpected')"
+        :message="error?.message ?? $t('errors:common.message.unexpected')"
         :onRetry="load"
       />
+
       <EmptyState v-else-if="state === 'empty'" data-testid="properties-empty" />
 
-      <!-- List -->
       <div v-else class="mt-8">
         <div
           class="flex flex-col gap-5"
           data-testid="properties-list"
           role="list"
-          :aria-label="$t('pages:properties.list.cardsAriaLabel')"
+          :aria-label="$t('properties:list.cardsAriaLabel')"
         >
           <PropertyCard v-for="p in items" :key="p.id" :property="p" />
         </div>

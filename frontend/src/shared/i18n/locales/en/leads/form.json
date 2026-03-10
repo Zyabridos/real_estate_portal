@@ -1,0 +1,30 @@
+{
+  "ariaLabel": "Lead form",
+  "pageAriaLabel": "Create lead page",
+  "pageActionsAriaLabel": "Lead create page actions",
+  "title": "Contact broker",
+  "subtitle": "Send a request about this property. We will get back to you soon.",
+  "fields": {
+    "fullName": {
+      "label": "Full name",
+      "placeholder": "Your name"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "you@example.com"
+    },
+    "phoneNumber": {
+      "label": "Phone number",
+      "placeholder": "+47 123 45 678"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Tell us what you’re interested in…"
+    }
+  },
+  "submit": "Send request",
+  "submitLoading": "Sending…",
+  "success": "Thanks! Your request has been sent.",
+  "error": "Something went wrong. Please try again.",
+  "note": "We’ll use your contact details only to respond to this request."
+}

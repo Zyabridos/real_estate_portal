@@ -1,0 +1,16 @@
+{
+  "appTitle": "Eiendomsportal",
+  "language": "Språk",
+  "currency": {
+    "nok": "NOK"
+  },
+  "sorting": {
+    "notSorted": "Ikke sortert",
+    "sortedAscending": "Sortert stigende",
+    "sortedDescending": "Sortert synkende"
+  },
+  "languageSwitcher": {
+    "triggerAriaLabel": "Bytt språk",
+    "menuAriaLabel": "Språkmeny"
+  }
+}

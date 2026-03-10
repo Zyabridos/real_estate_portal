@@ -1,0 +1,16 @@
+{
+  "appTitle": "Real Estate Portal",
+  "language": "Language",
+  "currency": {
+    "nok": "NOK"
+  },
+  "sorting": {
+    "notSorted": "Not sorted",
+    "sortedAscending": "Sorted ascending",
+    "sortedDescending": "Sorted descending"
+  },
+  "languageSwitcher": {
+    "triggerAriaLabel": "Change language",
+    "menuAriaLabel": "Language menu"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": {
+    "network": "Network error. Probably some unexpected request tp backend",
+    "timeout": "Request timed out",
+    "generic": "Something went wrong",
+    "badRequest": "Invalid request",
+    "notFound": {
+      "property": "Property not found",
+      "broker": "Broker not found",
+      "page": "Page not found"
+    },
+    "loadFailed": {
+      "property": "Failed to load property",
+      "broker": "Failed to load broker",
+      "brokers": "Failed to load brokers list",
+      "properties": "Failed to load properties list"
+    }
+  },
+  "message": {
+    "unexpected": "An unexpected error occurred.",
+    "invalidPropertyId": "Invalid property ID.",
+    "invalidBrokerId": "Invalid broker ID.",
+    "notFound": {
+      "property": "We couldn't find this property. It may have been removed or the link is incorrect.",
+      "broker": "We couldn't find this broker. It may have been removed or the link is incorrect."
+    }
+  },
+  "actions": {
+    "retry": "Try again"
+  }
+}

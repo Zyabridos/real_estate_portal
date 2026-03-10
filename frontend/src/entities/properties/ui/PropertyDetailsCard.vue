@@ -22,13 +22,22 @@ const imageSrc = computed(() => {
   return property.mainImageUrl?.trim() || house_default;
 });
 
+const dateLocale = computed(() => {
+  const language = i18n.resolvedLanguage ?? i18n.language;
+
+  if (language === "ru") return "ru-RU";
+  if (language === "no") return "nb-NO";
+
+  return "en-GB";
+});
+
 const createdAtText = computed(() => {
   if (!property.createdAt) return null;
 
   const date = new Date(property.createdAt);
   if (Number.isNaN(date.getTime())) return null;
 
-  return new Intl.DateTimeFormat("nb-NO", {
+  return new Intl.DateTimeFormat(dateLocale.value, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -70,15 +79,15 @@ const typeClass = computed(() => {
 });
 
 const localizedStatus = computed(() => {
-  if (property.status === "Active") return i18n.t("entities:property.status.active");
-  if (property.status === "Sold") return i18n.t("entities:property.status.sold");
+  if (property.status === "Active") return i18n.t("properties:card.status.active");
+  if (property.status === "Sold") return i18n.t("properties:card.status.sold");
   return property.status;
 });
 
 const localizedType = computed(() => {
-  if (property.type === "Apartment") return i18n.t("entities:property.type.apartment");
-  if (property.type === "House") return i18n.t("entities:property.type.house");
-  if (property.type === "Commercial") return i18n.t("entities:property.type.commercial");
+  if (property.type === "Apartment") return i18n.t("properties:card.type.apartment");
+  if (property.type === "House") return i18n.t("properties:card.type.house");
+  if (property.type === "Commercial") return i18n.t("properties:card.type.commercial");
   return property.type;
 });
 </script>
@@ -87,7 +96,7 @@ const localizedType = computed(() => {
   <article
     class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
     data-testid="property-details-card"
-    :aria-label="$t('entities:property.detailsCard.detailsCardAriaLabel')"
+    :aria-label="$t('properties:card.detailsCard.detailsCardAriaLabel')"
   >
     <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.9fr]">
       <div class="relative min-h-[280px] bg-slate-100 lg:min-h-[520px]">
@@ -137,13 +146,13 @@ const localizedType = computed(() => {
                 <div
                   class="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl"
                   data-testid="property-price"
-                  :aria-label="$t('entities:property.detailsCard.priceValueAriaLabel', { value: formattedPrice })"
+                  :aria-label="$t('properties:card.detailsCard.priceValueAriaLabel', { value: formattedPrice })"
                 >
                   {{ formattedPrice }}
                 </div>
 
                 <div class="text-sm text-slate-500">
-                  {{ $t("common:currency.nok") }}
+                  {{ $t("common:app.currency.nok") }}
                 </div>
               </div>
             </div>
@@ -153,11 +162,11 @@ const localizedType = computed(() => {
             </p>
           </header>
 
-          <section :aria-label="$t('entities:property.detailsCard.metaSectionAriaLabel')">
+          <section :aria-label="$t('properties:card.detailsCard.metaSectionAriaLabel')">
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("entities:property.detailsCard.bedroomsLabel") }}
+                  {{ $t("properties:card.detailsCard.bedroomsLabel") }}
                 </p>
                 <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-bedrooms">
                   {{ property.bedrooms }}
@@ -166,7 +175,7 @@ const localizedType = computed(() => {
 
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("entities:property.detailsCard.bathroomsLabel") }}
+                  {{ $t("properties:card.detailsCard.bathroomsLabel") }}
                 </p>
                 <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-bathrooms">
                   {{ property.bathrooms }}
@@ -175,16 +184,16 @@ const localizedType = computed(() => {
 
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("entities:property.detailsCard.areaLabel") }}
+                  {{ $t("properties:card.detailsCard.areaLabel") }}
                 </p>
                 <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-area">
-                  {{ property.area }} m²
+                  {{ property.area }} {{ $t("properties:card.detailsCard.areaUnit") }}
                 </p>
               </div>
 
               <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("entities:property.detailsCard.cityLabel") }}
+                  {{ $t("properties:card.detailsCard.cityLabel") }}
                 </p>
                 <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-city">
                   {{ property.city }}
@@ -196,10 +205,10 @@ const localizedType = computed(() => {
           <section
             v-if="hasDescription"
             data-testid="property-description"
-            :aria-label="$t('entities:property.detailsCard.descriptionSectionAriaLabel')"
+            :aria-label="$t('properties:card.detailsCard.descriptionSectionAriaLabel')"
           >
             <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
-              {{ $t("entities:property.detailsCard.descriptionTitle") }}
+              {{ $t("properties:card.detailsCard.descriptionTitle") }}
             </h2>
 
             <p class="whitespace-pre-line text-sm leading-7 text-slate-700">
@@ -209,33 +218,33 @@ const localizedType = computed(() => {
 
           <section class="rounded-2xl border border-slate-200 p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              {{ $t("entities:property.detailsCard.metaTitle") }}
+              {{ $t("properties:card.detailsCard.metaTitle") }}
             </h2>
 
             <dl class="mt-4 space-y-3 text-sm">
               <div class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("entities:property.detailsCard.typeLabel") }}</dt>
+                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.typeLabel") }}</dt>
                 <dd class="text-right font-medium text-slate-900">
                   {{ localizedType }}
                 </dd>
               </div>
 
               <div class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("entities:property.detailsCard.statusLabel") }}</dt>
+                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.statusLabel") }}</dt>
                 <dd class="text-right font-medium text-slate-900">
                   {{ localizedStatus }}
                 </dd>
               </div>
 
               <div class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("entities:property.detailsCard.propertyIdLabel") }}</dt>
+                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.propertyIdLabel") }}</dt>
                 <dd class="break-all text-right font-mono text-xs text-slate-700">
                   {{ property.id }}
                 </dd>
               </div>
 
               <div v-if="createdAtText" class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("entities:property.detailsCard.createdAtLabel") }}</dt>
+                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.createdAtLabel") }}</dt>
                 <dd class="text-right font-medium text-slate-900">
                   {{ createdAtText }}
                 </dd>
@@ -245,11 +254,11 @@ const localizedType = computed(() => {
 
           <section class="rounded-2xl border border-slate-200 p-4">
             <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              {{ $t("entities:property.detailsCard.brokerTitle") }}
+              {{ $t("properties:card.detailsCard.brokerTitle") }}
             </h2>
 
             <p class="mt-3 text-sm leading-6 text-slate-600">
-              {{ $t("entities:property.detailsCard.brokerSubtitle") }}
+              {{ $t("properties:card.detailsCard.brokerSubtitle") }}
             </p>
 
             <RouterLink

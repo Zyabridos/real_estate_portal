@@ -24,24 +24,16 @@ const imageSrc = computed(() => {
   return propertyWithImage.thumbnailUrl?.trim() || propertyWithImage.imageUrl?.trim() || house_default;
 });
 
-const propertyDescription = computed(() => {
-  const propertyWithDescription = props.property as PropertyListItemDto & {
-    description?: string | null;
-  };
-
-  return propertyWithDescription.description?.trim() || i18n.t("pages:properties.list.cardDescriptionFallback");
-});
-
 const localizedStatus = computed(() => {
-  if (props.property.status === "Active") return i18n.t("entities:property.status.active");
-  if (props.property.status === "Sold") return i18n.t("entities:property.status.sold");
+  if (props.property.status === "Active") return i18n.t("properties:card.status.active");
+  if (props.property.status === "Sold") return i18n.t("properties:card.status.sold");
   return props.property.status;
 });
 
 const localizedType = computed(() => {
-  if (props.property.type === "Apartment") return i18n.t("entities:property.type.apartment");
-  if (props.property.type === "House") return i18n.t("entities:property.type.house");
-  if (props.property.type === "Commercial") return i18n.t("entities:property.type.commercial");
+  if (props.property.type === "Apartment") return i18n.t("properties:card.type.apartment");
+  if (props.property.type === "House") return i18n.t("properties:card.type.house");
+  if (props.property.type === "Commercial") return i18n.t("properties:card.type.commercial");
   return props.property.type;
 });
 </script>
@@ -52,10 +44,7 @@ const localizedType = computed(() => {
     class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
     role="listitem"
   >
-    <div
-      class="flex h-full flex-col md:flex-row"
-      :data-testid="`property-card-${property.id}`"
-    >
+    <div class="flex h-full flex-col md:flex-row" :data-testid="`property-card-${property.id}`">
       <div class="h-56 w-full shrink-0 bg-slate-100 md:h-auto md:w-80 lg:w-96">
         <img
           :src="imageSrc"
@@ -75,27 +64,25 @@ const localizedType = computed(() => {
             <p class="mt-2 text-sm text-slate-600" data-testid="property-card-meta">
               {{ property.city }} • {{ localizedType }} • {{ localizedStatus }}
             </p>
-
-            <p class="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
-              {{ propertyDescription }}
-            </p>
           </div>
 
           <div class="shrink-0 text-left md:text-right">
             <div
               class="text-xl font-semibold text-slate-900"
-              :aria-label="$t('entities:property.priceValueAriaLabel', { value: priceText })"
+              :aria-label="$t('properties:filters.priceValueAriaLabel', { value: priceText })"
             >
               {{ priceText }}
             </div>
 
             <div class="text-sm text-slate-500">
-              {{ $t("common:currency.nok") }}
+              {{ $t("common:app.currency.nok") }}
             </div>
           </div>
         </div>
 
-        <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div class="text-xs text-slate-500">
             {{ $t("common:pagination.idShort") }}:
             <span class="font-mono">{{ property.id }}</span>
@@ -104,7 +91,7 @@ const localizedType = computed(() => {
           <RouterLink
             :to="detailsTo"
             class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-            :aria-label="$t('pages:properties.list.viewDetailsAriaLabel', { id: property.id })"
+            :aria-label="$t('properties:list.viewDetailsAriaLabel', { id: property.id })"
           >
             {{ $t("common:actions.viewDetails") }}
           </RouterLink>

@@ -1,0 +1,16 @@
+{
+  "appTitle": "Портал недвижимости",
+  "language": "Язык",
+  "currency": {
+    "nok": "NOK"
+  },
+  "sorting": {
+    "notSorted": "Не отсортировано",
+    "sortedAscending": "Сортировка по возрастанию",
+    "sortedDescending": "Сортировка по убыванию"
+  },
+  "languageSwitcher": {
+    "triggerAriaLabel": "Сменить язык",
+    "menuAriaLabel": "Меню выбора языка"
+  }
+}

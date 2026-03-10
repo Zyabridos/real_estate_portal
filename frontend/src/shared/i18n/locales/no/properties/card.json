@@ -1,0 +1,30 @@
+{
+  "detailsCard": {
+    "detailsCardAriaLabel": "Kort med eiendomsdetaljer",
+    "priceValueAriaLabel": "Eiendomspris: {{value}}",
+    "metaSectionAriaLabel": "Hovedinformasjon om eiendommen",
+    "descriptionSectionAriaLabel": "Beskrivelse av eiendommen",
+    "descriptionTitle": "Beskrivelse",
+    "metaTitle": "Eiendomsinformasjon",
+    "typeLabel": "Type",
+    "statusLabel": "Status",
+    "cityLabel": "By",
+    "propertyIdLabel": "Eiendoms-ID",
+    "createdAtLabel": "Opprettet",
+    "bedroomsLabel": "Soverom",
+    "bathroomsLabel": "Bad",
+    "areaLabel": "Areal",
+    "areaUnit": "m²",
+    "brokerTitle": "Megler",
+    "brokerSubtitle": "Se meglerprofilen og utforsk flere boliger fra samme megler."
+  },
+  "type": {
+    "apartment": "Leilighet",
+    "house": "Hus",
+    "commercial": "Næringseiendom"
+  },
+  "status": {
+    "active": "Aktiv",
+    "sold": "Solgt"
+  }
+}

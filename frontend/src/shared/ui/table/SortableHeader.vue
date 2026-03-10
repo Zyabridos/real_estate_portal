@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import i18n from "@/shared/i18n";
 import type { SortDirection } from "@/shared/types/queries";
 
 type Props = {
@@ -21,8 +22,9 @@ const ariaSort = computed<"none" | "ascending" | "descending">(() => {
 });
 
 const srText = computed(() => {
-  if (ariaSort.value === "none") return "Not sorted";
-  return `Sorted ${ariaSort.value}`;
+  if (ariaSort.value === "none") return String(i18n.t("common:app.sorting.notSorted"));
+  if (ariaSort.value === "ascending") return String(i18n.t("common:app.sorting.sortedAscending"));
+  return String(i18n.t("common:app.sorting.sortedDescending"));
 });
 </script>
 
@@ -42,14 +44,9 @@ const srText = computed(() => {
       <span>{{ label }}</span>
 
       <span aria-hidden="true" class="inline-flex items-center text-slate-500">
-        <!-- not active -->
-        <i v-if="!isActive" class="pi pi-arrows-v text-base"></i>
-
-        <!-- active asc -->
-        <i v-else-if="activeSortDirection === 'asc'" class="pi pi-arrow-up text-base"></i>
-
-        <!-- active desc -->
-        <i v-else class="pi pi-arrow-down text-base"></i>
+        <i v-if="!isActive" class="pi pi-arrows-v text-base" />
+        <i v-else-if="activeSortDirection === 'asc'" class="pi pi-arrow-up text-base" />
+        <i v-else class="pi pi-arrow-down text-base" />
       </span>
 
       <span class="sr-only">{{ srText }}</span>

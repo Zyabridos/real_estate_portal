@@ -23,7 +23,7 @@ const data = ref<BrokerDetailsDto | null>(null);
 const id = computed(() => String(route.params.id ?? "").trim());
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("pages:brokers.details.titleFallback");
+  const fallback = i18n.t("brokers:details.titleFallback");
   const firstName = data.value?.firstName?.trim() ?? "";
   const lastName = data.value?.lastName?.trim() ?? "";
   const fullName = `${firstName} ${lastName}`.trim();
@@ -32,21 +32,24 @@ const pageTitle = computed(() => {
 });
 
 const errorTitle = computed(() => {
-  if (error.value?.kind === "NotFound") return i18n.t("errors:titles.brokerNotFound");
-  if (error.value?.kind === "Network") return i18n.t("errors:titles.network");
-  if (error.value?.kind === "Timeout") return i18n.t("errors:titles.timeout");
-  if (error.value?.kind === "BadRequest") return i18n.t("errors:titles.badRequest");
-  return i18n.t("errors:titles.genericLoadFailed");
+  if (error.value?.kind === "NotFound") return i18n.t("errors:common.title.notFound.broker");
+  if (error.value?.kind === "Network") return i18n.t("errors:common.title.network");
+  if (error.value?.kind === "Timeout") return i18n.t("errors:common.title.timeout");
+  if (error.value?.kind === "BadRequest") return i18n.t("errors:common.title.badRequest");
+
+  return i18n.t("errors:common.title.loadFailed.broker");
 });
 
 const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") {
-    return i18n.t("errors:messages.brokerNotFoundLong");
+    return i18n.t("errors:common.message.notFound.broker");
   }
+
   if (error.value?.kind === "BadRequest") {
-    return i18n.t("errors:messages.invalidBrokerId");
+    return i18n.t("errors:common.message.invalidBrokerId");
   }
-  return error.value?.message ?? i18n.t("errors:messages.unexpected");
+
+  return error.value?.message ?? i18n.t("errors:common.message.unexpected");
 });
 
 async function load(): Promise<void> {
@@ -56,7 +59,11 @@ async function load(): Promise<void> {
 
   if (!id.value) {
     state.value = "error";
-    error.value = { kind: "BadRequest", message: i18n.t("errors:messages.invalidBrokerId") } as ApiError;
+    error.value = {
+      kind: "BadRequest",
+      message: i18n.t("errors:common.message.invalidBrokerId"),
+    } as ApiError;
+
     return;
   }
 
@@ -69,7 +76,6 @@ async function load(): Promise<void> {
     state.value = "error";
 
     if (import.meta.env.DEV) {
-      // eslint-disable-next-line no-console
       console.error("Failed to fetch broker details", e);
     }
   }
@@ -87,7 +93,11 @@ watch(id, () => {
 </script>
 
 <template>
-  <section class="w-full" data-testid="broker-details-page" :aria-label="$t('pages:brokers.details.ariaLabel')">
+  <section
+    class="w-full"
+    data-testid="broker-details-page"
+    :aria-label="$t('brokers:details.ariaLabel')"
+  >
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
@@ -99,19 +109,23 @@ watch(id, () => {
           </h1>
 
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t('pages:brokers.details.subtitle') }}
+            {{ $t("brokers:details.subtitle") }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
+        <div
+          class="flex items-center gap-3"
+          role="group"
+          :aria-label="$t('brokers:details.pageActionsAriaLabel')"
+        >
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
             @click="goBack"
-            :aria-label="$t('common:actions.backToListAria')"
+            :aria-label="$t('common:actions.backToList')"
           >
-            {{ $t('common:actions.backToList') }}
+            {{ $t("common:actions.backToList") }}
           </button>
 
           <button
@@ -119,9 +133,9 @@ watch(id, () => {
             class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             data-testid="refresh-button"
             @click="load"
-            :aria-label="$t('common:actions.refreshAria')"
+            :aria-label="$t('common:actions.refresh')"
           >
-            {{ $t('common:actions.refresh') }}
+            {{ $t("common:actions.refresh") }}
           </button>
         </div>
       </div>

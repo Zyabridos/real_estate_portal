@@ -1,0 +1,8 @@
+{
+  "title": "Agencies",
+  "subtitle": "Browse agencies from the backend.",
+  "ariaLabel": "Agencies page",
+  "cardsAriaLabel": "Agency cards",
+  "pageActionsAriaLabel": "Agency list page actions",
+  "cardAriaLabel": "Agency card {{id}}"
+}

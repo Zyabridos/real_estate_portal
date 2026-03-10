@@ -11,12 +11,11 @@ const labels: Record<SupportedLanguage, string> = {
 };
 
 const normalize = (lng?: string): SupportedLanguage => {
-  const code = (lng ?? "en").slice(0, 2).toLowerCase();
-  return (code as SupportedLanguage) ?? "en";
+  const code = (lng ?? "en").slice(0, 2).toLowerCase() as SupportedLanguage;
+  return supportedLanguages.includes(code) ? code : "en";
 };
 
-// ✅ реактивный текущий язык
-const current = ref<SupportedLanguage>(normalize(i18n.language));
+const current = ref<SupportedLanguage>(normalize(i18n.resolvedLanguage ?? i18n.language));
 
 const onLanguageChanged = (lng: string) => {
   current.value = normalize(lng);
@@ -32,15 +31,27 @@ onBeforeUnmount(() => {
 
 const currentLabel = computed(() => labels[current.value] ?? current.value.toUpperCase());
 
-const toggle = () => (isOpen.value = !isOpen.value);
-const close = () => (isOpen.value = false);
+const triggerAriaLabel = computed(() =>
+  String(i18n.t("common:app.languageSwitcher.triggerAriaLabel"))
+);
+
+const menuAriaLabel = computed(() =>
+  String(i18n.t("common:app.languageSwitcher.menuAriaLabel"))
+);
+
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
+
+const close = () => {
+  isOpen.value = false;
+};
 
 const changeLanguage = (lng: SupportedLanguage) => {
   void i18n.changeLanguage(lng);
   close();
 };
 
-// close on click outside + ESC
 const onDocumentClick = (e: MouseEvent) => {
   const target = e.target as HTMLElement | null;
   if (!target) return;
@@ -61,7 +72,6 @@ onBeforeUnmount(() => {
   document.removeEventListener("keydown", onKeydown);
 });
 
-// выровнено под твой navbar-стиль
 const triggerClasses =
   "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-2xl text-slate-700 hover:bg-slate-100 hover:text-indigo-800";
 
@@ -76,6 +86,7 @@ const itemClasses =
       :class="triggerClasses"
       :aria-expanded="isOpen"
       aria-haspopup="menu"
+      :aria-label="triggerAriaLabel"
       @click="toggle"
     >
       {{ currentLabel }}
@@ -90,7 +101,7 @@ const itemClasses =
       v-if="isOpen"
       class="absolute right-0 top-full z-10 mt-2 w-28 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black/10"
       role="menu"
-      aria-label="Language"
+      :aria-label="menuAriaLabel"
     >
       <div class="py-1">
         <button
@@ -104,7 +115,7 @@ const itemClasses =
           <span class="flex items-center justify-between">
             <span>{{ labels[lng as SupportedLanguage] ?? String(lng).toUpperCase() }}</span>
             <i
-              v-if="normalize(String(lng)) === current"
+              v-if="normalize(String(lng)) === current.value"
               class="pi pi-check text-sm text-slate-500"
               aria-hidden="true"
             />

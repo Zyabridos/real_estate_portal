@@ -1,0 +1,8 @@
+{
+  "actions": {
+    "createLead": "Contact broker",
+    "createLeadAria": "Send a request for this property"
+  },
+  "titleFallback": "Property details",
+  "subtitle": "Property details loaded from the backend."
+}

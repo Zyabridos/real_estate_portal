@@ -1,0 +1,15 @@
+{
+  "ariaLabel": "Siden ble ikke funnet",
+  "badge": "404 • Siden ble ikke funnet",
+  "title": "Vi fant ikke siden",
+  "description": "Siden du leter etter finnes ikke, eller den kan ha blitt flyttet. Sjekk URL-en eller bruk navigasjonen nedenfor.",
+  "requestedPathLabel": "Forespurt sti",
+  "requestedPathUnknown": "(ukjent)",
+  "goHome": "Gå til forsiden",
+  "asideAriaLabel": "Hjelp og tips",
+  "whatYouCanDoTitle": "Hva du kan gjøre",
+  "tip1": "Sjekk URL-en for skrivefeil.",
+  "tip2": "Bruk hovedmenyen øverst.",
+  "tip3": "Start fra Boliger og bruk filtrene.",
+  "note": "Hvis du tror dette er en feil, kan du rapportere det senere."
+}

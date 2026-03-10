@@ -1,0 +1,15 @@
+{
+  "contactNotAvailable": "Контактные данные недоступны.",
+  "agencyIdLabel": "ID агентства",
+  "brokerIdLabel": "ID брокера",
+  "emailLabel": "Email",
+  "phoneLabel": "Телефон",
+  "openDetailsAria": "Открыть детали брокера: {{name}}",
+  "details": {
+    "emptyValue": "—",
+    "experienceTitle": "Стаж в агентстве",
+    "experienceSince": "Работает в агентстве с {{date}}",
+    "lastUpdatedTitle": "Последнее обновление",
+    "profileUpdated": "Профиль обновлён {{date}}"
+  }
+}

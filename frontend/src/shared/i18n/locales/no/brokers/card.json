@@ -1,0 +1,15 @@
+{
+  "contactNotAvailable": "Kontaktinformasjon er ikke tilgjengelig.",
+  "agencyIdLabel": "Byrå-ID",
+  "brokerIdLabel": "Megler-ID",
+  "emailLabel": "E-post",
+  "phoneLabel": "Telefon",
+  "openDetailsAria": "Åpne meglerdetaljer: {{name}}",
+  "details": {
+    "emptyValue": "—",
+    "experienceTitle": "Erfaring i byrået",
+    "experienceSince": "Har jobbet i byrået siden {{date}}",
+    "lastUpdatedTitle": "Sist oppdatert",
+    "profileUpdated": "Profilen ble oppdatert {{date}}"
+  }
+}

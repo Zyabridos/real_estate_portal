@@ -1,0 +1,6 @@
+{
+  "orgNumberLabel": "Org number",
+  "phoneLabel": "Phone",
+  "addressLabel": "Address",
+  "openDetailsAria": "Open agency details: {name}"
+}

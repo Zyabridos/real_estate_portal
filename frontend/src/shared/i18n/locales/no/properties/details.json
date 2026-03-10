@@ -1,0 +1,7 @@
+{
+  "actions": {
+    "createLead": "Kontakt megler",
+    "createLeadAria": "Send en forespørsel om denne boligen",
+    "ariaLabel": "Detaljer om eiendom"
+  }
+}
