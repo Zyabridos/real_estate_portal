@@ -115,7 +115,7 @@ const itemClasses =
           <span class="flex items-center justify-between">
             <span>{{ labels[lng as SupportedLanguage] ?? String(lng).toUpperCase() }}</span>
             <i
-              v-if="normalize(String(lng)) === current.value"
+              v-if="normalize(String(lng)) === current"
               class="pi pi-check text-sm text-slate-500"
               aria-hidden="true"
             />

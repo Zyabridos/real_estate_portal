@@ -9,6 +9,7 @@ public sealed record BrokerListItemDto(
     string Email,
     string PhoneNumber,
     string? PhotoUrl,
+    BrokerGender Gender,
     DateTime CreatedAt,
     DateTime UpdatedAt
 );

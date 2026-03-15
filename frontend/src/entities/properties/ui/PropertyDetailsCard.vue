@@ -45,8 +45,10 @@ const createdAtText = computed(() => {
 });
 
 const brokerTo = computed(() => {
-  return property.brokerId
-    ? routes.app.brokers.details(property.brokerId)
+  const brokerId = Number(property.brokerId);
+
+  return Number.isInteger(brokerId) && brokerId > 0
+    ? routes.app.brokers.details(brokerId)
     : routes.app.brokers.list();
 });
 

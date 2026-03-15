@@ -20,7 +20,12 @@ const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<BrokerDetailsDto | null>(null);
 
-const id = computed(() => String(route.params.id ?? "").trim());
+const rawId = computed(() => String(route.params.id ?? "").trim());
+
+const id = computed<number>(() => {
+  const parsed = Number(rawId.value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+});
 
 const pageTitle = computed(() => {
   const fallback = i18n.t("brokers:details.titleFallback");
@@ -57,9 +62,10 @@ async function load(): Promise<void> {
   error.value = null;
   data.value = null;
 
-  if (!id.value) {
+  if (id.value <= 0) {
     state.value = "error";
     error.value = {
+      name: "BadRequest",
       kind: "BadRequest",
       message: i18n.t("errors:common.message.invalidBrokerId"),
     } as ApiError;

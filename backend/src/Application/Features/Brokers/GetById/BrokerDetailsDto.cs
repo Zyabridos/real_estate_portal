@@ -1,3 +1,5 @@
+using RealEstate.Domain.Enums.Brokers;
+    
 namespace RealEstate.Application.Features.Brokers.GetById;
 
 public sealed record BrokerDetailsDto(
@@ -8,6 +10,7 @@ public sealed record BrokerDetailsDto(
     string Email,
     string PhoneNumber,
     string? PhotoUrl,
+    BrokerGender Gender,
     DateTime CreatedAt,
     DateTime UpdatedAt
 );

@@ -1,6 +1,7 @@
 {
   "contactNotAvailable": "Kontaktinformasjon er ikke tilgjengelig.",
   "agencyIdLabel": "Byrå-ID",
+  "genderLabel": "Kjønn",
   "brokerIdLabel": "Megler-ID",
   "emailLabel": "E-post",
   "phoneLabel": "Telefon",

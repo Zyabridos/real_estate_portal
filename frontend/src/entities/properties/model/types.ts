@@ -9,7 +9,7 @@ export type PropertyListItem = {
   status: string;
   price: number;
   imageUrl?: string | null;
-  brokerId?: string | null;
+  brokerId?: number;
 };
 
 export type PropertyFiltersValue = {

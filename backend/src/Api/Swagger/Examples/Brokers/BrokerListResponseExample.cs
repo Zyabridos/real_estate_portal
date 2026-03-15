@@ -1,6 +1,7 @@
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Common;
 using RealEstate.Application.Features.Brokers.List;
+using RealEstate.Domain.Enums.Brokers;
 
 namespace RealEstate.Api.Swagger.Examples.Brokers;
 
@@ -18,6 +19,7 @@ public sealed class BrokerListResponseExample : IExamplesProvider<PagedResult<Br
                     LastName: "Nordmann",
                     Email: "ola.nordmann@realestate.no",
                     PhoneNumber: "+47 111 11 111",
+                    Gender: BrokerGender.Female,
                     PhotoUrl: "https://cdn.example.com/brokers/ola.jpg",
                     CreatedAt: DateTime.Parse("2026-01-10T12:00:00Z"),
                     UpdatedAt: DateTime.Parse("2026-01-10T13:00:00Z")
@@ -28,6 +30,7 @@ public sealed class BrokerListResponseExample : IExamplesProvider<PagedResult<Br
                     LastName: "Nordmann",
                     Email: "kari.nordmann@realestate.no",
                     PhoneNumber: "+47 222 22 222",
+                    Gender: BrokerGender.Female,
                     PhotoUrl: null,
                     CreatedAt: DateTime.Parse("2026-01-11T09:30:00Z"),
                     UpdatedAt: DateTime.Parse("2026-01-11T10:30:00Z")

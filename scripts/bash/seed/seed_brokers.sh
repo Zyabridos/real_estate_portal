@@ -101,21 +101,28 @@ http_delete() {
 }
 
 create_broker_payload() {
-  local agency_id="$1" first="$2" last="$3" email="$4" phone="$5"
+  local agency_id="$1"
+  local first="$2"
+  local last="$3"
+  local gender="$4"
+  local email="$5"
+  local phone="$6"
 
-  python3 - "$agency_id" "$first" "$last" "$email" "$phone" <<'PY'
+  python3 - "$agency_id" "$first" "$last" "$gender" "$email" "$phone" <<'PY'
 import json, sys
 
 agency_id = int(sys.argv[1])
 first = sys.argv[2]
 last = sys.argv[3]
-email = sys.argv[4]
-phone = sys.argv[5]
+gender = sys.argv[4]
+email = sys.argv[5]
+phone = sys.argv[6]
 
 print(json.dumps({
   "agencyId": agency_id,
   "firstName": first,
   "lastName": last,
+  "gender": gender,
   "email": email,
   "phoneNumber": phone,
   "photoUrl": None
@@ -156,6 +163,7 @@ fi
 
 first_names=("Ola" "Kari" "Anders" "Ingrid" "Erik" "Nora" "Jonas" "Maja" "Lars" "Emma" "Sindre" "Hanna")
 last_names=("Nordmann" "Hansen" "Johansen" "Olsen" "Larsen" "Andersen" "Nilsen" "Berg" "Haugen" "Moen" "Dahl" "Solberg")
+genders=(0 1 2 3)
 agencies=("${AGENCY1_ID}" "${AGENCY2_ID}" "${AGENCY3_ID}")
 
 neutral "Creating ${SEED_BROKERS_COUNT} brokers distributed across 3 agencies"
@@ -166,6 +174,7 @@ i=1
 while [[ "${i}" -le "${SEED_BROKERS_COUNT}" ]]; do
   first="${first_names[$(((i-1) % ${#first_names[@]}))]}"
   last="${last_names[$(((i-1) % ${#last_names[@]}))]}"
+  gender="${genders[$(((i-1) % ${#genders[@]}))]}"
   email="broker${i}.seed@broker.no"
   phone=$(printf "+47 900 %02d %03d" $(((i-1) / 100)) $(((i-1) % 1000)))
 
@@ -173,7 +182,7 @@ while [[ "${i}" -le "${SEED_BROKERS_COUNT}" ]]; do
 
   resp="$(http_post_json \
     "${BACKEND_URL}${BROKERS_ENDPOINT}" \
-    "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${email}" "${phone}")"
+    "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${gender}" "${email}" "${phone}")"
   )"
 
   assert_json "POST ${BROKERS_ENDPOINT} #${i}" "${resp}"

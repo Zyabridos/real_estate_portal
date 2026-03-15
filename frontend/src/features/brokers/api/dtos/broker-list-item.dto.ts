@@ -1,3 +1,5 @@
+import type {BrokerGender} from "@/features/brokers/api/dtos/broker-details.dto.ts";
+
 export type BrokerListItemDto = {
   id: number
   firstName: string
@@ -6,4 +8,5 @@ export type BrokerListItemDto = {
   phoneNumber?: string
   photoUrl?: string
   createdAt: string
+  gender?: BrokerGender
 }

@@ -1,5 +1,5 @@
 export type AgencyListItem = {
-  id: string;
+  id: number;
   name: string;
   orgNumber: string;
   phoneNumber?: string;

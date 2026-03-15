@@ -1,7 +1,3 @@
-tf-init:
-	@echo -e "$(BLUE)Terraform init ($(TERRAFORM_DIR))$(RESET)"
-	@$(TF) -chdir=$(TERRAFORM_DIR) init
-
 tf-format:
 	@echo -e "$(BLUE)Terraform formatting (pretty-print) ($(TERRAFORM_DIR))$(RESET)"
 	@$(TF) -chdir=$(TERRAFORM_DIR) fmt -recursive
@@ -27,7 +23,9 @@ tf-output:
 	@$(TF) -chdir=$(TERRAFORM_DIR) output
 
 # Ansible
-.PHONY: ansible-inventory ansible-known-hosts ansible-ping ansible-playbook ansible-show-diff
+ansible-inventory:
+	@echo -e "$(BLUE)Check generated Ansible inventory ($(ANSIBLE_INVENTORY_PATH))$(RESET)"
+
 ansible-known-hosts: ansible-inventory
 	@echo -e "$(BLUE)Update SSH known_hosts from inventory ($(ANSIBLE_INVENTORY_PATH))$(RESET)"
 	@mkdir -p "$(HOME)/.ssh"
@@ -111,8 +109,6 @@ infra-ssh:
 	@ssh "$(INFRA_SSH_USER)@$(INFRA_SSH_HOST)"
 
 # --- Kubernetes / k3s helpers ---
-
-.PHONY: k8s-ingress-debug k8s-traefik-remove
 
 k8s-ingress-debug: ## Debug ingress port conflicts on k3s server (checks 80/443 and common ingress pods - i.e. Traefik headache)
 	@ssh root@$(K3S_SERVER_IP) "ss -lntp | egrep ':80|:443' || true"

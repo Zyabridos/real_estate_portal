@@ -145,7 +145,13 @@ async function openMessageModal(payload: {
   messageLoading.value = true;
 
   try {
-    const dto = await leadsApi.getById(payload.id);
+    const leadId = Number(payload.id);
+
+    if (!Number.isInteger(leadId) || leadId <= 0) {
+      return;
+    }
+
+    const dto = await leadsApi.getById(leadId);
     messageText.value = dto.message ?? null;
   } catch (e) {
     const err = e as ApiError;

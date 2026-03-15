@@ -11,6 +11,7 @@ import agenciesList from "./agencies/list.json";
 import agenciesDetails from "./agencies/details.json";
 import agenciesCard from "./agencies/card.json";
 
+import brokersCommon from "./brokers/common.json";
 import brokersList from "./brokers/list.json";
 import brokersDetails from "./brokers/details.json";
 import brokersCard from "./brokers/card.json";
@@ -52,6 +53,7 @@ const en = {
     card: agenciesCard,
   },
   brokers: {
+    common: brokersCommon,
     list: brokersList,
     details: brokersDetails,
     card: brokersCard,

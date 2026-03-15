@@ -1,4 +1,5 @@
 {
   "titleFallback": "Meglerdetaljer",
-  "subtitle": "Meglerdetaljer lastet fra backend."
+  "subtitle": "Meglerdetaljer lastet fra backend.",
+  "genderLabel": "Kjønn"
 }

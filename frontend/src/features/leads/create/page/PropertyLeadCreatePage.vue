@@ -20,9 +20,19 @@ const successMessage = ref<string | null>(null);
 const formKey = ref(0);
 const leadFormRef = ref<InstanceType<typeof LeadForm> | null>(null);
 
-const propertyId = computed(() => String(route.params.id ?? "").trim());
+const rawPropertyId = computed(() => String(route.params.id ?? "").trim());
+
+const propertyId = computed<number>(() => {
+  const parsed = Number(rawPropertyId.value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+});
 
 function goBackToDetails(): void {
+  if (propertyId.value <= 0) {
+    router.push(routes.app.properties.list());
+    return;
+  }
+
   router.push({
     path: routes.app.properties.details(propertyId.value),
     query: route.query,
@@ -30,6 +40,12 @@ function goBackToDetails(): void {
 }
 
 async function onSubmit(values: LeadFormValues): Promise<void> {
+  if (propertyId.value <= 0) {
+    state.value = "error";
+    errorMessage.value = i18n.t("errors:common.message.invalidPropertyId");
+    return;
+  }
+
   state.value = "loading";
   errorMessage.value = null;
   successMessage.value = null;

@@ -1,3 +1,5 @@
+using RealEstate.Domain.Enums.Brokers;
+
 namespace RealEstate.Application.Features.Brokers.Create;
 
 // Server assigns id and CreatedAt;
@@ -7,5 +9,6 @@ public sealed record CreateBrokerRequest(
     string LastName,
     string Email,
     string PhoneNumber,
+    BrokerGender Gender,
     string? PhotoUrl = null
 );

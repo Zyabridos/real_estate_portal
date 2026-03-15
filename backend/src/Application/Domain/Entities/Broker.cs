@@ -1,3 +1,5 @@
+using RealEstate.Domain.Enums.Brokers;
+
 namespace RealEstate.Domain.Entities;
 
 public sealed class Broker
@@ -11,6 +13,9 @@ public sealed class Broker
     public string PhoneNumber { get; set; } = default!;
     public string? PhotoUrl { get; set; }
     public string? MainImageUrl { get; set; }
+
+    public BrokerGender Gender { get; set; } = BrokerGender.Unspecified;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

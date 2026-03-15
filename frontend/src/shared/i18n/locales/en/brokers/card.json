@@ -2,6 +2,7 @@
   "contactNotAvailable": "Contact details are not available.",
   "agencyIdLabel": "Agency ID",
   "brokerIdLabel": "Broker ID",
+  "genderLabel": "Gender",
   "emailLabel": "Email",
   "phoneLabel": "Phone",
   "openDetailsAria": "Open broker details: {{name}}",

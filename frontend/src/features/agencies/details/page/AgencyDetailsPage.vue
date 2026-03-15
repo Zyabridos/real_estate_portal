@@ -17,11 +17,22 @@ const route = useRoute();
 const router = useRouter();
 const store = agenciesStore();
 
-const id = computed(() => String(route.params.id ?? "").trim());
+const rawId = computed(() => String(route.params.id ?? "").trim());
 
-const agency = computed(() => store.getById(id.value));
-const status = computed<UIState>(() => store.getDetailsStatus(id.value));
-const error = computed<ApiError | null>(() => store.getDetailsError(id.value));
+const id = computed<number>(() => {
+  const parsed = Number(rawId.value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+});
+
+const agency = computed(() => (id.value > 0 ? store.getById(id.value) : null));
+
+const status = computed<UIState>(() =>
+  id.value > 0 ? store.getDetailsStatus(id.value) : "idle"
+);
+
+const error = computed<ApiError | null>(() =>
+  id.value > 0 ? store.getDetailsError(id.value) : null
+);
 
 const pageTitle = computed(() => {
   const fallback = i18n.t("pages:agencies.details.titleFallback");
@@ -43,11 +54,7 @@ const errorMessage = computed(() => {
   return error.value?.message ?? i18n.t("errors:messages.unexpected");
 });
 
-const rawId = computed(() => String(route.params.id ?? ""));
-
-const showInvalidId = computed(() =>
-  !id.value || (status.value === "error" && error.value?.kind === "BadRequest")
-);
+const showInvalidId = computed(() => id.value <= 0);
 
 const showNotFound = computed(() =>
   status.value === "error" && error.value?.kind === "NotFound"
@@ -58,7 +65,7 @@ const showGenericError = computed(() =>
 );
 
 async function load(force = false): Promise<void> {
-  if (!id.value) return;
+  if (id.value <= 0) return;
   await store.fetchById(id.value, { force });
 }
 
@@ -125,7 +132,7 @@ onBeforeUnmount(() => {
         <AgencyDetailsMissingState
           v-else-if="showNotFound"
           variant="notFound"
-          :requestedId="id"
+          :requestedId="rawId"
           :onRefresh="() => load(true)"
         />
 
