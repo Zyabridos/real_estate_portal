@@ -2,7 +2,7 @@
 import { computed, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import AgencyDetailsMissingState from "@/features/agencies/details/ui/AgencyDetailsMissingState.vue";
+import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
 
 import i18n from "@/shared/i18n";
 import routes from "@/shared/routes";
@@ -27,16 +27,17 @@ const id = computed<number>(() => {
 const agency = computed(() => (id.value > 0 ? store.getById(id.value) : null));
 
 const status = computed<UIState>(() =>
-  id.value > 0 ? store.getDetailsStatus(id.value) : "idle"
+  id.value > 0 ? store.getDetailsStatus(id.value) : "idle",
 );
 
 const error = computed<ApiError | null>(() =>
-  id.value > 0 ? store.getDetailsError(id.value) : null
+  id.value > 0 ? store.getDetailsError(id.value) : null,
 );
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("pages:agencies.details.titleFallback");
+  const fallback = i18n.t("agencies:details.titleFallback");
   const name = agency.value?.name?.trim();
+
   return name ? name : fallback;
 });
 
@@ -45,24 +46,31 @@ const errorTitle = computed(() => {
   if (error.value?.kind === "Network") return i18n.t("errors:titles.network");
   if (error.value?.kind === "Timeout") return i18n.t("errors:titles.timeout");
   if (error.value?.kind === "BadRequest") return i18n.t("errors:titles.badRequest");
+
   return i18n.t("errors:titles.genericLoadFailed");
 });
 
 const errorMessage = computed(() => {
   if (error.value?.kind === "NotFound") return i18n.t("errors:messages.agencyNotFoundLong");
   if (error.value?.kind === "BadRequest") return i18n.t("errors:messages.invalidAgencyId");
+
   return error.value?.message ?? i18n.t("errors:messages.unexpected");
 });
 
 const showInvalidId = computed(() => id.value <= 0);
 
-const showNotFound = computed(() =>
-  status.value === "error" && error.value?.kind === "NotFound"
+const showNotFound = computed(
+  () => status.value === "error" && error.value?.kind === "NotFound",
 );
 
-const showGenericError = computed(() =>
-  status.value === "error" && !showInvalidId.value && !showNotFound.value
+const showGenericError = computed(
+  () => status.value === "error" && !showInvalidId.value && !showNotFound.value,
 );
+
+const errorRefreshHandler = computed<(() => void) | undefined>(() => {
+  if (showInvalidId.value) return undefined;
+  return () => void load(true);
+});
 
 async function load(force = false): Promise<void> {
   if (id.value <= 0) return;
@@ -82,25 +90,30 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="w-full" data-testid="agency-details-page" :aria-label="$t('pages:agencies.details.ariaLabel')">
+  <section
+    class="w-full"
+    data-testid="agency-details-page"
+    :aria-label="$t('agencies:details.ariaLabel')"
+  >
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="page-title">
             {{ pageTitle }}
           </h1>
+
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t("pages:agencies.details.subtitle") }}
+            {{ $t("agencies:details.subtitle") }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
+        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:app.pageActions')">
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
-            @click="goBack"
             :aria-label="$t('common:actions.backToListAria')"
+            @click="goBack"
           >
             {{ $t("common:actions.backToList") }}
           </button>
@@ -109,8 +122,8 @@ onBeforeUnmount(() => {
             type="button"
             class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             data-testid="refresh-button"
-            @click="load(true)"
             :aria-label="$t('common:actions.refreshAria')"
+            @click="load(true)"
           >
             {{ $t("common:actions.refresh") }}
           </button>
@@ -118,22 +131,26 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="mt-8" aria-live="polite">
-        <AgencyDetailsMissingState
+        <EntityDetailsErrorState
           v-if="showInvalidId"
+          entity="agency"
           variant="invalidId"
-          :requestedId="rawId"
+          :requested-id="rawId"
+          :back-to="routes.app.agencies.list()"
+        />
+
+        <EntityDetailsErrorState
+          v-else-if="showNotFound"
+          entity="agency"
+          variant="notFound"
+          :requested-id="rawId"
+          :back-to="routes.app.agencies.list()"
+          :on-refresh="errorRefreshHandler"
         />
 
         <LoadingState
           v-else-if="status === 'loading' || status === 'idle'"
           data-testid="loading-state"
-        />
-
-        <AgencyDetailsMissingState
-          v-else-if="showNotFound"
-          variant="notFound"
-          :requestedId="rawId"
-          :onRefresh="() => load(true)"
         />
 
         <ErrorState

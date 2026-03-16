@@ -24,24 +24,35 @@ test.describe("Leads: list page (seeded DB)", () => {
         await page.route(apiRoutes.properties.pattern(), async (route) => route.continue());
       });
 
-      test("default view is grouped and shows one group for seeded propertyId + 3 rows", async ({ page, request }) => {
-        const { propertyId, emailOnly, phoneOnly, both } = await getSeedLeads(request);
-        const title = await getPropertyTitle(request, propertyId);
+      test("default view is grouped and shows 3 seeded groups with 1 row each", async ({ page, request }) => {
+        const { emailOnly, phoneOnly, both } = await getSeedLeads(request);
+
+        const title1 = await getPropertyTitle(request, emailOnly.propertyId);
+        const title2 = await getPropertyTitle(request, phoneOnly.propertyId);
+        const title3 = await getPropertyTitle(request, both.propertyId);
 
         await page.goto(routes.leads.list());
         await expect(page.getByTestId(testIds.leadsList.page)).toBeVisible();
 
-        // grouped is default
         await expect(page.getByTestId(testIds.leadsList.viewGrouped)).toHaveAttribute("aria-pressed", "true");
         await expect(page.getByTestId(testIds.leadsList.tableGrouped)).toBeVisible();
 
-        // group header exists for PROPERTY_ID and contains property title
-        const groupHeader = page.getByTestId(testIds.leadsList.groupHeader(propertyId));
-        await expect(groupHeader).toBeVisible();
-        await expect(groupHeader).toContainText(title);
-        await expect(groupHeader).toContainText("(3)");
+        const group1 = page.getByTestId(testIds.leadsList.groupHeader(emailOnly.propertyId));
+        const group2 = page.getByTestId(testIds.leadsList.groupHeader(phoneOnly.propertyId));
+        const group3 = page.getByTestId(testIds.leadsList.groupHeader(both.propertyId));
 
-        // rows exist by ids
+        await expect(group1).toBeVisible();
+        await expect(group2).toBeVisible();
+        await expect(group3).toBeVisible();
+
+        await expect(group1).toContainText(title1);
+        await expect(group2).toContainText(title2);
+        await expect(group3).toContainText(title3);
+
+        await expect(group1).toContainText("Property ID: 1");
+        await expect(group2).toContainText("Property ID: 2");
+        await expect(group3).toContainText("Property ID: 3");
+
         await expect(page.getByTestId(testIds.leadsList.row(emailOnly.id))).toBeVisible();
         await expect(page.getByTestId(testIds.leadsList.row(phoneOnly.id))).toBeVisible();
         await expect(page.getByTestId(testIds.leadsList.row(both.id))).toBeVisible();

@@ -27,5 +27,60 @@
   },
   "actions": {
     "retry": "Prøv igjen"
+  },
+  "entityDetails": {
+    "ariaLabel": "Feilmelding for detaljvisning",
+    "asideAriaLabel": "Hva du kan gjøre videre",
+    "requestedIdLabel": "Etterspurt ID",
+    "requestedIdEmpty": "tom verdi",
+    "whatYouCanDoTitle": "Hva du kan gjøre",
+    "tip1": "Kontroller URL-en og pass på at ID-en er riktig.",
+    "tip2": "Gå tilbake til listen og åpne elementet på nytt.",
+    "tip3": "Oppdater siden eller prøv igjen senere.",
+    "note": "Hvis problemet fortsetter, kan oppføringen være slettet eller lenken være utdatert.",
+    "invalidId": {
+      "agency": {
+        "badge": "Ugyldig ID",
+        "title": "Ugyldig byrå-ID",
+        "description": "Byrå-ID må være et tall."
+      },
+      "property": {
+        "badge": "Ugyldig ID",
+        "title": "Ugyldig eiendoms-ID",
+        "description": "Eiendoms-ID må være et tall."
+      },
+      "broker": {
+        "badge": "Ugyldig ID",
+        "title": "Ugyldig megler-ID",
+        "description": "Megler-ID må være et tall."
+      },
+      "lead": {
+        "badge": "Ugyldig ID",
+        "title": "Ugyldig lead-ID",
+        "description": "Lead-ID må være et tall."
+      }
+    },
+    "notFound": {
+      "agency": {
+        "badge": "Ikke funnet",
+        "title": "Byrå ikke funnet",
+        "description": "Fant ikke noe byrå for denne ID-en."
+      },
+      "property": {
+        "badge": "Ikke funnet",
+        "title": "Eiendom ikke funnet",
+        "description": "Fant ikke noen eiendom for denne ID-en."
+      },
+      "broker": {
+        "badge": "Ikke funnet",
+        "title": "Megler ikke funnet",
+        "description": "Fant ikke noen megler for denne ID-en."
+      },
+      "lead": {
+        "badge": "Ikke funnet",
+        "title": "Lead ikke funnet",
+        "description": "Fant ikke noen lead for denne ID-en."
+      }
+    }
   }
 }

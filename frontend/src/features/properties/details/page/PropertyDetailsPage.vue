@@ -3,11 +3,12 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import i18n from "@/shared/i18n";
-import { propertiesApi } from "@/features/properties/api/propertiesApi";
 import routes from "@/shared/routes";
 
-import { ErrorState, LoadingState } from "@/shared/ui/states";
+import { propertiesApi } from "@/features/properties/api/propertiesApi";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
+import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
+import { ErrorState, LoadingState } from "@/shared/ui/states";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { UIState } from "@/shared/types/ui";
@@ -20,8 +21,22 @@ const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PropertyDetailsDto | null>(null);
 
-const id = computed<number>(() => Number(route.params.id ?? ""));
-const isValidId = computed<boolean>(() => Number.isInteger(id.value) && id.value > 0);
+const rawId = computed(() => String(route.params.id ?? "").trim());
+
+const id = computed<number>(() => {
+  const parsed = Number(rawId.value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+});
+
+const showInvalidId = computed(() => id.value <= 0);
+
+const showNotFound = computed(
+  () => state.value === "error" && error.value?.kind === "NotFound",
+);
+
+const showGenericError = computed(
+  () => state.value === "error" && !showInvalidId.value && !showNotFound.value,
+);
 
 const pageTitle = computed(() => {
   const fallback = i18n.t("properties:details.titleFallback");
@@ -31,7 +46,12 @@ const pageTitle = computed(() => {
 });
 
 const canCreateLead = computed<boolean>(() => {
-  return state.value === "success" && !!data.value && Number.isInteger(data.value.id) && data.value.id > 0;
+  return (
+    state.value === "success" &&
+    !!data.value &&
+    Number.isInteger(data.value.id) &&
+    data.value.id > 0
+  );
 });
 
 function goCreateLead(): void {
@@ -46,7 +66,6 @@ function goCreateLead(): void {
 }
 
 const errorTitle = computed(() => {
-  if (error.value?.kind === "NotFound") return i18n.t("errors:common.title.notFound.property");
   if (error.value?.kind === "Network") return i18n.t("errors:common.title.network");
   if (error.value?.kind === "Timeout") return i18n.t("errors:common.title.timeout");
   if (error.value?.kind === "BadRequest") return i18n.t("errors:common.title.badRequest");
@@ -55,10 +74,6 @@ const errorTitle = computed(() => {
 });
 
 const errorMessage = computed(() => {
-  if (error.value?.kind === "NotFound") {
-    return i18n.t("errors:common.message.notFound.property");
-  }
-
   if (error.value?.kind === "BadRequest") {
     return i18n.t("errors:common.message.invalidPropertyId");
   }
@@ -66,23 +81,18 @@ const errorMessage = computed(() => {
   return error.value?.message ?? i18n.t("errors:common.message.unexpected");
 });
 
-async function load(): Promise<void> {
+async function load(force = false): Promise<void> {
   state.value = "loading";
   error.value = null;
   data.value = null;
 
-  if (!isValidId.value) {
+  if (id.value <= 0) {
     state.value = "error";
-    error.value = {
-      kind: "BadRequest",
-      message: i18n.t("errors:common.message.invalidPropertyId"),
-    } as ApiError;
-
     return;
   }
 
   try {
-    const res = await propertiesApi.getById(id.value);
+    const res = await propertiesApi.getById(id.value, { force });
     data.value = res;
     state.value = "success";
   } catch (e) {
@@ -99,10 +109,12 @@ function goBack(): void {
   router.push(routes.app.properties.list());
 }
 
-onMounted(load);
+onMounted(() => {
+  void load(false);
+});
 
 watch(id, () => {
-  load();
+  void load(false);
 });
 </script>
 
@@ -134,7 +146,7 @@ watch(id, () => {
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
             @click="goBack"
-            :aria-label="$t('common:actions.backToList')"
+            :aria-label="$t('common:actions.backToListAria')"
           >
             {{ $t("common:actions.backToList") }}
           </button>
@@ -154,8 +166,8 @@ watch(id, () => {
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="refresh-button"
-            @click="load"
-            :aria-label="$t('common:actions.refresh')"
+            @click="load(true)"
+            :aria-label="$t('common:actions.refreshAria')"
           >
             {{ $t("common:actions.refresh") }}
           </button>
@@ -163,18 +175,35 @@ watch(id, () => {
       </div>
 
       <div class="mt-8" aria-live="polite">
+        <EntityDetailsErrorState
+          v-if="showInvalidId"
+          entity="property"
+          variant="invalidId"
+          :requested-id="rawId"
+          :back-to="routes.app.properties.list()"
+        />
+
+        <EntityDetailsErrorState
+          v-else-if="showNotFound"
+          entity="property"
+          variant="notFound"
+          :requested-id="rawId"
+          :back-to="routes.app.properties.list()"
+          :on-refresh="() => load(true)"
+        />
+
         <LoadingState
-          v-if="state === 'loading'"
+          v-else-if="state === 'loading'"
           data-testid="loading-state"
           :title="$t('states:loading.propertyDetailsTitle')"
         />
 
         <ErrorState
-          v-else-if="state === 'error'"
+          v-else-if="showGenericError"
           data-testid="error-state"
           :title="errorTitle"
           :message="errorMessage"
-          :onRetry="load"
+          :onRetry="() => load(true)"
         />
 
         <PropertyDetailsCard v-else-if="data" :property="data" />

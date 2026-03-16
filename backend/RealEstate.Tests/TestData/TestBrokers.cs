@@ -1,5 +1,6 @@
 using System.Threading;
 using RealEstate.Domain.Entities;
+using RealEstate.Domain.Enums.Brokers;
 
 namespace RealEstate.TestData;
 
@@ -15,6 +16,7 @@ public static class TestBrokers
         string? email = null,
         string phoneNumber = "+4744444444",
         string? photoUrl = null,
+        BrokerGender gender = BrokerGender.Female,
         DateTime? createdAt = null,
         DateTime? updatedAt = null)
     {
@@ -34,6 +36,7 @@ public static class TestBrokers
             LastName = lastName,
             Email = safeEmail,
             PhoneNumber = phoneNumber,
+            Gender = gender,
             PhotoUrl = photoUrl,
             CreatedAt = created,
             UpdatedAt = updated,
