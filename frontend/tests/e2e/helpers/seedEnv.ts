@@ -1,68 +1,97 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+type SeedEnv = Record<string, string>;
 
-const parseEnvFile = (content: string): Record<string, string> => {
-  const out: Record<string, string> = {};
-  for (const line of content.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
+const currentFilePath = fileURLToPath(import.meta.url);
+const currentDirPath = path.dirname(currentFilePath);
 
-    const idx = trimmed.indexOf("=");
-    if (idx === -1) continue;
-
-    const key = trimmed.slice(0, idx).trim();
-    const value = trimmed.slice(idx + 1).trim();
-    out[key] = value;
-  }
-  return out;
-};
-
-function findSeedEnvPath(repoRoot: string): string {
+const findSeedEnvPath = (): string => {
   const candidates = [
-    path.join(repoRoot, "scripts/.seed/seed.env"), // основной путь (как в твоих seed-скриптах)
-    path.join(repoRoot, ".env.seed"),              // fallback, если ты это используешь
-    path.join(repoRoot, ".seed/seed.env"),         // fallback (если вдруг поменяешь структуру)
+    path.resolve(process.cwd(), "../scripts/.seed/seed.env"),
+    path.resolve(process.cwd(), "../../scripts/.seed/seed.env"),
+    path.resolve(process.cwd(), "../../../scripts/.seed/seed.env"),
+    path.resolve(currentDirPath, "../../../../scripts/.seed/seed.env"),
   ];
 
-  const existing = candidates.find((p) => fs.existsSync(p));
-  if (!existing) {
+  const found = candidates.find((candidate) => fs.existsSync(candidate));
+
+  if (!found) {
     throw new Error(
-      `seed env file not found. Tried:\n- ${candidates.join("\n- ")}\nRun seeding first (e.g. make seed).`
+      [
+        "Seed env file was not found.",
+        "Expected one of:",
+        ...candidates.map((x) => `- ${x}`),
+      ].join("\n"),
     );
   }
 
-  return existing;
-}
+  return found;
+};
 
-function readSeedEnv(): Record<string, string> {
-  const repoRoot = path.resolve(__dirname, "../../../..");
-  const seedEnvPath = findSeedEnvPath(repoRoot);
+const parseSeedEnvFile = (): SeedEnv => {
+  const filePath = findSeedEnvPath();
+  const raw = fs.readFileSync(filePath, "utf-8");
 
-  const content = fs.readFileSync(seedEnvPath, "utf-8");
-  return parseEnvFile(content);
-}
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"))
+    .reduce<SeedEnv>((acc, line) => {
+      const eqIndex = line.indexOf("=");
+      if (eqIndex === -1) return acc;
 
-export function getSeedPropertyId(): string {
-  const env = readSeedEnv();
-  const propertyId = env.PROPERTY_ID;
-  if (!propertyId) throw new Error(`PROPERTY_ID is missing in seed env file`);
-  return propertyId;
-}
+      const key = line.slice(0, eqIndex).trim();
+      const value = line.slice(eqIndex + 1).trim();
 
-export function getSeedAgencyIds(): { agency1Id: string; agency2Id: string; agency3Id: string } {
-  const env = readSeedEnv();
+      acc[key] = value;
+      return acc;
+    }, {});
+};
 
-  const a1 = env.AGENCY1_ID;
-  const a2 = env.AGENCY2_ID;
-  const a3 = env.AGENCY3_ID;
+const seedEnv = parseSeedEnvFile();
 
-  if (!a1 || !a2 || !a3) {
-    throw new Error(`AGENCY1_ID/AGENCY2_ID/AGENCY3_ID missing in seed env file`);
+const getRequiredValue = (name: string, fallbackNames: string[] = []): string => {
+  const keys = [name, ...fallbackNames];
+
+  for (const key of keys) {
+    const fromProcess = process.env[key];
+    if (fromProcess && fromProcess.trim() !== "") return fromProcess.trim();
+
+    const fromFile = seedEnv[key];
+    if (fromFile && fromFile.trim() !== "") return fromFile.trim();
   }
 
-  return { agency1Id: a1, agency2Id: a2, agency3Id: a3 };
-}
+  throw new Error(
+    `Missing required seed env: ${name}${
+      fallbackNames.length ? ` (fallbacks: ${fallbackNames.join(", ")})` : ""
+    }`,
+  );
+};
+
+const parseRequiredNumber = (name: string, fallbackNames: string[] = []): number => {
+  const value = getRequiredValue(name, fallbackNames);
+  const parsed = Number(value);
+
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid numeric seed env: ${name}="${value}"`);
+  }
+
+  return parsed;
+};
+
+export const getSeedPropertyId = (): number =>
+  parseRequiredNumber("PROPERTY_ID", ["PROPERTY1_ID"]);
+
+export const getSeedAgencyIds = () => ({
+  agency1Id: parseRequiredNumber("AGENCY1_ID"),
+  agency2Id: parseRequiredNumber("AGENCY2_ID"),
+  agency3Id: parseRequiredNumber("AGENCY3_ID"),
+});
+
+export const getSeedBrokerIds = () => ({
+  broker1Id: parseRequiredNumber("BROKER1_ID"),
+  broker2Id: parseRequiredNumber("BROKER2_ID"),
+  broker3Id: parseRequiredNumber("BROKER3_ID"),
+});

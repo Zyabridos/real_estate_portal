@@ -123,9 +123,9 @@ else
 fi
 
 neutral "Creating 3 leads linked to 3 different properties"
-http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY1_ID}" "Seed User One" "seed.one@example.com" "" "Seed lead for property 1.")" >/dev/null
-http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY2_ID}" "Seed User Two" "" "+47 999 88 777" "Seed lead for property 2.")" >/dev/null
-http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY3_ID}" "Seed User Three" "seed.three@example.com" "+47 111 22 333" "Seed lead for property 3.")" >/dev/null
+http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY1_ID}" "Seed User EmailOnly" "seed.emailonly@example.com" "" "Seed lead (email only).")" >/dev/null
+http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY2_ID}" "Seed User PhoneOnly" "" "+4799988777" "Seed lead (phone only).")" >/dev/null
+http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY3_ID}" "Seed User Both" "seed.both@example.com" "+4711122333" "Seed lead (both email and phone).")" >/dev/null
 
 success "[seed] Leads created"
 

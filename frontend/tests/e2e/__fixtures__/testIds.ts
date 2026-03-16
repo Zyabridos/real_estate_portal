@@ -18,7 +18,7 @@ export const testIds = {
 
     viewDetails: "agency-view-details",
 
-    card: (id: string) => `agency-card-${id}`,
+    card: (id: string | number) => `agency-card-${id}`,
   },
 
   blog: {
@@ -91,13 +91,13 @@ export const testIds = {
     error: "leads-list-error",
     empty: "leads-list-empty",
 
-    tableGrouped: "leads-table-grouped",
-    tableList: "leads-table-list",
+    tableGrouped: "leads-grouped-table",
+    tableList: "leads-list-table",
 
-    groupHeader: (propertyId: string) => `lead-group-header-${propertyId}`,
-    row: (leadId: string) => `lead-row-${leadId}`,
-    commentBtn: (leadId: string) => `lead-action-comment-${leadId}`,
-    propertyLink: (leadId: string) => `lead-property-link-${leadId}`,
+    groupHeader: (propertyId: string | number) => `leads-group-${propertyId}`,
+    row: (leadId: string | number) => `lead-row-${leadId}`,
+    commentBtn: (leadId: string | number) => `open-message-${leadId}`,
+    propertyLink: (leadId: string | number) => `lead-property-link-${leadId}`,
   },
 
   leadMessageModal: {
@@ -107,5 +107,5 @@ export const testIds = {
     close: "lead-message-close",
     loading: "lead-message-loading",
     error: "lead-message-error",
-  }
+  },
 } as const;

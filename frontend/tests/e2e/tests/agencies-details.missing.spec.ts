@@ -25,7 +25,7 @@ test.describe("Agencies: details missing states", () => {
         await page.route(apiRoutes.agencies.pattern(), async (route) => route.continue());
       });
 
-      test("invalid id (whitespace) shows friendly state (not message from backand)", async ({ page }) => {
+      test("invalid id (whitespace) shows friendly state and does not call backend", async ({ page }) => {
         let detailsCalls = 0;
 
         page.on("request", (req) => {
@@ -40,44 +40,35 @@ test.describe("Agencies: details missing states", () => {
         await expect(page.getByTestId(testIds.states.errorTitle)).toBeVisible();
         await expect(page.getByTestId(testIds.states.errorMessage)).toBeVisible();
 
-        // no refresh button inside state
         await expect(page.getByTestId(testIds.states.retryButton)).toHaveCount(0);
 
         expect(detailsCalls).toBe(0);
       });
 
-      test("400 BadRequest (non-guid id) shows friendly message (does not leak backend detail)", async ({ page }) => {
+      test("invalid id (non-numeric) shows friendly state and does not call backend", async ({ page }) => {
         let detailsCalls = 0;
 
         page.on("request", (req) => {
           const isDetails = isAgenciesDetailsGet(req.url(), req.method());
-          const isThisId = req.url().includes(apiRoutes.agencies.byId(agenciesMissing.ids.nonGuid));
+          const isThisId = req.url().includes(apiRoutes.agencies.byId(agenciesMissing.ids.nonNumeric));
           if (isDetails && isThisId) detailsCalls += 1;
         });
 
-        await page.goto(routes.agencies.details(agenciesMissing.ids.nonGuid));
+        await page.goto(routes.agencies.details(agenciesMissing.ids.nonNumeric));
 
         await expect(page.getByTestId(testIds.agencies.detailsPage)).toBeVisible();
         await expect(page.getByTestId(testIds.agencies.errorState)).toBeVisible();
 
         await expect(page.getByTestId(testIds.states.errorTitle)).toBeVisible();
-
-        const msg = page.getByTestId(testIds.states.errorMessage);
-        await expect(msg).toBeVisible();
-
-        for (const phrase of agenciesMissing.backendLeakPhrases) {
-          await expect(msg).not.toContainText(phrase);
-        }
-
-        await expect(page.getByTestId(testIds.agencies.errorState)).toContainText(agenciesMissing.ids.nonGuid);
+        await expect(page.getByTestId(testIds.states.errorMessage)).toBeVisible();
 
         await expect(page.getByTestId(testIds.states.retryButton)).toHaveCount(0);
 
-        expect(detailsCalls).toBeGreaterThan(0);
+        expect(detailsCalls).toBe(0);
       });
 
-      test("404 NotFound shows notFound state and retry triggers re-fetch", async ({ page }) => {
-        const missingId = agenciesMissing.ids.missingGuid;
+      test("404 NotFound for missing numeric id shows notFound state and retry triggers re-fetch", async ({ page }) => {
+        const missingId = agenciesMissing.ids.missingNumeric;
 
         let detailsCalls = 0;
 

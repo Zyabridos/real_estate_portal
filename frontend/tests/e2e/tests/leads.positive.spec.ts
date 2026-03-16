@@ -30,7 +30,7 @@ test.describe("Leads: positive cases", () => {
         status: 201,
         contentType: "application/json",
         body: JSON.stringify({
-          id: "11111111-1111-1111-1111-111111111111",
+          id: 111,
         }),
       });
     });
