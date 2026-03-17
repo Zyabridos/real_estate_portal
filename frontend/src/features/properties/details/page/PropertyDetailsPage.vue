@@ -4,11 +4,12 @@ import { useRoute, useRouter } from "vue-router";
 
 import i18n from "@/shared/i18n";
 import routes from "@/shared/routes";
+import { parsePositiveIntParam } from "@/shared/utils/parsePositiveIntParam";
 
 import { propertiesApi } from "@/features/properties/api/propertiesApi";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
 import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
-import {ErrorState, LoadingState} from "@/shared/ui/states";
+import { ErrorState, LoadingState } from "@/shared/ui/states";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { UIState } from "@/shared/types/ui";
@@ -17,16 +18,14 @@ import type { PropertyDetailsDto } from "@/features/properties/api/dtos/property
 const route = useRoute();
 const router = useRouter();
 
+const backToList = routes.app.properties.list();
+
 const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PropertyDetailsDto | null>(null);
 
 const rawId = computed(() => String(route.params.id ?? "").trim());
-
-const id = computed<number>(() => {
-  const parsed = Number(rawId.value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
-});
+const id = computed<number>(() => parsePositiveIntParam(route.params.id));
 
 const showInvalidId = computed(() => id.value <= 0);
 
@@ -46,11 +45,14 @@ const pageTitle = computed(() => {
 });
 
 const canCreateLead = computed<boolean>(() => {
+  const propertyStatus = data.value?.status?.trim().toLowerCase();
+
   return (
     state.value === "success" &&
     !!data.value &&
     Number.isInteger(data.value.id) &&
-    data.value.id > 0
+    data.value.id > 0 &&
+    propertyStatus !== "sold"
   );
 });
 
@@ -120,7 +122,7 @@ async function load(): Promise<void> {
 }
 
 function goBack(): void {
-  router.push(routes.app.properties.list());
+  router.push(backToList);
 }
 
 watch(
@@ -190,7 +192,7 @@ watch(
           entity="property"
           variant="invalidId"
           :requested-id="rawId"
-          :back-to="routes.app.properties.list()"
+          :back-to="backToList"
         />
 
         <EntityDetailsErrorState
@@ -198,12 +200,12 @@ watch(
           entity="property"
           variant="notFound"
           :requested-id="rawId"
-          :back-to="routes.app.properties.list()"
+          :back-to="backToList"
           :on-refresh="() => load()"
         />
 
         <LoadingState
-          v-if="state === 'loading'"
+          v-else-if="state === 'loading'"
           testId="properties-loading"
           :title="$t('common:states.loading.genericTitle')"
           :subtitle="$t('properties:card.subtitle')"

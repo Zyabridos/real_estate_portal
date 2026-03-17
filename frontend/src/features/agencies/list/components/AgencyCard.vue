@@ -3,17 +3,12 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 
 import routes from "@/shared/routes";
+import { formatAddress } from "@/shared/utils/formatters/formatAddress";
 import type { AgencyListItemDto } from "@/features/agencies/api/dtos/agency-list-item.dto";
 
 const props = defineProps<{ agency: AgencyListItemDto }>();
 
 const detailsTo = computed(() => routes.app.agencies.details(props.agency.id));
-
-function formatAddress(a: AgencyListItemDto): string {
-  const parts = [a.street, [a.zipCode, a.city].filter(Boolean).join(" ")].filter(Boolean);
-  return parts.join(", ");
-}
-
 const address = computed(() => formatAddress(props.agency));
 </script>
 

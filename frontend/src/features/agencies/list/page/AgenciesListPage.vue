@@ -7,11 +7,11 @@ import { usePagedQueryParams } from "@/shared/composables/usePagedQueryParams";
 import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/states";
 import PagedListShell from "@/shared/ui/pagination/PagedListShell.vue";
 
-import agenciesStore from "@/entities/agencies/model/agenciesStore";
 import AgencyCard from "@/features/agencies/list/components/AgencyCard.vue";
+import { useAgenciesStore } from "@/entities/agencies/model/agenciesStore";
 import type { AgenciesListQuery } from "@/shared/types/queries";
 
-const store = agenciesStore();
+const store = useAgenciesStore();
 const { agencies, listStatus, listError, lastPagedResult } = storeToRefs(store);
 
 const { page, pageSize, setPage } = usePagedQueryParams({
@@ -21,14 +21,13 @@ const { page, pageSize, setPage } = usePagedQueryParams({
 
 const state = computed(() => listStatus.value);
 const error = computed(() => listError.value);
-
 const listAriaLabel = computed(() => i18n.t("agencies:list.ariaLabel"));
 
 const currentPage = computed(() => lastPagedResult.value?.page ?? page.value);
 const currentPageSize = computed(() => lastPagedResult.value?.pageSize ?? pageSize.value);
 
 const showFullLoading = computed(
-  () => (state.value === "idle" || state.value === "loading") && agencies.value.length === 0
+  () => state.value === "loading" && agencies.value.length === 0,
 );
 
 async function load(): Promise<void> {
@@ -37,7 +36,7 @@ async function load(): Promise<void> {
     pageSize: pageSize.value,
   };
 
-  await store.fetchAgenciesList(q);
+  await store.fetchList(q);
 }
 
 async function onGoToPage(nextPage: number): Promise<void> {
@@ -49,7 +48,7 @@ watch(
   () => {
     void load();
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 <template>
@@ -92,7 +91,7 @@ watch(
         @goToPage="onGoToPage"
       >
         <LoadingState
-          v-if="state === 'loading'"
+          v-if="showFullLoading"
           testId="properties-loading"
           :title="$t('common:states.loading.genericTitle')"
           :subtitle="$t('properties:list.subtitle')"

@@ -92,8 +92,8 @@ watch(
       >
 
         <LoadingState
-          v-if="state === 'loading'"
-          testId="properties-loading"
+          v-if="showFullLoading"
+          testId="brokers-loading"
           :title="$t('common:states.loading.genericTitle')"
           :subtitle="$t('brokers:list.subtitle')"
         />
