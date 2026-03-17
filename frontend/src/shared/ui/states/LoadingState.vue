@@ -1,37 +1,41 @@
 <script setup lang="ts">
-import { computed } from "vue";
+type Props = {
+  title: string;
+  subtitle?: string | null;
+  testId?: string;
+};
 
-import i18n from "@/shared/i18n";
-import type { LoadingStateProps } from "@/shared/types/states";
-
-const props = defineProps<LoadingStateProps>();
-
-const resolvedTitle = computed(
-  () => props.title?.trim() || i18n.t("common:states.loading.genericTitle")
-);
-
-const testId = computed(() => props.testId?.trim() || "loading-state");
+withDefaults(defineProps<Props>(), {
+  subtitle: null,
+  testId: "details-loading-state",
+});
 </script>
-
 
 <template>
   <section
-    class="state state--loading"
     :data-testid="testId"
-    role="status"
+    class="grid min-h-[34rem] place-items-center rounded-3xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur"
     aria-live="polite"
-    :aria-label="$t('common:states.loading.ariaLabel')"
+    aria-busy="true"
   >
-    <div class="state__body">
-      <div class="state__spinner" aria-hidden="true"></div>
+    <div class="flex flex-col items-center gap-4 text-center">
+      <div class="relative h-16 w-16">
+        <div class="absolute inset-0 rounded-full border-4 border-slate-200" />
+        <div
+          class="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-300"
+        />
+        <div class="absolute inset-2 rounded-full bg-white" />
+      </div>
 
-      <h2 v-if="resolvedTitle" class="state__title" data-testid="loading-title">
-        {{ resolvedTitle }}
-      </h2>
+      <div class="space-y-1">
+        <p class="text-base font-semibold text-slate-900">
+          {{ title }}
+        </p>
 
-      <p v-if="props.description" class="state__desc" data-testid="loading-description">
-        {{ props.description }}
-      </p>
+        <p v-if="subtitle" class="text-sm text-slate-500">
+          {{ subtitle }}
+        </p>
+      </div>
     </div>
   </section>
 </template>

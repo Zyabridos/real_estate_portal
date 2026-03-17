@@ -90,7 +90,13 @@ watch(
         :totalPages="lastPagedResult?.totalPages"
         @goToPage="onGoToPage"
       >
-        <LoadingState v-if="showFullLoading" />
+
+        <LoadingState
+          v-if="state === 'loading'"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('brokers:list.subtitle')"
+        />
 
         <ErrorState
           v-else-if="state === 'error'"

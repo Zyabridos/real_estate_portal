@@ -167,9 +167,10 @@ watch(id, () => {
         />
 
         <LoadingState
-          v-else-if="state === 'loading'"
-          data-testid="loading-state"
-          :title="$t('states:loading.brokerDetailsTitle')"
+          v-if="state === 'loading'"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('brokers:list.subtitle')"
         />
 
         <ErrorState

@@ -8,7 +8,7 @@ import routes from "@/shared/routes";
 import { propertiesApi } from "@/features/properties/api/propertiesApi";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
 import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
-import { ErrorState } from "@/shared/ui/states";
+import {ErrorState, LoadingState} from "@/shared/ui/states";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { UIState } from "@/shared/types/ui";
@@ -202,28 +202,12 @@ watch(
           :on-refresh="() => load()"
         />
 
-        <section
-          v-else-if="state === 'loading'"
-          data-testid="loading-state"
-          class="grid min-h-[34rem] place-items-center rounded-3xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur"
-        >
-          <div class="flex flex-col items-center gap-4 text-center">
-            <div class="relative h-16 w-16">
-              <div class="absolute inset-0 rounded-full border-4 border-slate-200" />
-              <div class="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-300" />
-              <div class="absolute inset-2 rounded-full bg-white" />
-            </div>
-
-            <div class="space-y-1">
-              <p class="text-base font-semibold text-slate-900">
-                {{ $t("states:loading.propertyDetailsTitle") }}
-              </p>
-              <p class="text-sm text-slate-500">
-                {{ $t("properties:card.titleFallback") }}
-              </p>
-            </div>
-          </div>
-        </section>
+        <LoadingState
+          v-if="state === 'loading'"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('properties:card.subtitle')"
+        />
 
         <ErrorState
           v-else-if="showGenericError"

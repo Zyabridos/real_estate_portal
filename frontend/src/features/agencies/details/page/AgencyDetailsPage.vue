@@ -60,11 +60,11 @@ const errorMessage = computed(() => {
 const showInvalidId = computed(() => id.value <= 0);
 
 const showNotFound = computed(
-  () => status.value === "error" && error.value?.kind === "NotFound",
+  () => state.value === "error" && error.value?.kind === "NotFound",
 );
 
 const showGenericError = computed(
-  () => status.value === "error" && !showInvalidId.value && !showNotFound.value,
+  () => state.value === "error" && !showInvalidId.value && !showNotFound.value,
 );
 
 const errorRefreshHandler = computed<(() => void) | undefined>(() => {
@@ -149,8 +149,10 @@ onBeforeUnmount(() => {
         />
 
         <LoadingState
-          v-else-if="status === 'loading' || status === 'idle'"
-          data-testid="loading-state"
+          v-if="state === 'loading'"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('agencies:details.subtitle')"
         />
 
         <ErrorState
