@@ -20,7 +20,7 @@ const store = useAgenciesStore();
 const backToList = routes.app.agencies.list();
 
 const rawId = computed(() => String(route.params.id ?? "").trim());
-const id = computed<number>(() => parsePositiveIntParam(route.params.id));)
+const id = computed<number>(() => parsePositiveIntParam(route.params.id));
 
 const agency = computed(() => (id.value > 0 ? store.getById(id.value) : null));
 
