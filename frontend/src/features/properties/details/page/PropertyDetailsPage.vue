@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import i18n from "@/shared/i18n";
@@ -8,7 +8,7 @@ import routes from "@/shared/routes";
 import { propertiesApi } from "@/features/properties/api/propertiesApi";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
 import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
-import { ErrorState, LoadingState } from "@/shared/ui/states";
+import { ErrorState } from "@/shared/ui/states";
 
 import type { ApiError } from "@/shared/types/errors";
 import type { UIState } from "@/shared/types/ui";
@@ -39,7 +39,7 @@ const showGenericError = computed(
 );
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("properties:details.titleFallback");
+  const fallback = i18n.t("properties:card.titleFallback");
   const title = data.value?.title?.trim();
 
   return title ? title : fallback;
@@ -81,7 +81,14 @@ const errorMessage = computed(() => {
   return error.value?.message ?? i18n.t("errors:common.message.unexpected");
 });
 
-async function load(force = false): Promise<void> {
+function toNotFoundError(): ApiError {
+  return {
+    kind: "NotFound",
+    message: "",
+  } as ApiError;
+}
+
+async function load(): Promise<void> {
   state.value = "loading";
   error.value = null;
   data.value = null;
@@ -93,6 +100,13 @@ async function load(force = false): Promise<void> {
 
   try {
     const res = await propertiesApi.getById(id.value);
+
+    if (!res || !Number.isInteger(res.id) || res.id <= 0) {
+      error.value = toNotFoundError();
+      state.value = "error";
+      return;
+    }
+
     data.value = res;
     state.value = "success";
   } catch (e) {
@@ -109,13 +123,13 @@ function goBack(): void {
   router.push(routes.app.properties.list());
 }
 
-onMounted(() => {
-  void load(false);
-});
-
-watch(id, () => {
-  void load(false);
-});
+watch(
+  id,
+  () => {
+    void load();
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -162,7 +176,7 @@ watch(id, () => {
             type="button"
             class="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="refresh-button"
-            @click="load(true)"
+            @click="load"
             :aria-label="$t('common:actions.refreshAria')"
           >
             {{ $t("common:actions.refresh") }}
@@ -185,21 +199,38 @@ watch(id, () => {
           variant="notFound"
           :requested-id="rawId"
           :back-to="routes.app.properties.list()"
-          :on-refresh="() => load(true)"
+          :on-refresh="() => load()"
         />
 
-        <LoadingState
+        <section
           v-else-if="state === 'loading'"
           data-testid="loading-state"
-          :title="$t('states:loading.propertyDetailsTitle')"
-        />
+          class="grid min-h-[34rem] place-items-center rounded-3xl border border-slate-200 bg-white/90 shadow-sm backdrop-blur"
+        >
+          <div class="flex flex-col items-center gap-4 text-center">
+            <div class="relative h-16 w-16">
+              <div class="absolute inset-0 rounded-full border-4 border-slate-200" />
+              <div class="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-300" />
+              <div class="absolute inset-2 rounded-full bg-white" />
+            </div>
+
+            <div class="space-y-1">
+              <p class="text-base font-semibold text-slate-900">
+                {{ $t("states:loading.propertyDetailsTitle") }}
+              </p>
+              <p class="text-sm text-slate-500">
+                {{ $t("properties:card.titleFallback") }}
+              </p>
+            </div>
+          </div>
+        </section>
 
         <ErrorState
           v-else-if="showGenericError"
           data-testid="error-state"
           :title="errorTitle"
           :message="errorMessage"
-          :onRetry="() => load(true)"
+          :onRetry="() => load()"
         />
 
         <PropertyDetailsCard

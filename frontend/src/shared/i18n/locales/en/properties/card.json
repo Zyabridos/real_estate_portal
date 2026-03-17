@@ -1,4 +1,5 @@
 {
+  "titleFallback": "Property details",
   "detailsCard": {
     "detailsCardAriaLabel": "Property details card",
     "priceValueAriaLabel": "Property price: {{value}}",

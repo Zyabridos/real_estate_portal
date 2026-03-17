@@ -56,8 +56,8 @@ const address = computed(() => formatAddress(props.agency));
       </div>
 
       <RouterLink
-        class="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 hover:bg-slate-50"
         :to="detailsTo"
+        class="inline-flex shrink-0 whitespace-nowrap rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
         :aria-label="$t('agencies:card.openDetailsAria', { name: props.agency.name })"
         data-testid="agency-view-details"
       >

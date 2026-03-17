@@ -39,7 +39,7 @@ const showGenericError = computed(
 );
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("brokers:details.titleFallback");
+  const fallback = i18n.t("brokers:card.titleFallback");
   const firstName = data.value?.firstName?.trim() ?? "";
   const lastName = data.value?.lastName?.trim() ?? "";
   const fullName = `${firstName} ${lastName}`.trim();
