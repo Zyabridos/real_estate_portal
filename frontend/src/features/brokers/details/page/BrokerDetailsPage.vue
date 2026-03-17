@@ -74,7 +74,7 @@ async function load(force = false): Promise<void> {
   }
 
   try {
-    const response = await brokersApi.getById(id.value, { force });
+    const response = await brokersApi.getById(id.value);
     data.value = response;
     state.value = "success";
   } catch (e) {
@@ -117,7 +117,7 @@ watch(id, () => {
           </h1>
 
           <p class="mt-1 text-sm text-slate-600">
-            {{ $t("brokers:details.subtitle") }}
+            {{ $t("brokers:card.details.subtitle") }}
           </p>
         </div>
 

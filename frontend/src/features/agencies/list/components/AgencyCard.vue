@@ -21,7 +21,7 @@ const address = computed(() => formatAddress(props.agency));
   <article
     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
     role="article"
-    :aria-label="$t('pages:agencies.list.cardAriaLabel', { id: props.agency.id })"
+    :aria-label="$t('agencies:list.cardAriaLabel', { id: props.agency.id })"
     :data-testid="`agency-card-${props.agency.id}`"
   >
     <div class="flex items-start justify-between gap-4">
@@ -29,23 +29,23 @@ const address = computed(() => formatAddress(props.agency));
         <RouterLink
           class="block truncate text-base font-semibold text-slate-900 hover:text-indigo-800"
           :to="detailsTo"
-          :aria-label="$t('pages:agencies.card.openDetailsAria', { name: props.agency.name })"
+          :aria-label="$t('agencies:card.openDetailsAria', { name: props.agency.name })"
         >
           {{ props.agency.name }}
         </RouterLink>
 
         <p class="mt-1 text-sm text-slate-600">
-          {{ $t("pages:agencies.card.orgNumberLabel") }}:
+          {{ $t("agencies:card.orgNumberLabel") }}:
           <span class="font-medium text-slate-800">{{ props.agency.orgNumber }}</span>
         </p>
 
         <p v-if="address" class="mt-2 text-sm text-slate-600">
-          {{ $t("pages:agencies.card.addressLabel") }}:
+          {{ $t("agencies:card.addressLabel") }}:
           <span class="text-slate-800">{{ address }}</span>
         </p>
 
         <p v-if="props.agency.phoneNumber" class="mt-2 text-sm text-slate-600">
-          {{ $t("pages:agencies.card.phoneLabel") }}:
+          {{ $t("agencies:card.phoneLabel") }}:
           <a
             class="font-medium text-slate-900 hover:text-indigo-800"
             :href="`tel:${props.agency.phoneNumber}`"
@@ -58,7 +58,7 @@ const address = computed(() => formatAddress(props.agency));
       <RouterLink
         class="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 hover:bg-slate-50"
         :to="detailsTo"
-        :aria-label="$t('pages:agencies.card.openDetailsAria', { name: props.agency.name })"
+        :aria-label="$t('agencies:card.openDetailsAria', { name: props.agency.name })"
         data-testid="agency-view-details"
       >
         {{ $t("common:actions.viewDetails") }}

@@ -7,10 +7,11 @@
   "phoneLabel": "Telefon",
   "openDetailsAria": "Åpne meglerdetaljer: {{name}}",
   "details": {
+    "subtitle": "Data av megleren fetched fra backend",
     "emptyValue": "—",
     "experienceTitle": "Erfaring i byrået",
-    "experienceSince": "Har jobbet i byrået siden {{date}}",
+    "experienceSince": "Har jobbet i byrået siden",
     "lastUpdatedTitle": "Sist oppdatert",
-    "profileUpdated": "Profilen ble oppdatert {{date}}"
+    "profileUpdated": "Profilen ble oppdatert"
   }
 }

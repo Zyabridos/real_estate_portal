@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 
 import i18n from "@/shared/i18n";
+import routes from "@/shared/routes.ts"
 import type { PropertyListItemDto } from "@/features/properties/api/dtos/property-list-item.dto";
 import house_default from "@/assets/images/house_default.png";
 
@@ -12,7 +13,8 @@ type Props = {
 
 const props = defineProps<Props>();
 
-const detailsTo = computed(() => `/properties/${props.property.id}`);
+
+const detailsTo = computed(() => routes.app.properties.details(props.property.id));
 const priceText = computed(() => props.property.price.toLocaleString("nb-NO"));
 
 const imageSrc = computed(() => {

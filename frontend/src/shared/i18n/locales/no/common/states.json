@@ -1,0 +1,13 @@
+{
+  "loading": {
+    "genericTitle": "Laster...",
+    "ariaLabel": "Laster innhold"
+  },
+  "empty": {
+    "title": "Ingenting funnet",
+    "message": "Det finnes ingen data å vise ennå.",
+    "action": "Prøv igjen",
+    "ariaLabel": "Tom tilstand",
+    "actionAria": "Prøv å laste inn data på nytt"
+  }
+}

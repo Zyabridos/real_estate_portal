@@ -7,10 +7,11 @@
   "phoneLabel": "Phone",
   "openDetailsAria": "Open broker details: {{name}}",
   "details": {
+    "subtitle": "Data of particular broker fetched from backend",
     "emptyValue": "—",
     "experienceTitle": "Experience at the agency",
-    "experienceSince": "Working at the agency since {{date}}",
+    "experienceSince": "Working at the agency since",
     "lastUpdatedTitle": "Last update",
-    "profileUpdated": "Profile updated {{date}}"
+    "profileUpdated": "Profile updated"
   }
 }

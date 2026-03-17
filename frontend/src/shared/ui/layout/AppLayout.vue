@@ -1,3 +1,4 @@
+<!-- AppLayout.vue -->
 <script setup lang="ts">
 import { computed } from "vue";
 
@@ -26,8 +27,8 @@ const hasError = computed(() => Boolean(props.errorMessage));
       class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur"
       :aria-label="$t('common:layout.header.ariaLabel')"
     >
-      <div class="flex w-full items-center justify-between px-6 py-3">
-        <div class="flex items-center gap-3">
+      <div class="flex w-full items-center justify-between px-5 py-2.5">
+        <div class="flex items-center gap-2.5">
           <RouterLink
             :to="routes.app.home()"
             class="rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300"
@@ -36,7 +37,7 @@ const hasError = computed(() => Boolean(props.errorMessage));
             <img
               :src="RealEstatePortal"
               :alt="$t('common:layout.header.logoAlt')"
-              class="h-20 w-40 rounded-xl object-contain"
+              class="h-14 w-32 rounded-xl object-contain"
             />
           </RouterLink>
         </div>
@@ -60,7 +61,7 @@ const hasError = computed(() => Boolean(props.errorMessage));
         role="alert"
         aria-live="assertive"
       >
-        <div class="w-full px-6 py-3">
+        <div class="w-full px-5 py-3">
           <div class="text-sm font-medium text-rose-900">
             {{ $t("common:layout.error.title") }}
           </div>

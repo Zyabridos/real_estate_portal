@@ -5,21 +5,84 @@ import { RouterLink } from "vue-router";
 import i18n from "@/shared/i18n";
 import type { PropertyDetailsDto } from "@/features/properties/api/dtos/property-details.dto";
 import routes from "@/shared/routes";
+import { formatDateByLocale} from "@/shared/utils/formatters/formatDateByLocale.ts";
 import house_default from "@/assets/images/house_default.png";
+import PropertyImageGallery from "@/entities/properties/ui/PropertyImageGallery.vue";
 
 type Props = {
   property: PropertyDetailsDto;
 };
 
+type PropertyImageObject = {
+  src?: string;
+  url?: string;
+};
+
+type PropertyWithGallery = PropertyDetailsDto & {
+  imageUrls?: string[];
+  images?: Array<string | PropertyImageObject>;
+};
+
 const { property } = defineProps<Props>();
 
 const formattedPrice = computed(() => property.price.toLocaleString("nb-NO"));
-
 const hasDescription = computed(() => !!property.description?.trim());
 const titleText = computed(() => property.title?.trim() ?? "");
 
-const imageSrc = computed(() => {
-  return property.mainImageUrl?.trim() || house_default;
+function normalizeUrl(value?: string | null): string | null {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+}
+
+const imageBadges = computed(() => [
+  {
+    label: String(localizedStatus.value),
+    class: `${statusClass.value} bg-white/85`,
+    testId: "property-status-badge",
+  },
+  {
+    label: String(localizedType.value),
+    class: `${typeClass.value} bg-white/85`,
+    testId: "property-type-badge",
+  },
+]);
+
+const galleryImages = computed(() => {
+  const urls: string[] = [];
+  const extendedProperty = property as PropertyWithGallery;
+
+  const pushUnique = (value?: string | null): void => {
+    const normalized = normalizeUrl(value);
+
+    if (normalized && !urls.includes(normalized)) {
+      urls.push(normalized);
+    }
+  };
+
+  pushUnique(property.mainImageUrl);
+
+  for (const imageUrl of extendedProperty.imageUrls ?? []) {
+    pushUnique(imageUrl);
+  }
+
+  for (const image of extendedProperty.images ?? []) {
+    if (typeof image === "string") {
+      pushUnique(image);
+    } else {
+      pushUnique(image.src ?? image.url);
+    }
+  }
+
+  if (!urls.length) {
+    urls.push(house_default);
+  }
+
+  return urls.map((src, index) => ({
+    src,
+    alt: index === 0
+      ? titleText.value || "Property image"
+      : `${titleText.value || "Property image"} ${index + 1}`,
+  }));
 });
 
 const dateLocale = computed(() => {
@@ -32,16 +95,11 @@ const dateLocale = computed(() => {
 });
 
 const createdAtText = computed(() => {
-  if (!property.createdAt) return null;
-
-  const date = new Date(property.createdAt);
-  if (Number.isNaN(date.getTime())) return null;
-
-  return new Intl.DateTimeFormat(dateLocale.value, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
+  return formatDateByLocale(
+    property.createdAt,
+    i18n.resolvedLanguage ?? i18n.language,
+    "long",
+  );
 });
 
 const brokerTo = computed(() => {
@@ -96,183 +154,170 @@ const localizedType = computed(() => {
 
 <template>
   <article
-    class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+    class="grid h-full gap-6 lg:min-h-[calc(100vh-16rem)] lg:grid-cols-[minmax(420px,1.02fr)_minmax(0,0.92fr)] xl:grid-cols-[minmax(520px,1.08fr)_minmax(0,0.86fr)]"
     data-testid="property-details-card"
     :aria-label="$t('properties:card.detailsCard.detailsCardAriaLabel')"
   >
-    <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.9fr]">
-      <div class="relative min-h-[280px] bg-slate-100 lg:min-h-[520px]">
-        <img
-          :src="imageSrc"
-          :alt="titleText"
-          class="h-full w-full object-cover"
-        />
+    <div class="lg:self-start">
+      <PropertyImageGallery
+        :images="galleryImages"
+        :badges="imageBadges"
+      />
+    </div>
 
-        <div class="absolute left-4 top-4 flex flex-wrap gap-2">
-          <span
-            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="statusClass"
-            data-testid="property-status-badge"
-          >
-            {{ localizedStatus }}
-          </span>
-
-          <span
-            class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset"
-            :class="typeClass"
-            data-testid="property-type-badge"
-          >
-            {{ localizedType }}
-          </span>
-        </div>
-      </div>
-
-      <div class="p-6 md:p-8">
-        <div class="flex flex-col gap-6">
-          <header class="space-y-3">
-            <div class="flex items-start justify-between gap-4">
-              <div class="min-w-0">
-                <p class="text-sm font-medium text-slate-500">
-                  {{ property.city }}
-                </p>
-
-                <h1
-                  class="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl"
-                  data-testid="property-title"
-                >
-                  {{ titleText }}
-                </h1>
-              </div>
-
-              <div class="shrink-0 text-right">
-                <div
-                  class="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl"
-                  data-testid="property-price"
-                  :aria-label="$t('properties:card.detailsCard.priceValueAriaLabel', { value: formattedPrice })"
-                >
-                  {{ formattedPrice }}
-                </div>
-
-                <div class="text-sm text-slate-500">
-                  {{ $t("common:app.currency.nok") }}
-                </div>
-              </div>
-            </div>
-
-            <p class="text-sm leading-6 text-slate-600" data-testid="property-address">
-              {{ property.address }}
-            </p>
-          </header>
-
-          <section :aria-label="$t('properties:card.detailsCard.metaSectionAriaLabel')">
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("properties:card.detailsCard.bedroomsLabel") }}
-                </p>
-                <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-bedrooms">
-                  {{ property.bedrooms }}
-                </p>
-              </div>
-
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("properties:card.detailsCard.bathroomsLabel") }}
-                </p>
-                <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-bathrooms">
-                  {{ property.bathrooms }}
-                </p>
-              </div>
-
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("properties:card.detailsCard.areaLabel") }}
-                </p>
-                <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-area">
-                  {{ property.area }} {{ $t("properties:card.detailsCard.areaUnit") }}
-                </p>
-              </div>
-
-              <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  {{ $t("properties:card.detailsCard.cityLabel") }}
-                </p>
-                <p class="mt-2 text-lg font-semibold text-slate-900" data-testid="property-city">
-                  {{ property.city }}
-                </p>
-              </div>
-            </div>
-          </section>
-
+    <section
+      class="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:p-6"
+    >
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <section
             v-if="hasDescription"
+            class="min-w-0 flex-1"
             data-testid="property-description"
             :aria-label="$t('properties:card.detailsCard.descriptionSectionAriaLabel')"
           >
-            <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">
               {{ $t("properties:card.detailsCard.descriptionTitle") }}
             </h2>
 
-            <p class="whitespace-pre-line text-sm leading-7 text-slate-700">
+            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700">
               {{ property.description }}
             </p>
           </section>
 
-          <section class="rounded-2xl border border-slate-200 p-4">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              {{ $t("properties:card.detailsCard.metaTitle") }}
-            </h2>
-
-            <dl class="mt-4 space-y-3 text-sm">
-              <div class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.typeLabel") }}</dt>
-                <dd class="text-right font-medium text-slate-900">
-                  {{ localizedType }}
-                </dd>
-              </div>
-
-              <div class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.statusLabel") }}</dt>
-                <dd class="text-right font-medium text-slate-900">
-                  {{ localizedStatus }}
-                </dd>
-              </div>
-
-              <div class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.propertyIdLabel") }}</dt>
-                <dd class="break-all text-right font-mono text-xs text-slate-700">
-                  {{ property.id }}
-                </dd>
-              </div>
-
-              <div v-if="createdAtText" class="flex items-start justify-between gap-4">
-                <dt class="text-slate-500">{{ $t("properties:card.detailsCard.createdAtLabel") }}</dt>
-                <dd class="text-right font-medium text-slate-900">
-                  {{ createdAtText }}
-                </dd>
-              </div>
-            </dl>
-          </section>
-
-          <section class="rounded-2xl border border-slate-200 p-4">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              {{ $t("properties:card.detailsCard.brokerTitle") }}
-            </h2>
-
-            <p class="mt-3 text-sm leading-6 text-slate-600">
-              {{ $t("properties:card.detailsCard.brokerSubtitle") }}
+          <div class="shrink-0 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-right sm:px-4">
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              {{ $t("properties:card.detailsCard.priceLabel") }}
             </p>
 
-            <RouterLink
-              :to="brokerTo"
-              class="mt-4 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
-              data-testid="property-broker-link"
+            <div
+              class="mt-0.5 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl"
+              data-testid="property-price"
+              :aria-label="$t('properties:card.detailsCard.priceValueAriaLabel', { value: formattedPrice })"
             >
-              {{ $t("common:actions.viewBroker") }}
-            </RouterLink>
-          </section>
+              {{ formattedPrice }}
+            </div>
+
+            <div class="text-[11px] text-slate-500">
+              {{ $t("common:app.currency.nok") }}
+            </div>
+          </div>
+        </div>
+
+        <div class="min-w-0">
+
+          <p class="whitespace-nowrap"
+             data-testid="property-address"
+             :title="property.address">
+            <span class="font-medium text-slate-500">
+              {{ $t("properties:card.detailsCard.streetLabel") }}:
+            </span>
+            <span class="ml-1 font-semibold text-slate-900" data-testid="property-bedrooms">
+              {{ property.address }}
+            </span>
+          </p>
+
         </div>
       </div>
-    </div>
+
+      <section
+        class="mt-5"
+        :aria-label="$t('properties:card.detailsCard.metaSectionAriaLabel')"
+      >
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-700">
+          <p class="whitespace-nowrap">
+            <span class="font-medium text-slate-500">
+              {{ $t("properties:card.detailsCard.bedroomsLabel") }}:
+            </span>
+            <span class="ml-1 font-semibold text-slate-900" data-testid="property-bedrooms">
+              {{ property.bedrooms }}
+            </span>
+          </p>
+
+          <p class="whitespace-nowrap">
+            <span class="font-medium text-slate-500">
+              {{ $t("properties:card.detailsCard.bathroomsLabel") }}:
+            </span>
+            <span class="ml-1 font-semibold text-slate-900" data-testid="property-bathrooms">
+              {{ property.bathrooms }}
+            </span>
+          </p>
+
+          <p class="whitespace-nowrap">
+            <span class="font-medium text-slate-500">
+              {{ $t("properties:card.detailsCard.areaLabel") }}:
+            </span>
+            <span class="ml-1 font-semibold text-slate-900" data-testid="property-area">
+              {{ property.area }} {{ $t("properties:card.detailsCard.areaUnit") }}
+            </span>
+          </p>
+
+          <p class="whitespace-nowrap">
+            <span class="font-medium text-slate-500">
+              {{ $t("properties:card.detailsCard.cityLabel") }}:
+            </span>
+            <span class="ml-1 font-semibold text-slate-900" data-testid="property-city">
+              {{ property.city }}
+            </span>
+          </p>
+        </div>
+      </section>
+
+      <div class="mt-5 grid gap-3 xl:grid-cols-[1.05fr_0.95fr]">
+        <section class="rounded-2xl border border-slate-200 px-4 py-4">
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {{ $t("properties:card.detailsCard.metaTitle") }}
+          </h2>
+
+          <dl class="mt-3 space-y-3 text-sm">
+            <div class="flex items-start justify-between gap-4">
+              <dt class="text-slate-500">{{ $t("properties:card.detailsCard.typeLabel") }}</dt>
+              <dd class="text-right font-medium text-slate-900">
+                {{ localizedType }}
+              </dd>
+            </div>
+
+            <div class="flex items-start justify-between gap-4">
+              <dt class="text-slate-500">{{ $t("properties:card.detailsCard.statusLabel") }}</dt>
+              <dd class="text-right font-medium text-slate-900">
+                {{ localizedStatus }}
+              </dd>
+            </div>
+
+            <div class="flex items-start justify-between gap-4">
+              <dt class="text-slate-500">{{ $t("properties:card.detailsCard.propertyIdLabel") }}</dt>
+              <dd class="break-all text-right font-mono text-xs text-slate-700">
+                {{ property.id }}
+              </dd>
+            </div>
+
+            <div v-if="createdAtText" class="flex items-start justify-between gap-4">
+              <dt class="text-slate-500">{{ $t("properties:card.detailsCard.createdAtLabel") }}</dt>
+              <dd class="text-right font-medium text-slate-900">
+                {{ createdAtText }}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {{ $t("properties:card.detailsCard.brokerTitle") }}
+          </h2>
+
+          <p class="mt-2 text-sm leading-6 text-slate-600">
+            {{ $t("properties:card.detailsCard.brokerSubtitle") }}
+          </p>
+
+          <RouterLink
+            :to="brokerTo"
+            class="mt-4 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-100"
+            data-testid="property-broker-link"
+          >
+            {{ $t("common:actions.viewBroker") }}
+          </RouterLink>
+        </section>
+      </div>
+    </section>
   </article>
 </template>

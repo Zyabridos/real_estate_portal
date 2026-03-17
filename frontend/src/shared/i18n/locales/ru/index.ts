@@ -2,6 +2,7 @@ import app from "./common/app.json";
 import actions from "./common/actions.json";
 import layout from "./common/layout.json";
 import pagination from "./common/pagination.json";
+import states from "./common/states.json";
 import meta from "./common/meta.json";
 
 import errorsCommon from "./errors/common.json";
@@ -13,11 +14,9 @@ import agenciesCard from "./agencies/card.json";
 
 import brokersCommon from "./brokers/common.json";
 import brokersList from "./brokers/list.json";
-import brokersDetails from "./brokers/details.json";
 import brokersCard from "./brokers/card.json";
 
 import propertiesList from "./properties/list.json";
-import propertiesDetails from "./properties/details.json";
 import propertiesFilters from "./properties/filters.json";
 import propertiesCard from "./properties/card.json";
 
@@ -41,6 +40,7 @@ const ru = {
     actions,
     layout,
     pagination,
+    states,
     meta,
   },
   errors: {
@@ -55,12 +55,10 @@ const ru = {
   brokers: {
     common: brokersCommon,
     list: brokersList,
-    details: brokersDetails,
     card: brokersCard,
   },
   properties: {
     list: propertiesList,
-    details: propertiesDetails,
     filters: propertiesFilters,
     card: propertiesCard,
   },

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+import i18n from "@/shared/i18n"
+import { formatDateByLocale} from "@/shared/utils/formatters/formatDateByLocale.ts";
+
 import type { BrokerDetailsDto } from "@/features/brokers/api/dtos/broker-details.dto";
 import {
   getBrokerFallbackImage,
@@ -28,6 +31,14 @@ const pictureSrc = computed(() => {
   }
 
   return getBrokerFallbackImage(props.broker.gender);
+});
+
+const createdAtText = computed(() => {
+  return formatDateByLocale(
+    props.broker.createdAt,
+    i18n.resolvedLanguage ?? i18n.language,
+    "long",
+  );
 });
 
 const genderLabelKey = computed(() => getBrokerGenderLabelKey(props.broker.gender));
@@ -66,13 +77,13 @@ const useContainImage = computed(() => {
         </h2>
 
         <p class="mt-2 text-sm text-slate-600">
-          {{ $t("brokers:details.subtitle") }}
+          {{ $t("brokers:card.details.subtitle") }}
         </p>
 
         <dl class="mt-6 grid gap-4 sm:grid-cols-2">
           <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-              {{ $t("brokers:details.genderLabel") }}
+              {{ $t("brokers:card.genderLabel") }}
             </dt>
             <dd class="mt-1 text-sm font-medium text-slate-900">
               {{ $t(genderLabelKey) }}
@@ -84,7 +95,7 @@ const useContainImage = computed(() => {
             class="rounded-xl border border-slate-200 bg-slate-50 p-4"
           >
             <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-              {{ $t("brokers:details.emailLabel") }}
+              {{ $t("brokers:card:emailLabel") }}
             </dt>
             <dd class="mt-1 break-all text-sm text-slate-900">
               {{ broker.email }}
@@ -96,10 +107,21 @@ const useContainImage = computed(() => {
             class="rounded-xl border border-slate-200 bg-slate-50 p-4"
           >
             <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-              {{ $t("brokers:details.phoneLabel") }}
+              {{ $t("brokers:card:phoneLabel") }}
             </dt>
             <dd class="mt-1 text-sm text-slate-900">
               {{ broker.phoneNumber }}
+            </dd>
+          </div>
+          <div
+            v-if="createdAtText"
+            class="rounded-xl border border-slate-200 bg-slate-50 p-4"
+          >
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {{ $t("brokers:card:details.experienceSince") }}
+            </dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              {{ createdAtText }}
             </dd>
           </div>
         </dl>

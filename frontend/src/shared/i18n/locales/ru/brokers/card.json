@@ -7,10 +7,11 @@
   "phoneLabel": "Телефон",
   "openDetailsAria": "Открыть детали брокера: {{name}}",
   "details": {
+    "subtitle": "Данные определенного брокера с бэкенда",
     "emptyValue": "—",
     "experienceTitle": "Стаж в агентстве",
-    "experienceSince": "Работает в агентстве с {{date}}",
+    "experienceSince": "Работает в агентстве с",
     "lastUpdatedTitle": "Последнее обновление",
-    "profileUpdated": "Профиль обновлён {{date}}"
+    "profileUpdated": "Профиль обновлён"
   }
 }

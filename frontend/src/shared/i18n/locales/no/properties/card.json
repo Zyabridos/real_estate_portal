@@ -16,7 +16,12 @@
     "areaLabel": "Areal",
     "areaUnit": "m²",
     "brokerTitle": "Megler",
-    "brokerSubtitle": "Se meglerprofilen og utforsk flere boliger fra samme megler."
+    "brokerSubtitle": "Se meglerprofilen og utforsk flere boliger fra samme megler.",
+    "priceLabel": "Pris",
+    "streetLabel": "Gate",
+    "actions": {
+      "createLead": "Kontakt megler"
+    }
   },
   "type": {
     "apartment": "Leilighet",

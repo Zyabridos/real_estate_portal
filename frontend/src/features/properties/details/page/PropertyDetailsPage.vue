@@ -92,7 +92,7 @@ async function load(force = false): Promise<void> {
   }
 
   try {
-    const res = await propertiesApi.getById(id.value, { force });
+    const res = await propertiesApi.getById(id.value);
     data.value = res;
     state.value = "success";
   } catch (e) {
@@ -120,30 +120,26 @@ watch(id, () => {
 
 <template>
   <section
-    class="w-full"
+    class="flex h-full w-full flex-col"
     data-testid="property-details-page"
     :aria-label="$t('properties:details.ariaLabel')"
   >
-    <div class="w-full px-6 py-2">
-      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div class="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="page-title">
             {{ pageTitle }}
           </h1>
-
-          <p class="mt-1 text-sm text-slate-600">
-            {{ $t("properties:details.subtitle") }}
-          </p>
         </div>
 
         <div
-          class="flex items-center gap-3"
+          class="flex flex-wrap items-center gap-2.5"
           role="group"
           :aria-label="$t('properties:details.pageActionsAriaLabel')"
         >
           <button
             type="button"
-            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
+            class="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="back-to-list-button"
             @click="goBack"
             :aria-label="$t('common:actions.backToListAria')"
@@ -153,18 +149,18 @@ watch(id, () => {
 
           <button
             type="button"
-            class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-300"
+            class="rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-300"
             data-testid="create-lead-button"
             @click="goCreateLead"
             :disabled="!canCreateLead"
-            :aria-label="$t('properties:details.actions.createLeadAria')"
+            :aria-label="$t('properties:card.detailsCard.actions.createLeadAria')"
           >
-            {{ $t("properties:details.actions.createLead") }}
+            {{ $t("properties:card.detailsCard.actions.createLead") }}
           </button>
 
           <button
             type="button"
-            class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
+            class="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="refresh-button"
             @click="load(true)"
             :aria-label="$t('common:actions.refreshAria')"
@@ -174,7 +170,7 @@ watch(id, () => {
         </div>
       </div>
 
-      <div class="mt-8" aria-live="polite">
+      <div class="mt-5 flex-1" aria-live="polite">
         <EntityDetailsErrorState
           v-if="showInvalidId"
           entity="property"
@@ -206,7 +202,11 @@ watch(id, () => {
           :onRetry="() => load(true)"
         />
 
-        <PropertyDetailsCard v-else-if="data" :property="data" />
+        <PropertyDetailsCard
+          v-else-if="data"
+          class="h-full"
+          :property="data"
+        />
       </div>
     </div>
   </section>
