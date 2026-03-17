@@ -121,4 +121,37 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
         var resp = await _client.GetAsync($"/api/properties/{id}");
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+    
+    [Fact]
+    public async Task Details_existing_property_returns_image_urls()
+    {
+        var property = TestProperties.Create(
+            id: 12345,
+            mainImageUrl: "https://example.com/main.jpg",
+            imageUrls: new[]
+            {
+                "https://example.com/kitchen.jpg",
+                "https://example.com/bathroom.jpg"
+            },
+            createdAt: DateTime.UtcNow,
+            updatedAt: DateTime.UtcNow
+        );
+
+        await _properties.InsertOneAsync(property);
+
+        var resp = await _client.GetAsync($"/api/properties/{property.Id}");
+
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var body = await resp.Content.ReadFromJsonTestAsync<PropertyDetailsDto>();
+
+        body.Should().NotBeNull();
+        body!.Id.Should().Be(property.Id);
+        body.MainImageUrl.Should().Be("https://example.com/main.jpg");
+        body.ImageUrls.Should().NotBeNull();
+        body.ImageUrls.Should().HaveCount(2);
+        body.ImageUrls.Should().ContainInOrder(
+            "https://example.com/kitchen.jpg",
+            "https://example.com/bathroom.jpg");
+    }
 }
