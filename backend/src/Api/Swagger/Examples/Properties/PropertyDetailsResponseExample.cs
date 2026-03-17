@@ -10,8 +10,8 @@ public sealed class PropertyDetailsResponseExample : IExamplesProvider<PropertyD
     {
         return new PropertyDetailsDto(
             Id: 123,
-            BrokerId: 1001,
             AgencyId: 1,
+            BrokerId: 1001,
             Title: "Spacious family house",
             Description: "A bright house with a large garden.",
             Address: "Example street 10",
@@ -21,11 +21,15 @@ public sealed class PropertyDetailsResponseExample : IExamplesProvider<PropertyD
             Bathrooms: 2,
             Area: 180m,
             MainImageUrl: "https://example.com/house.jpg",
+            ImageUrls:
+            [
+                "https://example.com/kitchen.jpg",
+                "https://example.com/bathroom.jpg",
+                "https://example.com/second_bathroom.jpg",
+            ],
             Status: PropertyStatus.Active,
             Type: PropertyType.House,
-            CreatedAt: DateTime.SpecifyKind(
-                DateTime.Parse("2025-12-15T12:00:00Z"),
-                DateTimeKind.Utc),
+            CreatedAt: DateTime.Parse("2025-12-15T12:00:00Z"),
             UpdatedAt: DateTime.Parse("2026-01-11T12:00:00Z")
         );
     }

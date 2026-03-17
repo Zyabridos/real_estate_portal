@@ -39,7 +39,7 @@ const showGenericError = computed(
 );
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("brokers:details.titleFallback");
+  const fallback = i18n.t("brokers:card.titleFallback");
   const firstName = data.value?.firstName?.trim() ?? "";
   const lastName = data.value?.lastName?.trim() ?? "";
   const fullName = `${firstName} ${lastName}`.trim();
@@ -167,9 +167,10 @@ watch(id, () => {
         />
 
         <LoadingState
-          v-else-if="state === 'loading'"
-          data-testid="loading-state"
-          :title="$t('states:loading.brokerDetailsTitle')"
+          v-if="state === 'loading'"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('brokers:list.subtitle')"
         />
 
         <ErrorState

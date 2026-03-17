@@ -18,6 +18,7 @@ public sealed class Property
     public int Bathrooms { get; set; }
     public decimal Area { get; set; }
     public string? MainImageUrl { get; set; }
+    public IReadOnlyList<string> ImageUrls { get; set; } = Array.Empty<string>();
 
     public PropertyStatus Status { get; set; }
     public PropertyType Type { get; set; }

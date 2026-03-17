@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
+
+import { formatAddress } from "@/shared/utils/formatters/formatAddress";
 import type { AgencyDetailsDto } from "@/features/agencies/api/dtos/agency-details.dto";
 
 const props = defineProps<{ agency: AgencyDetailsDto }>();
-
-function formatAddress(a: AgencyDetailsDto): string | null {
-  const line2 = [a.zipCode, a.city].filter(Boolean).join(" ");
-  const parts = [a.street, line2].filter(Boolean);
-  return parts.length ? parts.join(", ") : null;
-}
 
 const address = computed(() => formatAddress(props.agency));
 </script>

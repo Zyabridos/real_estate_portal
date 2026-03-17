@@ -1,4 +1,5 @@
 {
+  "titleFallback": "Broker details",
   "contactNotAvailable": "Contact details are not available.",
   "agencyIdLabel": "Agency ID",
   "brokerIdLabel": "Broker ID",

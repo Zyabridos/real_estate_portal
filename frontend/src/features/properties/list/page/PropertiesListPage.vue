@@ -124,6 +124,7 @@ watch(
   { immediate: true }
 );
 </script>
+
 <template>
   <section class="w-full" :aria-label="listAriaLabel" data-testid="properties-page">
     <div class="w-full px-6 py-2">
@@ -169,8 +170,15 @@ watch(
         @goToPage="onGoToPage"
       >
 
+        <LoadingState
+          v-if="state === 'loading'"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('properties:list.subtitle')"
+        />
+
         <ErrorState
-          v-if="state === 'error'"
+          v-else-if="state === 'error'"
           data-testid="properties-error"
           :message="error?.message ?? $t('errors:common.message.unexpected')"
           :onRetry="load"

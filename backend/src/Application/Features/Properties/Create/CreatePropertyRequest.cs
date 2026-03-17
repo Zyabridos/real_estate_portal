@@ -12,7 +12,8 @@ public sealed record CreatePropertyRequest(
     decimal Area,
     int Bedrooms,
     int Bathrooms,
+    string? MainImageUrl,
+    IReadOnlyList<string> ImageUrls,
     PropertyType Type,
-    PropertyStatus Status,
-    string? MainImageUrl
+    PropertyStatus Status
 );

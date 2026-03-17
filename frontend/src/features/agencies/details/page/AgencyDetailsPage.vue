@@ -1,32 +1,30 @@
 <script setup lang="ts">
-import { computed, onMounted, watch, onBeforeUnmount } from "vue";
+import { computed, onBeforeUnmount, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
-import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
 
 import i18n from "@/shared/i18n";
 import routes from "@/shared/routes";
 import { ErrorState, LoadingState } from "@/shared/ui/states";
+import EntityDetailsErrorState from "@/shared/ui/errors/EntityDetailsErrorState.vue";
 import AgencyDetailsCard from "@/entities/agencies/ui/AgencyDetailsCard.vue";
+import { useAgenciesStore } from "@/entities/agencies/model/agenciesStore";
 
-import agenciesStore from "@/entities/agencies/model/agenciesStore";
+import { parsePositiveIntParam } from "@/shared/utils/parsePositiveIntParam";
 import type { ApiError } from "@/shared/types/errors";
 import type { UIState } from "@/shared/types/ui";
 
 const route = useRoute();
 const router = useRouter();
-const store = agenciesStore();
+const store = useAgenciesStore();
+
+const backToList = routes.app.agencies.list();
 
 const rawId = computed(() => String(route.params.id ?? "").trim());
-
-const id = computed<number>(() => {
-  const parsed = Number(rawId.value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
-});
+const id = computed<number>(() => parsePositiveIntParam(route.params.id));
 
 const agency = computed(() => (id.value > 0 ? store.getById(id.value) : null));
 
-const status = computed<UIState>(() =>
+const state = computed<UIState>(() =>
   id.value > 0 ? store.getDetailsStatus(id.value) : "idle",
 );
 
@@ -37,9 +35,16 @@ const error = computed<ApiError | null>(() =>
 const pageTitle = computed(() => {
   const fallback = i18n.t("agencies:details.titleFallback");
   const name = agency.value?.name?.trim();
-
   return name ? name : fallback;
 });
+
+const showInvalidId = computed(() => id.value <= 0);
+const showNotFound = computed(
+  () => state.value === "error" && error.value?.kind === "NotFound",
+);
+const showGenericError = computed(
+  () => state.value === "error" && !showInvalidId.value && !showNotFound.value,
+);
 
 const errorTitle = computed(() => {
   if (error.value?.kind === "NotFound") return i18n.t("errors:titles.agencyNotFound");
@@ -57,32 +62,16 @@ const errorMessage = computed(() => {
   return error.value?.message ?? i18n.t("errors:messages.unexpected");
 });
 
-const showInvalidId = computed(() => id.value <= 0);
-
-const showNotFound = computed(
-  () => status.value === "error" && error.value?.kind === "NotFound",
-);
-
-const showGenericError = computed(
-  () => status.value === "error" && !showInvalidId.value && !showNotFound.value,
-);
-
-const errorRefreshHandler = computed<(() => void) | undefined>(() => {
-  if (showInvalidId.value) return undefined;
-  return () => void load(true);
-});
-
 async function load(force = false): Promise<void> {
   if (id.value <= 0) return;
   await store.fetchById(id.value, { force });
 }
 
 function goBack(): void {
-  router.push(routes.app.agencies.list());
+  router.push(backToList);
 }
 
-onMounted(() => void load(false));
-watch(id, () => void load(false));
+watch(id, () => void load(false), { immediate: true });
 
 onBeforeUnmount(() => {
   store.cancelDetailsRequest();
@@ -136,7 +125,7 @@ onBeforeUnmount(() => {
           entity="agency"
           variant="invalidId"
           :requested-id="rawId"
-          :back-to="routes.app.agencies.list()"
+          :back-to="backToList"
         />
 
         <EntityDetailsErrorState
@@ -144,13 +133,15 @@ onBeforeUnmount(() => {
           entity="agency"
           variant="notFound"
           :requested-id="rawId"
-          :back-to="routes.app.agencies.list()"
-          :on-refresh="errorRefreshHandler"
+          :back-to="backToList"
+          :on-refresh="() => load(true)"
         />
 
         <LoadingState
-          v-else-if="status === 'loading' || status === 'idle'"
-          data-testid="loading-state"
+          v-else-if="state === 'loading'"
+          testId="agencies-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('agencies:details.subtitle')"
         />
 
         <ErrorState

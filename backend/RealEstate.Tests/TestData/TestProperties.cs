@@ -17,8 +17,13 @@ public static class TestProperties
         decimal price = 4_500_000m,
         PropertyType type = PropertyType.Apartment,
         PropertyStatus status = PropertyStatus.Active,
-        DateTime? createdAt = null)
+        string? mainImageUrl = "https://example.com/image.jpg",
+        IReadOnlyList<string>? imageUrls = null,
+        DateTime? createdAt = null,
+        DateTime? updatedAt = null)
     {
+        var created = createdAt ?? DateTime.UtcNow;
+
         return new Property
         {
             Id = id ?? Interlocked.Increment(ref _propertyId),
@@ -34,8 +39,10 @@ public static class TestProperties
             Bathrooms = 1,
             Area = 55m,
             Status = status,
-            MainImageUrl = "https://example.com/image.jpg",
-            CreatedAt = createdAt ?? DateTime.UtcNow
+            MainImageUrl = mainImageUrl,
+            ImageUrls = imageUrls ?? Array.Empty<string>(),
+            CreatedAt = created,
+            UpdatedAt = updatedAt ?? created
         };
     }
 
@@ -48,7 +55,10 @@ public static class TestProperties
         decimal price = 4_500_000m,
         PropertyType type = PropertyType.Apartment,
         PropertyStatus status = PropertyStatus.Active,
-        DateTime? createdAt = null)
+        string? mainImageUrl = "https://example.com/image.jpg",
+        IReadOnlyList<string>? imageUrls = null,
+        DateTime? createdAt = null,
+        DateTime? updatedAt = null)
     {
         return Create(
             id: id,
@@ -59,7 +69,10 @@ public static class TestProperties
             price: price,
             type: type,
             status: status,
-            createdAt: createdAt
+            mainImageUrl: mainImageUrl,
+            imageUrls: imageUrls,
+            createdAt: createdAt,
+            updatedAt: updatedAt
         );
     }
 }

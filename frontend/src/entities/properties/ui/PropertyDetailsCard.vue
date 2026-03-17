@@ -5,34 +5,21 @@ import { RouterLink } from "vue-router";
 import i18n from "@/shared/i18n";
 import type { PropertyDetailsDto } from "@/features/properties/api/dtos/property-details.dto";
 import routes from "@/shared/routes";
-import { formatDateByLocale} from "@/shared/utils/formatters/formatDateByLocale.ts";
-import house_default from "@/assets/images/house_default.png";
+import { formatDateByLocale } from "@/shared/utils/formatters/formatDateByLocale.ts";
+import {
+  getPropertyImageUrls,
+  toGalleryImages,
+  type PropertyImageSource,
+} from "@/shared/utils/properties/getPropertyImageUrls";
 import PropertyImageGallery from "@/entities/properties/ui/PropertyImageGallery.vue";
 
-type Props = {
+const { property } = defineProps<{
   property: PropertyDetailsDto;
-};
-
-type PropertyImageObject = {
-  src?: string;
-  url?: string;
-};
-
-type PropertyWithGallery = PropertyDetailsDto & {
-  imageUrls?: string[];
-  images?: Array<string | PropertyImageObject>;
-};
-
-const { property } = defineProps<Props>();
+}>();
 
 const formattedPrice = computed(() => property.price.toLocaleString("nb-NO"));
 const hasDescription = computed(() => !!property.description?.trim());
 const titleText = computed(() => property.title?.trim() ?? "");
-
-function normalizeUrl(value?: string | null): string | null {
-  const normalized = value?.trim();
-  return normalized ? normalized : null;
-}
 
 const imageBadges = computed(() => [
   {
@@ -48,50 +35,12 @@ const imageBadges = computed(() => [
 ]);
 
 const galleryImages = computed(() => {
-  const urls: string[] = [];
-  const extendedProperty = property as PropertyWithGallery;
+  const urls = getPropertyImageUrls(property as PropertyImageSource, {
+    fallbackImage: "",
+    preferImageUrlsFirst: false,
+  }).filter((url) => url.trim().length > 0);
 
-  const pushUnique = (value?: string | null): void => {
-    const normalized = normalizeUrl(value);
-
-    if (normalized && !urls.includes(normalized)) {
-      urls.push(normalized);
-    }
-  };
-
-  pushUnique(property.mainImageUrl);
-
-  for (const imageUrl of extendedProperty.imageUrls ?? []) {
-    pushUnique(imageUrl);
-  }
-
-  for (const image of extendedProperty.images ?? []) {
-    if (typeof image === "string") {
-      pushUnique(image);
-    } else {
-      pushUnique(image.src ?? image.url);
-    }
-  }
-
-  if (!urls.length) {
-    urls.push(house_default);
-  }
-
-  return urls.map((src, index) => ({
-    src,
-    alt: index === 0
-      ? titleText.value || "Property image"
-      : `${titleText.value || "Property image"} ${index + 1}`,
-  }));
-});
-
-const dateLocale = computed(() => {
-  const language = i18n.resolvedLanguage ?? i18n.language;
-
-  if (language === "ru") return "ru-RU";
-  if (language === "no") return "nb-NO";
-
-  return "en-GB";
+  return toGalleryImages(urls, titleText.value);
 });
 
 const createdAtText = computed(() => {

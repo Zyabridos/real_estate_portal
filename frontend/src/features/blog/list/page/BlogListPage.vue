@@ -134,7 +134,13 @@ watch(
       </div>
     </header>
 
-    <LoadingState v-if="state === 'loading'" />
+    <LoadingState
+      v-if="state === 'loading'"
+      testId="properties-loading"
+      :title="$t('common:states.loading.genericTitle')"
+      :subtitle="$t('properties:list.subtitle')"
+    />
+
     <ErrorState
       v-else-if="state === 'error'"
       :message="errorMessage ?? $t('errors:messages.unexpected')"

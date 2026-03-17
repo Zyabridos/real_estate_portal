@@ -3,9 +3,9 @@ import { computed } from "vue";
 import { RouterLink } from "vue-router";
 
 import i18n from "@/shared/i18n";
-import routes from "@/shared/routes.ts"
+import routes from "@/shared/routes.ts";
 import type { PropertyListItemDto } from "@/features/properties/api/dtos/property-list-item.dto";
-import house_default from "@/assets/images/house_default.png";
+import house_default from "@/assets/images/Default_House_MainUrl.png";
 
 type Props = {
   property: PropertyListItemDto;
@@ -13,17 +13,27 @@ type Props = {
 
 const props = defineProps<Props>();
 
-
 const detailsTo = computed(() => routes.app.properties.details(props.property.id));
 const priceText = computed(() => props.property.price.toLocaleString("nb-NO"));
+
+function normalizeUrl(value?: string | null): string | null {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+}
 
 const imageSrc = computed(() => {
   const propertyWithImage = props.property as PropertyListItemDto & {
     thumbnailUrl?: string | null;
     imageUrl?: string | null;
+    mainImageUrl?: string | null;
   };
 
-  return propertyWithImage.thumbnailUrl?.trim() || propertyWithImage.imageUrl?.trim() || house_default;
+  return (
+    normalizeUrl(propertyWithImage.thumbnailUrl) ||
+    normalizeUrl(propertyWithImage.mainImageUrl) ||
+    normalizeUrl(propertyWithImage.imageUrl) ||
+    house_default
+  );
 });
 
 const localizedStatus = computed(() => {

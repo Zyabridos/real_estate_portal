@@ -63,7 +63,12 @@ watch(
 
 <template>
   <main class="mx-auto w-full max-w-3xl px-4 py-6">
-    <LoadingState v-if="state === 'loading'" />
+    <LoadingState
+      v-if="state === 'loading'"
+      testId="properties-loading"
+      :title="$t('common:states.loading.genericTitle')"
+      :subtitle="$t('properties:list.subtitle')"
+    />
 
     <ErrorState
       v-else-if="state === 'error'"

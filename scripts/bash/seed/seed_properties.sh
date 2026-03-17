@@ -33,10 +33,12 @@ source "${seed_env}"
 assert_json() {
   local label="$1"
   local body="$2"
+
   if [[ -z "$body" ]]; then
     error "[seed] ERROR: ${label} returned empty response."
     exit 1
   fi
+
   if ! printf '%s' "$body" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
     error "[seed] ERROR: ${label} did not return JSON. Response was:"
     printf '%s\n' "$body" | head -n 120
@@ -84,12 +86,23 @@ http_post_json() {
 }
 
 create_property_payload() {
-  local title="$1" city="$2" price="$3" broker_id="$4" type="$5" status="$6"
+  local title="$1"
+  local city="$2"
+  local price="$3"
+  local broker_id="$4"
+  local type="$5"
+  local status="$6"
+  local main_image_url="$7"
+  local image_urls_json="$8"
 
-  python3 - "$title" "$city" "$price" "$broker_id" "$type" "$status" <<'PY'
-import json, sys
+  python3 - "$title" "$city" "$price" "$broker_id" "$type" "$status" "$main_image_url" "$image_urls_json" <<'PY'
+import json
+import sys
 
-title, city, price, broker_id, ptype, status = sys.argv[1:]
+title, city, price, broker_id, ptype, status, main_image_url, image_urls_json = sys.argv[1:]
+
+main_image_url = None if main_image_url == "" else main_image_url
+image_urls = json.loads(image_urls_json)
 
 print(json.dumps({
   "title": title,
@@ -102,7 +115,8 @@ print(json.dumps({
   "bedrooms": 2,
   "bathrooms": 1,
   "area": 55.5,
-  "mainImageUrl": None,
+  "mainImageUrl": main_image_url,
+  "imageUrls": image_urls,
   "brokerId": int(broker_id)
 }))
 PY
@@ -149,6 +163,25 @@ cities=("Oslo" "Bergen" "Stavanger" "Trondheim" "Drammen" "Elverum")
 types=("Apartment" "House" "Commercial")
 statuses=("Active" "Sold")
 
+PROPERTY1_IMAGE_1="https://commons.wikimedia.org/wiki/Special:Redirect/file/Modern_apartment_building_%28Unsplash%29.jpg"
+PROPERTY1_IMAGE_2="https://commons.wikimedia.org/wiki/Special:Redirect/file/Brown_apartment_building_%28Unsplash%29.jpg"
+PROPERTY1_IMAGE_3="https://commons.wikimedia.org/wiki/Special:Redirect/file/White_apartment_building_%28Unsplash%29.jpg"
+PROPERTY1_IMAGE_4="https://commons.wikimedia.org/wiki/Special:Redirect/file/Apartment_Building_Yellow_Wall_%28Unsplash%29.jpg"
+
+PROPERTY1_IMAGES_JSON="$(python3 - <<'PY'
+import json
+print(json.dumps([
+  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Modern_apartment_building_%28Unsplash%29.jpg",
+  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Brown_apartment_building_%28Unsplash%29.jpg",
+  "https://commons.wikimedia.org/wiki/Special:Redirect/file/White_apartment_building_%28Unsplash%29.jpg",
+  "https://commons.wikimedia.org/wiki/Special:Redirect/file/Apartment_Building_Yellow_Wall_%28Unsplash%29.jpg"
+]))
+PY
+)"
+
+PROPERTY2_MAIN_IMAGE="https://commons.wikimedia.org/wiki/Special:Redirect/file/Architecture-villa-house-building-home-construction-542165.jpg"
+EMPTY_IMAGES_JSON='[]'
+
 neutral "Creating ${SEED_PROPERTIES_COUNT} properties"
 
 created_ids=()
@@ -172,9 +205,20 @@ for broker_index in "${!broker_ids[@]}"; do
 
   for ((j=1; j<=per_broker; j++)); do
     city="${cities[$(( (i-1) % ${#cities[@]} ))]}"
-    price=$(( 2500000 + (i * 150000) ))
+    price=$((2500000 + (i * 150000)))
     type="${types[$(( (i-1) % ${#types[@]} ))]}"
     status="${statuses[$(( (i-1) % ${#statuses[@]} ))]}"
+
+    main_image_url=""
+    image_urls_json="${EMPTY_IMAGES_JSON}"
+
+    if [[ "${i}" -eq 1 ]]; then
+      main_image_url="${PROPERTY1_IMAGE_1}"
+      image_urls_json="${PROPERTY1_IMAGES_JSON}"
+    elif [[ "${i}" -eq 2 ]]; then
+      main_image_url="${PROPERTY2_MAIN_IMAGE}"
+      image_urls_json="${EMPTY_IMAGES_JSON}"
+    fi
 
     resp="$(http_post_json "${BACKEND_URL}/api/properties" "$(
       create_property_payload \
@@ -183,7 +227,9 @@ for broker_index in "${!broker_ids[@]}"; do
         "${price}" \
         "${broker_id}" \
         "${type}" \
-        "${status}"
+        "${status}" \
+        "${main_image_url}" \
+        "${image_urls_json}"
     )")"
 
     assert_json "POST /api/properties #${i}" "${resp}"
@@ -191,7 +237,7 @@ for broker_index in "${!broker_ids[@]}"; do
     id="$(printf '%s' "${resp}" | json_field "id")"
     created_ids+=("${id}")
 
-    i=$((i+1))
+    i=$((i + 1))
   done
 done
 

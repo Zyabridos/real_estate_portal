@@ -12,7 +12,7 @@ import type { UIState } from "@/shared/types/ui";
 let activeListController: AbortController | null = null;
 let activeDetailsController: AbortController | null = null;
 
-const agenciesStore = defineStore("agencies", {
+export const useAgenciesStore = defineStore("agencies", {
   state: () => ({
     agencies: [] as AgencyListItemDto[],
     lastPagedResult: null as PagedResultDto<AgencyListItemDto> | null,
@@ -27,26 +27,13 @@ const agenciesStore = defineStore("agencies", {
   }),
 
   getters: {
-    paging: (s) => ({
-      page: s.lastPagedResult?.page ?? 1,
-      pageSize: s.lastPagedResult?.pageSize ?? 20,
-      totalItems: s.lastPagedResult?.totalItems ?? 0,
-      totalPages: s.lastPagedResult?.totalPages ?? 0,
-    }),
-
-    isLoading: (s) => s.listStatus === "loading",
-
     getById: (s) => (id: number) => (id > 0 ? s.detailsById[id] ?? null : null),
-
-    getDetailsStatus: (s) => (id: number) =>
-      id > 0 ? s.detailsStatusById[id] ?? "idle" : "idle",
-
-    getDetailsError: (s) => (id: number) =>
-      id > 0 ? s.detailsErrorById[id] ?? null : null,
+    getDetailsStatus: (s) => (id: number) => (id > 0 ? s.detailsStatusById[id] ?? "idle" : "idle"),
+    getDetailsError: (s) => (id: number) => (id > 0 ? s.detailsErrorById[id] ?? null : null),
   },
 
   actions: {
-    async fetchAgenciesList(query: AgenciesListQuery = {}) {
+    async fetchList(query: AgenciesListQuery = {}) {
       activeListController?.abort();
       const controller = new AbortController();
       activeListController = controller;
@@ -73,7 +60,7 @@ const agenciesStore = defineStore("agencies", {
     },
 
     async refreshList() {
-      return this.fetchAgenciesList(this.lastQuery);
+      return this.fetchList(this.lastQuery);
     },
 
     cancelListRequest() {
@@ -82,9 +69,7 @@ const agenciesStore = defineStore("agencies", {
     },
 
     async fetchById(id: number, opts?: { force?: boolean }) {
-      if (!Number.isInteger(id) || id <= 0) {
-        return;
-      }
+      if (!Number.isInteger(id) || id <= 0) return;
 
       if (!opts?.force && this.detailsById[id]) {
         this.detailsStatusById[id] = "success";
@@ -119,22 +104,5 @@ const agenciesStore = defineStore("agencies", {
       activeDetailsController?.abort();
       activeDetailsController = null;
     },
-
-    reset() {
-      this.cancelListRequest();
-      this.cancelDetailsRequest();
-
-      this.agencies = [];
-      this.lastPagedResult = null;
-      this.lastQuery = {} as AgenciesListQuery;
-      this.listStatus = "idle";
-      this.listError = null;
-
-      this.detailsById = {} as Record<number, AgencyDetailsDto>;
-      this.detailsStatusById = {} as Record<number, UIState>;
-      this.detailsErrorById = {} as Record<number, ApiError | null>;
-    },
   },
 });
-
-export default agenciesStore;

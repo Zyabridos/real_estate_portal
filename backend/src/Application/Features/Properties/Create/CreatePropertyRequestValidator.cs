@@ -36,5 +36,13 @@ public sealed class CreatePropertyRequestValidator : AbstractValidator<CreatePro
         
         RuleFor(x => x.Bathrooms)
             .GreaterThan(0);
+        
+        RuleForEach(x => x.ImageUrls)
+            .NotEmpty()
+            .MaximumLength(1000);
+
+        RuleFor(x => x.ImageUrls)
+            .Must(urls => urls is null || urls.Count <= 20)
+            .WithMessage("No more than 20 gallery images are allowed.");
     }
 }

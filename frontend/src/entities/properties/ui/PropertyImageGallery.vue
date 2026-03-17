@@ -20,6 +20,8 @@ type Props = {
 const props = defineProps<Props>();
 
 const activeIndex = ref(0);
+const isCurrentImageLoading = ref(true);
+const hasCurrentImageError = ref(false);
 
 const safeImages = computed(() =>
   (props.images ?? []).filter(
@@ -47,6 +49,15 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => currentImage.value?.src,
+  () => {
+    isCurrentImageLoading.value = !!currentImage.value;
+    hasCurrentImageError.value = false;
+  },
+  { immediate: true },
+);
+
 function clampIndex(index: number): number {
   return Math.max(0, Math.min(index, safeImages.value.length - 1));
 }
@@ -63,6 +74,16 @@ function goPrev(): void {
 function goNext(): void {
   if (!hasMultipleImages.value) return;
   goTo(activeIndex.value + 1);
+}
+
+function onImageLoad(): void {
+  isCurrentImageLoading.value = false;
+  hasCurrentImageError.value = false;
+}
+
+function onImageError(): void {
+  isCurrentImageLoading.value = false;
+  hasCurrentImageError.value = true;
 }
 </script>
 
@@ -83,12 +104,48 @@ function goNext(): void {
       />
 
       <div class="relative aspect-[5/4] w-full">
-        <img
-          v-if="currentImage"
-          :src="currentImage.src"
-          :alt="currentImage.alt"
-          class="h-full w-full object-cover"
-        />
+        <template v-if="currentImage && !hasCurrentImageError">
+          <div
+            v-if="isCurrentImageLoading"
+            class="absolute inset-0 z-10 grid place-items-center bg-slate-100/85 backdrop-blur-sm"
+          >
+            <div class="flex flex-col items-center gap-3">
+              <div class="relative h-14 w-14">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-200" />
+                <div class="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-emerald-500 border-r-emerald-300" />
+                <div class="absolute inset-2 rounded-full bg-white/90" />
+              </div>
+
+              <div class="h-2 w-24 rounded-full bg-slate-200" />
+            </div>
+          </div>
+
+          <img
+            :key="currentImage.src"
+            :src="currentImage.src"
+            :alt="currentImage.alt"
+            class="h-full w-full object-cover transition-opacity duration-300"
+            :class="isCurrentImageLoading ? 'opacity-0' : 'opacity-100'"
+            @load="onImageLoad"
+            @error="onImageError"
+          />
+        </template>
+
+        <div
+          v-else
+          class="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#f8fafc_0%,#eef2f7_100%)]"
+        >
+          <div class="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-slate-300 bg-white/80 px-8 py-10 shadow-sm backdrop-blur-sm">
+            <div class="grid h-16 w-16 place-items-center rounded-2xl bg-slate-100 shadow-inner">
+              <div class="h-8 w-8 rounded-xl border-2 border-slate-300" />
+            </div>
+
+            <div class="space-y-2 text-center">
+              <div class="mx-auto h-2 w-28 rounded-full bg-slate-200" />
+              <div class="mx-auto h-2 w-20 rounded-full bg-slate-100" />
+            </div>
+          </div>
+        </div>
 
         <div
           v-if="safeBadges.length"
@@ -106,16 +163,17 @@ function goNext(): void {
         </div>
 
         <div
+          v-if="safeImages.length"
           class="absolute bottom-3 right-3 rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-xs font-semibold text-slate-800 shadow-sm backdrop-blur"
           :aria-label="$t('properties:card.gallery.imageIndexAriaLabel')"
         >
-          {{ safeImages.length ? `${activeIndex + 1} / ${safeImages.length}` : "—" }}
+          {{ `${activeIndex + 1} / ${safeImages.length}` }}
         </div>
 
         <template v-if="hasMultipleImages">
           <button
             type="button"
-            class="absolute left-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/90 text-lg text-slate-700 shadow-sm backdrop-blur transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+            class="absolute left-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/90 text-lg text-slate-700 shadow-sm backdrop-blur transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             :aria-label="$t('properties:card.gallery.previousImage')"
             :disabled="activeIndex === 0"
             @click="goPrev"
@@ -125,7 +183,7 @@ function goNext(): void {
 
           <button
             type="button"
-            class="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/90 text-lg text-slate-700 shadow-sm backdrop-blur transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+            class="absolute right-3 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white/90 text-lg text-slate-700 shadow-sm backdrop-blur transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             :aria-label="$t('properties:card.gallery.nextImage')"
             :disabled="activeIndex === safeImages.length - 1"
             @click="goNext"

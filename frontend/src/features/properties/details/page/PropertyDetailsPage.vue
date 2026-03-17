@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import i18n from "@/shared/i18n";
 import routes from "@/shared/routes";
+import { parsePositiveIntParam } from "@/shared/utils/parsePositiveIntParam";
 
 import { propertiesApi } from "@/features/properties/api/propertiesApi";
 import PropertyDetailsCard from "@/entities/properties/ui/PropertyDetailsCard.vue";
@@ -17,16 +18,14 @@ import type { PropertyDetailsDto } from "@/features/properties/api/dtos/property
 const route = useRoute();
 const router = useRouter();
 
+const backToList = routes.app.properties.list();
+
 const state = ref<UIState>("loading");
 const error = ref<ApiError | null>(null);
 const data = ref<PropertyDetailsDto | null>(null);
 
 const rawId = computed(() => String(route.params.id ?? "").trim());
-
-const id = computed<number>(() => {
-  const parsed = Number(rawId.value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
-});
+const id = computed<number>(() => parsePositiveIntParam(route.params.id));
 
 const showInvalidId = computed(() => id.value <= 0);
 
@@ -39,18 +38,21 @@ const showGenericError = computed(
 );
 
 const pageTitle = computed(() => {
-  const fallback = i18n.t("properties:details.titleFallback");
+  const fallback = i18n.t("properties:card.titleFallback");
   const title = data.value?.title?.trim();
 
   return title ? title : fallback;
 });
 
 const canCreateLead = computed<boolean>(() => {
+  const propertyStatus = data.value?.status?.trim().toLowerCase();
+
   return (
     state.value === "success" &&
     !!data.value &&
     Number.isInteger(data.value.id) &&
-    data.value.id > 0
+    data.value.id > 0 &&
+    propertyStatus !== "sold"
   );
 });
 
@@ -81,7 +83,14 @@ const errorMessage = computed(() => {
   return error.value?.message ?? i18n.t("errors:common.message.unexpected");
 });
 
-async function load(force = false): Promise<void> {
+function toNotFoundError(): ApiError {
+  return {
+    kind: "NotFound",
+    message: "",
+  } as ApiError;
+}
+
+async function load(): Promise<void> {
   state.value = "loading";
   error.value = null;
   data.value = null;
@@ -93,6 +102,13 @@ async function load(force = false): Promise<void> {
 
   try {
     const res = await propertiesApi.getById(id.value);
+
+    if (!res || !Number.isInteger(res.id) || res.id <= 0) {
+      error.value = toNotFoundError();
+      state.value = "error";
+      return;
+    }
+
     data.value = res;
     state.value = "success";
   } catch (e) {
@@ -106,16 +122,16 @@ async function load(force = false): Promise<void> {
 }
 
 function goBack(): void {
-  router.push(routes.app.properties.list());
+  router.push(backToList);
 }
 
-onMounted(() => {
-  void load(false);
-});
-
-watch(id, () => {
-  void load(false);
-});
+watch(
+  id,
+  () => {
+    void load();
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -162,7 +178,7 @@ watch(id, () => {
             type="button"
             class="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             data-testid="refresh-button"
-            @click="load(true)"
+            @click="load"
             :aria-label="$t('common:actions.refreshAria')"
           >
             {{ $t("common:actions.refresh") }}
@@ -176,7 +192,7 @@ watch(id, () => {
           entity="property"
           variant="invalidId"
           :requested-id="rawId"
-          :back-to="routes.app.properties.list()"
+          :back-to="backToList"
         />
 
         <EntityDetailsErrorState
@@ -184,14 +200,15 @@ watch(id, () => {
           entity="property"
           variant="notFound"
           :requested-id="rawId"
-          :back-to="routes.app.properties.list()"
-          :on-refresh="() => load(true)"
+          :back-to="backToList"
+          :on-refresh="() => load()"
         />
 
         <LoadingState
           v-else-if="state === 'loading'"
-          data-testid="loading-state"
-          :title="$t('states:loading.propertyDetailsTitle')"
+          testId="properties-loading"
+          :title="$t('common:states.loading.genericTitle')"
+          :subtitle="$t('properties:card.subtitle')"
         />
 
         <ErrorState
@@ -199,7 +216,7 @@ watch(id, () => {
           data-testid="error-state"
           :title="errorTitle"
           :message="errorMessage"
-          :onRetry="() => load(true)"
+          :onRetry="() => load()"
         />
 
         <PropertyDetailsCard
