@@ -11,7 +11,6 @@ import type { BrokerDetailsDto } from "@/features/brokers/api/dtos/broker-detail
 import type { BrokerListItemDto } from "@/features/brokers/api/dtos/broker-list-item.dto";
 
 export const brokersApi = {
-  // GET /api/brokers
   async list(
     query: BrokersListQuery = {},
     config?: RequestConfig
@@ -29,8 +28,7 @@ export const brokersApi = {
     );
   },
 
-  // GET /api/brokers/{id}
-  async getById(id: string): Promise<BrokerDetailsDto> {
+  async getById(id: number): Promise<BrokerDetailsDto> {
     if (!id) {
       throw new Error('brokersApi.getById: id is required');
     }

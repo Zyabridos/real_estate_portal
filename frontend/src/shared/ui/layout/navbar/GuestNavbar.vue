@@ -1,10 +1,11 @@
+<!-- GuestNavbar.vue -->
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 import routes from "@/shared/routes";
 import LanguageSwitcher from "@/shared/ui/LanguageSwitcher.vue";
 
 const routerLinkClasses =
-  "rounded-lg text-2xl px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-indigo-800";
+  "rounded-lg px-2.5 text-2xl text-slate-700 hover:bg-slate-100 hover:text-indigo-800";
 
 const activeClass =
   "bg-slate-900 text-white hover:bg-slate-900 hover:text-white";
@@ -24,8 +25,11 @@ const navItems: NavItem[] = [
 </script>
 
 <template>
-  <nav class="flex h-16 items-center justify-between gap-2 text-sm">
-    <div class="flex gap-4">
+  <nav
+    class="flex h-14 items-center justify-between gap-1.5 text-sm"
+    :aria-label="$t('navigation:mainAriaLabel')"
+  >
+    <div class="flex gap-3">
       <RouterLink
         v-for="item in navItems"
         :key="item.to"
@@ -37,7 +41,7 @@ const navItems: NavItem[] = [
       </RouterLink>
     </div>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
       <LanguageSwitcher />
     </div>
   </nav>

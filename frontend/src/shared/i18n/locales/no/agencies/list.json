@@ -1,0 +1,8 @@
+{
+  "title": "Meglerkontorer",
+  "subtitle": "Bla gjennom meglerkontorer fra backend.",
+  "ariaLabel": "Liste over meglerkontorer",
+  "cardsAriaLabel": "Kort for meglerkontorer",
+  "pageActionsAriaLabel": "Handlinger for siden med meglerkontorer",
+  "cardAriaLabel": "Kort for meglerkontor {{id}}"
+}

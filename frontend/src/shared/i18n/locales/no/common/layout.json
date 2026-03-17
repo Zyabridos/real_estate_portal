@@ -1,0 +1,14 @@
+{
+  "header": {
+    "ariaLabel": "Applikasjonshode",
+    "logoLinkAria": "Gå til forsiden",
+    "logoAlt": "Real Estate Portal-logo",
+    "loadingAria": "Global lasteindikator"
+  },
+  "main": {
+    "ariaLabel": "Hovedinnhold"
+  },
+  "error": {
+    "title": "Applikasjonsfeil"
+  }
+}

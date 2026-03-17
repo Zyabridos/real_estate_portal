@@ -8,9 +8,6 @@ public sealed class CreateBrokerRequestValidator : AbstractValidator<CreateBroke
 {
     public CreateBrokerRequestValidator()
     {
-        RuleFor(x => x.AgencyId)
-            .NotEmpty();
-
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .MinimumLength(2)

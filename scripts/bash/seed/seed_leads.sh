@@ -24,14 +24,20 @@ if [[ ! -f "${seed_env}" ]]; then
   exit 1
 fi
 
+# shellcheck disable=SC1090
 source "${seed_env}"
 
-: "${PROPERTY_ID:?PROPERTY_ID missing}"
+: "${PROPERTY1_ID:?PROPERTY1_ID missing}"
+: "${PROPERTY2_ID:?PROPERTY2_ID missing}"
+: "${PROPERTY3_ID:?PROPERTY3_ID missing}"
 
 assert_json() {
   local label="$1"
   local body="$2"
-  if [[ -z "$body" ]]; then error "[seed] ERROR: ${label} returned empty response."; exit 1; fi
+  if [[ -z "$body" ]]; then
+    error "[seed] ERROR: ${label} returned empty response."
+    exit 1
+  fi
   if ! printf '%s' "$body" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
     error "[seed] ERROR: ${label} did not return JSON. Response was:"
     printf '%s\n' "$body" | head -n 80
@@ -45,7 +51,7 @@ import sys, json
 data = json.load(sys.stdin)
 for x in (data.get("items") or []):
     _id = x.get("id")
-    if _id:
+    if _id is not None:
         print(_id)
 '
 }
@@ -54,18 +60,43 @@ http_post_json() {
   local url="$1"
   local payload="$2"
   local resp status
+
   resp="$(curl -sS -i -X POST "$url" -H "Content-Type: application/json" -d "$payload")"
   status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
+
   if [[ "$status" =~ ^2 ]]; then
     printf '%s' "$resp" | awk 'BEGIN{p=0} /^\r?$/{p=1;next} {if(p) print}'
     return 0
   fi
+
   error "[seed] POST failed: $url"
   warn "----- payload -----"
   printf '%s\n' "$payload" | head -n 200
   warn "----- response -----"
   printf '%s\n' "$resp" | head -n 120
   return 22
+}
+
+lead_payload() {
+  local property_id="$1" full_name="$2" email="$3" phone="$4" message="$5"
+
+  python3 - "$property_id" "$full_name" "$email" "$phone" "$message" <<'PY'
+import json, sys
+
+property_id = int(sys.argv[1])
+full_name = sys.argv[2]
+email = sys.argv[3].strip() or None
+phone = sys.argv[4].strip() or None
+message = sys.argv[5]
+
+print(json.dumps({
+  "propertyId": property_id,
+  "fullName": full_name,
+  "email": email,
+  "phoneNumber": phone,
+  "message": message
+}))
+PY
 }
 
 neutral "Seeding leads"
@@ -91,32 +122,16 @@ else
   warn "[seed] No leads to clear"
 fi
 
-lead_payload() {
-  local full_name="$1" email="$2" phone="$3" message="$4"
-  python3 - <<PY
-import json
-email = "${email}".strip() or None
-phone = "${phone}".strip() or None
-print(json.dumps({
-  "propertyId": "${PROPERTY_ID}",
-  "fullName": "${full_name}",
-  "email": email,
-  "phoneNumber": phone,
-  "message": "${message}"
-}))
-PY
-}
-
-neutral "Creating leads (linked to propertyId=${PROPERTY_ID})"
-http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "Seed User EmailOnly" "seed.emailonly@example.com" "" "Seed lead (email only).")" >/dev/null
-http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "Seed User PhoneOnly" "" "+47 999 88 777" "Seed lead (phone only).")" >/dev/null
-http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "Seed User Both" "seed.both@example.com" "+47 111 22 333" "Seed lead (both email and phone).")" >/dev/null
+neutral "Creating 3 leads linked to 3 different properties"
+http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY1_ID}" "Seed User EmailOnly" "seed.emailonly@example.com" "" "Seed lead (email only).")" >/dev/null
+http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY2_ID}" "Seed User PhoneOnly" "" "+4799988777" "Seed lead (phone only).")" >/dev/null
+http_post_json "${BACKEND_URL}/api/leads" "$(lead_payload "${PROPERTY3_ID}" "Seed User Both" "seed.both@example.com" "+4711122333" "Seed lead (both email and phone).")" >/dev/null
 
 success "[seed] Leads created"
 
 neutral "Verifying leads list"
 check="$(curl -fsS "${BACKEND_URL}/api/leads?page=1&pageSize=10")"
 assert_json "GET /api/leads verify" "$check"
-printf '%s' "$check" | python3 -c 'import sys,json; d=json.load(sys.stdin); print("[seed] leads.totalCount =", d.get("totalCount"))'
+printf '%s' "$check" | python3 -c 'import sys,json; d=json.load(sys.stdin); print("[seed] leads.totalItems =", d.get("totalItems"))'
 
 success "[seed] Seed completed"

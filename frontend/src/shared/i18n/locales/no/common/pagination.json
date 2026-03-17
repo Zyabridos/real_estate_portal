@@ -1,0 +1,11 @@
+{
+  "ariaLabel": "Paginering",
+  "prev": "Forrige",
+  "next": "Neste",
+  "pageOf": "Side {{page}} / {{total}}",
+  "page": "Side",
+  "pageSize": "Sidestørrelse",
+  "total": "Totalt",
+  "id": "ID",
+  "idShort": "ID"
+}

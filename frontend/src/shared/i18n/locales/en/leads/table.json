@@ -1,0 +1,20 @@
+{
+  "captionGrouped": "Leads grouped by property",
+  "captionList": "Leads list",
+  "columns": {
+    "fullName": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "status": "Status",
+    "created": "Created",
+    "updated": "Updated",
+    "property": "Property",
+    "actions": "Actions"
+  },
+  "propertyFallback": "Property",
+  "openPropertyAria": "Open property {{title}}",
+  "openMessageAria": "Open message for {{name}}",
+  "actions": {
+    "comment": "Comment"
+  }
+}

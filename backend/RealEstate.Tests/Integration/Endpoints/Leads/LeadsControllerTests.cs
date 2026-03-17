@@ -1,17 +1,12 @@
 using System.Net;
-using System.Net.Http.Json;
 using FluentAssertions;
 using MongoDB.Driver;
 using RealEstate.Application.Common;
-using RealEstate.Application.Features.Leads.Create;
 using RealEstate.Application.Features.Leads.GetById;
 using RealEstate.Application.Features.Leads.List;
-using RealEstate.Application.Features.Leads.Update;
 using RealEstate.Domain.Entities;
 using RealEstate.TestData;
-using RealEstate.TestData.Fixtures;
 using RealEstate.TestData.Mongo;
-using RealEstate.Api.Tests.Integration;
 using RealEstate.Tests.Integration.Infrastructure;
 using Xunit;
 
@@ -30,12 +25,28 @@ public sealed class LeadsControllerTests : IntegrationTestBase
     [Fact]
     public async Task GetList_returns_200_and_paged_contract()
     {
-        var propertyId = Guid.NewGuid();
+        const int propertyId = 100;
+        const int agencyId = 10;
+        const int brokerId = 20;
 
         await _leads.InsertManyAsync(new[]
         {
-            TestLeads.Create(propertyId, fullName: "Cercei Lannister", email: "cercei@example.com"),
-            TestLeads.Create(propertyId, fullName: "Jane Roe", email: "jane.roe@example.com"),
+            TestLeads.Create(
+                id: 1,
+                agencyId: agencyId,
+                brokerId: brokerId,
+                propertyId: propertyId,
+                fullName: "Cercei Lannister",
+                email: "cercei@example.com"
+            ),
+            TestLeads.Create(
+                id: 2,
+                agencyId: agencyId,
+                brokerId: brokerId,
+                propertyId: propertyId,
+                fullName: "Jane Roe",
+                email: "jane.roe@example.com"
+            ),
         });
 
         var response = await Ctx.Client.GetAsync("/api/leads?page=1&pageSize=10");
@@ -53,7 +64,15 @@ public sealed class LeadsControllerTests : IntegrationTestBase
     [Fact]
     public async Task GetById_existing_returns_200()
     {
-        var lead = TestLeads.Create(Guid.NewGuid(), fullName: "Anna Test", email: "anna.test@example.com");
+        var lead = TestLeads.Create(
+            id: 1,
+            agencyId: 10,
+            brokerId: 20,
+            propertyId: 100,
+            fullName: "Anna Test",
+            email: "anna.test@example.com"
+        );
+
         await _leads.InsertOneAsync(lead);
 
         var response = await Ctx.Client.GetAsync($"/api/leads/{lead.Id}");
@@ -68,13 +87,13 @@ public sealed class LeadsControllerTests : IntegrationTestBase
     [Fact]
     public async Task GetById_missing_returns_404()
     {
-        var response = await Ctx.Client.GetAsync($"/api/leads/{Guid.NewGuid()}");
+        var response = await Ctx.Client.GetAsync("/api/leads/999999");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Theory]
-    [InlineData("not-a-guid")]
-    public async Task GetById_invalid_guid_returns_400(string rawId)
+    [InlineData("not-an-int")]
+    public async Task GetById_invalid_id_returns_400(string rawId)
     {
         var response = await Ctx.Client.GetAsync($"/api/leads/{rawId}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

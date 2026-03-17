@@ -20,7 +20,7 @@ public sealed class AgencyRepository : IAgencyRepository
     {
         _collection = db.GetCollection<Agency>(MongoCollectionNames.Agencies);
     }
-    public Task<Agency?> GetById(Guid id, CancellationToken ct) =>
+    public Task<Agency?> GetById(int id, CancellationToken ct) =>
         _collection.Find(x => x.Id == id).FirstOrDefaultAsync(ct);
 
     public async Task<IReadOnlyList<Agency>> GetAllAsync(CancellationToken ct) =>
@@ -46,7 +46,7 @@ public sealed class AgencyRepository : IAgencyRepository
         return res.IsAcknowledged && res.MatchedCount == 1;
     }
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
         var res = await _collection.DeleteOneAsync(x => x.Id == id, ct);
         return res.IsAcknowledged && res.DeletedCount == 1;

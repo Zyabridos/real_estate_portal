@@ -1,0 +1,17 @@
+{
+  "contactNotAvailable": "Kontaktinformasjon er ikke tilgjengelig.",
+  "agencyIdLabel": "Byrå-ID",
+  "genderLabel": "Kjønn",
+  "brokerIdLabel": "Megler-ID",
+  "emailLabel": "E-post",
+  "phoneLabel": "Telefon",
+  "openDetailsAria": "Åpne meglerdetaljer: {{name}}",
+  "details": {
+    "subtitle": "Data av megleren fetched fra backend",
+    "emptyValue": "—",
+    "experienceTitle": "Erfaring i byrået",
+    "experienceSince": "Har jobbet i byrået siden",
+    "lastUpdatedTitle": "Sist oppdatert",
+    "profileUpdated": "Profilen ble oppdatert"
+  }
+}

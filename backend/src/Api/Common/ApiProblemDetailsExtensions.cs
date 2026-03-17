@@ -1,32 +1,40 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace RealEstate.Api.Common;
 
 public static class ApiProblemDetailsExtensions
 {
-    public static ObjectResult InvalidGuidId(this ControllerBase controller, string entityName, string rawId) =>
-        controller.Problem(
-            title: "Invalid id",
-            detail: $"{entityName} id must be a valid GUID. Value was '{rawId}'.",
-            statusCode: StatusCodes.Status400BadRequest);
-
-    public static ObjectResult EntityNotFound(this ControllerBase controller, string entityName, string rawId) =>
-        controller.Problem(
-            title: "Not found",
-            detail: $"{entityName} '{rawId}' was not found.",
-            statusCode: StatusCodes.Status404NotFound);
-    
-    public static ObjectResult? ParseGuidOrProblem(
+    public static ObjectResult? ParseIdOrProblem(
         this ControllerBase controller,
         string rawId,
         string entityName,
-        out Guid id)
+        out int id)
     {
-        if (Guid.TryParse(rawId, out id))
-            return null;
-
         id = default;
-        return controller.InvalidGuidId(entityName, rawId);
+
+        if (string.IsNullOrWhiteSpace(rawId) || !int.TryParse(rawId, out id) || id <= 0)
+        {
+            return controller.BadRequest(new ProblemDetails
+            {
+                Title = "Invalid id",
+                Detail = $"{entityName} id must be a positive integer.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        return null;
+    }
+
+    public static NotFoundObjectResult EntityNotFound(
+        this ControllerBase controller,
+        string entityName,
+        object id)
+    {
+        return controller.NotFound(new ProblemDetails
+        {
+            Title = $"{entityName} not found",
+            Detail = $"{entityName} with id '{id}' was not found.",
+            Status = StatusCodes.Status404NotFound
+        });
     }
 }

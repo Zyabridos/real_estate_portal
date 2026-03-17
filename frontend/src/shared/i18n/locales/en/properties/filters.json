@@ -1,0 +1,13 @@
+{
+  "filtersAriaLabel": "Property filters",
+  "cityLabel": "City",
+  "cityPlaceholder": "Enter city",
+  "typeLabel": "Type",
+  "statusLabel": "Status",
+  "anyType": "Any type",
+  "anyStatus": "Any status",
+  "priceRangeLabel": "Price range",
+  "minPriceLabel": "Min price",
+  "maxPriceLabel": "Max price",
+  "priceValueAriaLabel": "Property price: {value}"
+}

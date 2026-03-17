@@ -1,6 +1,8 @@
+export type BrokerGender = "Unspecified" | "male" | "female" | "other";
+
 export type BrokerDetailsDto = {
-  id: string
-  agencyId: string
+  id: number
+  agencyId: number
   firstName: string
   lastName: string
   email?: string
@@ -8,4 +10,5 @@ export type BrokerDetailsDto = {
   photoUrl?: string
   createdAt: string
   updatedAt: string
+  gender?: BrokerGender
 }

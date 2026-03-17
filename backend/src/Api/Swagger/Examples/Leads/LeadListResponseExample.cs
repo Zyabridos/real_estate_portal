@@ -14,8 +14,10 @@ public sealed class LeadListResponseExample : IExamplesProvider<PagedResult<Lead
             Items =
             [
                 new LeadListItemDto(
-                    Id: Guid.Parse("22222222-1111-1111-1111-222222222222"),
-                    PropertyId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                    Id: 1,
+                    AgencyId: 1,
+                    BrokerId: 1002,
+                    PropertyId: 123,
                     FullName: "Rob Stark",
                     Email: "rob.stark@winterfale.com",
                     PhoneNumber: "+47 111 22 333",
@@ -24,8 +26,10 @@ public sealed class LeadListResponseExample : IExamplesProvider<PagedResult<Lead
                     UpdatedAt: DateTime.Parse("2026-01-11T13:00:00Z")
                 ),
                 new LeadListItemDto(
-                    Id: Guid.Parse("33333333-1111-1111-1111-333333331111"),
-                    PropertyId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                    Id: 2,
+                    AgencyId: 2,
+                    BrokerId: 1008,
+                    PropertyId: 124,
                     FullName: "Arya Stark",
                     Email: "arya.stark@winterfale.com",
                     PhoneNumber: "+47 111 22 333",

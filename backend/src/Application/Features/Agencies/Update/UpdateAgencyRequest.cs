@@ -1,7 +1,7 @@
 namespace RealEstate.Application.Features.Agencies.Update;
 
 public sealed record UpdateAgencyRequest(
-    Guid Id,
+    int Id,
     string Name,
     string PhoneNumber,
     string City, 

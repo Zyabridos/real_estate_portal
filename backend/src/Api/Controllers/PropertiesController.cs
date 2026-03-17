@@ -45,10 +45,10 @@ public sealed class PropertiesController : ControllerBase
 	[SwaggerResponseExample(StatusCodes.Status200OK, typeof(PropertyDetailsResponseExample))]
 	public async Task<ActionResult<PropertyDetailsDto>> GetById(string id, CancellationToken ct)
 	{
-        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        var bad = this.ParseIdOrProblem(id, EntityName, out var propertyId);
         if (bad is not null) return bad;
 
-        var dto = await _service.GetByIdAsync(guid, ct);
+        var dto = await _service.GetByIdAsync(propertyId, ct);
         if (dto is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(dto);
@@ -80,10 +80,10 @@ public sealed class PropertiesController : ControllerBase
         [FromBody] UpdatePropertyRequest request,
         CancellationToken ct)
     {
-        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        var bad = this.ParseIdOrProblem(id, EntityName, out var propertyId);
         if (bad is not null) return bad;
 
-        var updated = await _service.UpdateAsync(guid, request, ct);
+        var updated = await _service.UpdateAsync(propertyId, request, ct);
         if (updated is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(updated);
@@ -96,10 +96,10 @@ public sealed class PropertiesController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(string id, CancellationToken ct)
     {
-        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        var bad = this.ParseIdOrProblem(id, EntityName, out var propertyId);
         if (bad is not null) return bad;
 
-        var deleted = await _service.DeleteAsync(guid, ct);
+        var deleted = await _service.DeleteAsync(propertyId, ct);
         if (!deleted) return this.EntityNotFound(EntityName, id);
 
         return NoContent();

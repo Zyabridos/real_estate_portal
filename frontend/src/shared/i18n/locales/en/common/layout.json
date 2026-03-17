@@ -1,0 +1,14 @@
+{
+  "header": {
+  "ariaLabel": "Application header",
+    "logoLinkAria": "Go to home page",
+    "logoAlt": "Real Estate Portal logo",
+    "loadingAria": "Global loading indicator"
+},
+  "main": {
+  "ariaLabel": "Main content"
+},
+  "error": {
+  "title": "Application error"
+}
+}

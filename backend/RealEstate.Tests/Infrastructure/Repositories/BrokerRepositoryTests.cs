@@ -28,7 +28,7 @@ public sealed class BrokerRepositoryTests : MongoDbTestBase
     {
         var repo = CreateRepo();
 
-        var id = Guid.NewGuid();
+        var id = 1001;
 
         var entity = TestBrokers.Create(
             id: id,

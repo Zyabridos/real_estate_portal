@@ -1,3 +1,4 @@
+using System.Threading;
 using RealEstate.Domain.Entities;
 using RealEstate.Domain.Enums.Properties;
 
@@ -5,21 +6,24 @@ namespace RealEstate.TestData;
 
 public static class TestProperties
 {
-    private static readonly Guid DefaultBrokerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+    private static int _propertyId = 1000;
 
     public static Property Create(
-        Guid? id = null,
-        string title = "Test Property Titile",
+        int? id = null,
+        int agencyId = 1,
+        int brokerId = 1,
+        string title = "Test Property Title",
         string city = "Trondheim",
         decimal price = 4_500_000m,
         PropertyType type = PropertyType.Apartment,
         PropertyStatus status = PropertyStatus.Active,
-        DateTime? createdAt = null,
-        Guid? brokerId = null)
+        DateTime? createdAt = null)
     {
         return new Property
         {
-            Id = id ?? Guid.NewGuid(),
+            Id = id ?? Interlocked.Increment(ref _propertyId),
+            AgencyId = agencyId,
+            BrokerId = brokerId,
             Title = title,
             Description = "Some description",
             Address = "Example street 1",
@@ -31,14 +35,14 @@ public static class TestProperties
             Area = 55m,
             Status = status,
             MainImageUrl = "https://example.com/image.jpg",
-            BrokerId = brokerId ?? DefaultBrokerId,
             CreatedAt = createdAt ?? DateTime.UtcNow
         };
     }
 
     public static Property CreateForBroker(
-        Guid brokerId,
-        Guid? id = null,
+        int brokerId,
+        int agencyId = 1,
+        int? id = null,
         string title = "Broker Property",
         string city = "Trondheim",
         decimal price = 4_500_000m,
@@ -48,13 +52,14 @@ public static class TestProperties
     {
         return Create(
             id: id,
+            agencyId: agencyId,
+            brokerId: brokerId,
             title: title,
             city: city,
             price: price,
             type: type,
             status: status,
-            createdAt: createdAt,
-            brokerId: brokerId
+            createdAt: createdAt
         );
     }
 }

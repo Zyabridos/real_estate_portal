@@ -26,6 +26,7 @@
   when: ansible_check_mode
 
 - name: Apply Mongo secret
+  no_log: true
   ansible.builtin.shell: |
     set -euo pipefail
     kubectl --kubeconfig {{ local_kubeconfig_path }} -n {{ k8s_namespace }} apply -f - <<'YAML'
@@ -37,6 +38,7 @@
   when: not ansible_check_mode
 
 - name: Apply API secret
+  no_log: true
   ansible.builtin.shell: |
     set -euo pipefail
     kubectl --kubeconfig {{ local_kubeconfig_path }} -n {{ k8s_namespace }} apply -f - <<'YAML'

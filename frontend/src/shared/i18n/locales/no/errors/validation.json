@@ -1,0 +1,29 @@
+{
+  "lead": {
+    "server": "{{message}}",
+    "fullName": {
+      "required": "Navn er påkrevd",
+      "min": "Navn må være minst {{min}} tegn",
+      "max": "Navn kan være maks {{max}} tegn",
+      "tokenMin": "Hver del av navnet må være minst {{min}} tegn"
+    },
+    "email": {
+      "invalid": "Vennligst skriv inn en gyldig e-postadresse",
+      "min": "E-post må være minst {{min}} tegn",
+      "max": "E-post kan være maks {{max}} tegn"
+    },
+    "phoneNumber": {
+      "min": "Telefonnummer må være minst {{min}} tegn",
+      "max": "Telefonnummer kan være maks {{max}} tegn",
+      "invalid": "Telefon kan kun inneholde sifre, mellomrom, '-' og '+' (pluss kun i starten)",
+      "separatorsMax": "Telefonnummer kan ha maks {{max}} mellomrom og '-' totalt"
+    },
+    "message": {
+      "max": "Meldingen kan være maks {{max}} tegn"
+    },
+    "form": {
+      "fixErrors": "Vennligst rett feilene over",
+      "eitherEmailOrPhone": "Vennligst oppgi e-post og/eller telefonnummer."
+    }
+  }
+}

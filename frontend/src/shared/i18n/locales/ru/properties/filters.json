@@ -1,0 +1,13 @@
+{
+  "filtersAriaLabel": "Фильтры объектов недвижимости",
+  "cityLabel": "Город",
+  "cityPlaceholder": "Введите город",
+  "typeLabel": "Тип",
+  "statusLabel": "Статус",
+  "anyType": "Любой тип",
+  "anyStatus": "Любой статус",
+  "priceRangeLabel": "Диапазон цен",
+  "minPriceLabel": "Минимальная цена",
+  "maxPriceLabel": "Максимальная цена",
+  "priceValueAriaLabel": "Цена объекта: {value}"
+}

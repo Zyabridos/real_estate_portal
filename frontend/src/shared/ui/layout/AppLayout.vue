@@ -1,12 +1,12 @@
+<!-- AppLayout.vue -->
 <script setup lang="ts">
 import { computed } from "vue";
 
 import RealEstatePortal from "@/assets/RealEstateProtal.png";
-
-import routes from "../../routes.ts"
+import routes from "../../routes.ts";
 
 import GuestNavbar from "@/shared/ui/layout/navbar/GuestNavbar.vue";
-import Footer from "@/shared/ui/layout/Footer.vue"
+import Footer from "@/shared/ui/layout/Footer.vue";
 
 type Props = {
   isLoading?: boolean;
@@ -22,22 +22,22 @@ const hasError = computed(() => Boolean(props.errorMessage));
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+  <div class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
     <header
       class="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur"
-      :aria-label="$t('layout:header.ariaLabel')"
+      :aria-label="$t('common:layout.header.ariaLabel')"
     >
-      <div class="flex w-full items-center justify-between px-6 py-3">
-        <div class="flex items-center gap-3">
+      <div class="flex w-full items-center justify-between px-5 py-2.5">
+        <div class="flex items-center gap-2.5">
           <RouterLink
             :to="routes.app.home()"
             class="rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-300"
-            :aria-label="$t('layout:header.logoLinkAria')"
+            :aria-label="$t('common:layout.header.logoLinkAria')"
           >
             <img
               :src="RealEstatePortal"
-              :alt="$t('layout:header.logoAlt')"
-              class="h-20 w-40 rounded-xl object-contain"
+              :alt="$t('common:layout.header.logoAlt')"
+              class="h-14 w-32 rounded-xl object-contain"
             />
           </RouterLink>
         </div>
@@ -45,27 +45,25 @@ const hasError = computed(() => Boolean(props.errorMessage));
         <GuestNavbar />
       </div>
 
-      <!-- Loading placeholder -->
       <div
         v-if="isLoading"
         class="h-1 w-full bg-slate-200"
         role="status"
         aria-live="polite"
-        :aria-label="$t('layout:header.loadingAria')"
+        :aria-label="$t('common:layout.header.loadingAria')"
       >
-        <div class="h-1 w-1/3 bg-slate-900 animate-pulse" />
+        <div class="h-1 w-1/3 animate-pulse bg-slate-900" />
       </div>
 
-      <!-- Error placeholder -->
       <div
         v-if="hasError"
         class="border-t border-rose-200 bg-rose-50"
         role="alert"
         aria-live="assertive"
       >
-        <div class="w-full px-6 py-3">
+        <div class="w-full px-5 py-3">
           <div class="text-sm font-medium text-rose-900">
-            {{ $t('layout:error.title') }}
+            {{ $t("common:layout.error.title") }}
           </div>
           <div class="mt-1 text-sm text-rose-800">
             {{ errorMessage }}
@@ -74,10 +72,10 @@ const hasError = computed(() => Boolean(props.errorMessage));
       </div>
     </header>
 
-    <!-- Main -->
-    <main class="w-full flex-1 px-6 py-6" :aria-label="$t('layout:main.ariaLabel')">
+    <main class="w-full flex-1 px-6 py-6" :aria-label="$t('common:layout.main.ariaLabel')">
       <slot />
     </main>
+
     <Footer />
   </div>
 </template>

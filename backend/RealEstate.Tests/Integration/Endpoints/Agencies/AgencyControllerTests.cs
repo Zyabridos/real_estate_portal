@@ -9,9 +9,7 @@ using RealEstate.Application.Features.Agencies.List;
 using RealEstate.Application.Features.Agencies.Update;
 using RealEstate.Domain.Entities;
 using RealEstate.TestData;
-using RealEstate.TestData.Fixtures;
 using RealEstate.TestData.Mongo;
-using RealEstate.Api.Tests.Integration;
 using RealEstate.Tests.Integration.Infrastructure;
 using Xunit;
 
@@ -32,8 +30,24 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     {
         await _agencies.InsertManyAsync(new[]
         {
-            new Agency { Id = Guid.NewGuid(), Name = "A", OrgNumber = "111111", PhoneNumber = "+47 1", City = "Trondheim", Street = "S1", ZipCode = "7010", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
-            new Agency { Id = Guid.NewGuid(), Name = "B", OrgNumber = "222222", PhoneNumber = "+47 2", City = "Oslo", Street = "S2", ZipCode = "0001", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+            TestAgencies.Create(
+                id: 1,
+                name: "A",
+                orgNumber: "111111",
+                phoneNumber: "+47 1",
+                city: "Trondheim",
+                street: "S1",
+                zipCode: "7010"
+            ),
+            TestAgencies.Create(
+                id: 2,
+                name: "B",
+                orgNumber: "222222",
+                phoneNumber: "+47 2",
+                city: "Oslo",
+                street: "S2",
+                zipCode: "0001"
+            ),
         });
 
         var response = await Ctx.Client.GetAsync("/api/agencies?page=1&pageSize=10");
@@ -51,18 +65,15 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task GetById_existing_returns_200()
     {
-        var agency = new Agency
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Agency",
-            OrgNumber = "123123123",
-            PhoneNumber = "+4711111111",
-            City = "Trondheim",
-            Street = "Testgata 1",
-            ZipCode = "7010",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var agency = TestAgencies.Create(
+            id: 1,
+            name: "Test Agency",
+            orgNumber: "123123123",
+            phoneNumber: "+4711111111",
+            city: "Trondheim",
+            street: "Testgata 1",
+            zipCode: "7010"
+        );
 
         await _agencies.InsertOneAsync(agency);
 
@@ -79,13 +90,13 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task GetById_missing_returns_404()
     {
-        var response = await Ctx.Client.GetAsync($"/api/agencies/{Guid.NewGuid()}");
+        var response = await Ctx.Client.GetAsync("/api/agencies/999999");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Theory]
-    [InlineData("not-a-guid")]
-    public async Task GetById_invalid_guid_returns_400(string rawId)
+    [InlineData("not-an-int")]
+    public async Task GetById_invalid_id_returns_400(string rawId)
     {
         var response = await Ctx.Client.GetAsync($"/api/agencies/{rawId}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -108,10 +119,9 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
 
         var created = await createResponse.Content.ReadFromJsonAsync<AgencyDetailsDto>();
         created.Should().NotBeNull();
-        created!.Id.Should().NotBe(Guid.Empty);
+        created!.Id.Should().BePositive();
         created.Name.Should().Be("Created Agency");
         created.OrgNumber.Should().Be("999999");
-        
         created.PhoneNumber.Should().Be("+4711122333");
 
         var getResponse = await Ctx.Client.GetAsync($"/api/agencies/{created.Id}");
@@ -127,18 +137,17 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Update_existing_returns_200_and_updates_fields()
     {
-        var existing = new Agency
-        {
-            Id = Guid.NewGuid(),
-            Name = "Old Name",
-            OrgNumber = "111111",
-            PhoneNumber = "+47 999 99 999",
-            City = "OldCity",
-            Street = "OldStreet",
-            ZipCode = "0000",
-            CreatedAt = DateTime.UtcNow.AddDays(-1),
-            UpdatedAt = DateTime.UtcNow.AddDays(-1)
-        };
+        var existing = TestAgencies.Create(
+            id: 1,
+            name: "Old Name",
+            orgNumber: "111111",
+            phoneNumber: "+47 999 99 999",
+            city: "OldCity",
+            street: "OldStreet",
+            zipCode: "0000",
+            createdAt: DateTime.UtcNow.AddDays(-1),
+            updatedAt: DateTime.UtcNow.AddDays(-1)
+        );
 
         await _agencies.InsertOneAsync(existing);
 
@@ -170,7 +179,7 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Update_missing_returns_404()
     {
-        var id = Guid.NewGuid();
+        const int id = 999999;
 
         var request = new UpdateAgencyRequest(
             Id: id,
@@ -186,11 +195,11 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     }
 
     [Theory]
-    [InlineData("not-a-guid")]
-    public async Task Update_invalid_guid_returns_400(string rawId)
+    [InlineData("not-an-int")]
+    public async Task Update_invalid_id_returns_400(string rawId)
     {
         var request = new UpdateAgencyRequest(
-            Id: Guid.NewGuid(),
+            Id: 1,
             Name: "Name",
             PhoneNumber: "+47 111 11 111",
             City: "City",
@@ -205,18 +214,15 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Delete_existing_returns_204_and_entity_is_gone()
     {
-        var agency = new Agency
-        {
-            Id = Guid.NewGuid(),
-            Name = "To Delete",
-            OrgNumber = "333333",
-            PhoneNumber = "+47 3",
-            City = "Trondheim",
-            Street = "S",
-            ZipCode = "7010",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var agency = TestAgencies.Create(
+            id: 1,
+            name: "To Delete",
+            orgNumber: "333333",
+            phoneNumber: "+47 3",
+            city: "Trondheim",
+            street: "S",
+            zipCode: "7010"
+        );
 
         await _agencies.InsertOneAsync(agency);
 
@@ -230,13 +236,13 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Delete_missing_returns_404()
     {
-        var response = await Ctx.Client.DeleteAsync($"/api/agencies/{Guid.NewGuid()}");
+        var response = await Ctx.Client.DeleteAsync("/api/agencies/999999");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Theory]
-    [InlineData("not-a-guid")]
-    public async Task Delete_invalid_guid_returns_400(string rawId)
+    [InlineData("not-an-int")]
+    public async Task Delete_invalid_id_returns_400(string rawId)
     {
         var response = await Ctx.Client.DeleteAsync($"/api/agencies/{rawId}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

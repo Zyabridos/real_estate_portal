@@ -5,15 +5,21 @@ namespace RealEstate.Application.Features.Properties.Contracts;
 
 public interface IPropertyRepository
 {
-    Task<Property?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<Property?> GetByIdAsync(int id, CancellationToken ct);
 
-    Task<(IReadOnlyList<Property> Items, long Total)> GetListAsync(
-        PropertyListQuery query,
+    Task<Property?> GetByAgencyBrokerAndIdAsync(
+        int agencyId,
+        int brokerId,
+        int propertyId,
         CancellationToken ct);
+
+    Task<IReadOnlyList<Property>> GetAllAsync(CancellationToken ct);
 
     Task CreateAsync(Property entity, CancellationToken ct);
     Task<bool> UpdateAsync(Property entity, CancellationToken ct);
-    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+    Task<bool> DeleteAsync(int id, CancellationToken ct);
 
-    Task<IReadOnlyList<Property>> FindByBrokerIdAsync(Guid brokerId, int limit, CancellationToken ct);
+    Task<(IReadOnlyList<Property> Items, long TotalItems)> GetListAsync(
+        PropertyListQuery query,
+        CancellationToken ct);
 }

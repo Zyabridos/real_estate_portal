@@ -4,17 +4,17 @@ export const apiRoutes = {
   },
   agencies: {
     path: () => "/api/agencies",
-    byId: (id: string) => `/api/agencies/${id}`,
+    byId: (id: number) => `/api/agencies/${id}`,
     pattern: () => /\/api\/agencies(\/[^/?]+)?(\?.*)?$/,
   },
   leads: {
     path: () => "/api/leads",
-    byId: (id: string) => `/api/leads/${id}`,
+    byId: (id: number) => `/api/leads/${id}`,
     pattern: () => /\/api\/leads(\/[^/?]+)?(\?.*)?$/,
   },
   properties: {
     path: () => "/api/properties",
-    byId: (id: string) => `/api/properties/${id}`,
+    byId: (id: number) => `/api/properties/${id}`,
     pattern: () => /\/api\/properties(\/[^/?]+)?(\?.*)?$/,
   },
 };

@@ -2,9 +2,11 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import i18n from "@/shared/i18n";
 import routes from "@/shared/routes";
 import LeadForm from "@/features/leads/create/forms/LeadForm.vue";
 import { leadsApi } from "@/features/leads/api/leadsApi";
+
 import type { LeadFormStatus, LeadFormValues } from "@/entities/leads/model/types";
 import type { ApiError } from "@/shared/types/errors";
 
@@ -18,13 +20,32 @@ const successMessage = ref<string | null>(null);
 const formKey = ref(0);
 const leadFormRef = ref<InstanceType<typeof LeadForm> | null>(null);
 
-const propertyId = computed(() => String(route.params.id ?? "").trim());
+const rawPropertyId = computed(() => String(route.params.id ?? "").trim());
+
+const propertyId = computed<number>(() => {
+  const parsed = Number(rawPropertyId.value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 0;
+});
 
 function goBackToDetails(): void {
-  router.push({ path: routes.app.properties.details(propertyId.value), query: route.query });
+  if (propertyId.value <= 0) {
+    router.push(routes.app.properties.list());
+    return;
+  }
+
+  router.push({
+    path: routes.app.properties.details(propertyId.value),
+    query: route.query,
+  });
 }
 
-async function onSubmit(values: LeadFormValues) {
+async function onSubmit(values: LeadFormValues): Promise<void> {
+  if (propertyId.value <= 0) {
+    state.value = "error";
+    errorMessage.value = i18n.t("errors:common.message.invalidPropertyId");
+    return;
+  }
+
   state.value = "loading";
   errorMessage.value = null;
   successMessage.value = null;
@@ -39,8 +60,8 @@ async function onSubmit(values: LeadFormValues) {
     });
 
     state.value = "success";
-    successMessage.value = null; // TODO: add some text
-    formKey.value += 1; // clear form vie remount
+    successMessage.value = null;
+    formKey.value += 1;
   } catch (e) {
     const err = e as ApiError;
 
@@ -50,31 +71,34 @@ async function onSubmit(values: LeadFormValues) {
       return;
     }
 
-    // other errors -> show red banner
     state.value = "error";
-    errorMessage.value = err.message ?? "Unexpected error.";
+    errorMessage.value = err.message ?? i18n.t("errors:common.message.unexpected");
   }
 }
 </script>
 
 <template>
   <section
-    class="flex items-center w-full"
+    class="flex w-full items-center"
     data-testid="lead-create-page"
-    :aria-label="$t('pages:properties.details.leads.ariaLabel')"
+    :aria-label="$t('leads:form.pageAriaLabel')"
   >
     <div class="w-full px-6 py-2">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="lead-create-title">
-            {{ $t("pages:leads.title") }}
+            {{ $t("leads:form.title") }}
           </h1>
           <p class="mt-1 text-sm text-slate-600" data-testid="lead-create-subtitle">
-            {{ $t("pages:leads.subtitle") }}
+            {{ $t("leads:form.subtitle") }}
           </p>
         </div>
 
-        <div class="flex items-center gap-3" role="group" :aria-label="$t('common:aria.pageActions')">
+        <div
+          class="flex items-center gap-3"
+          role="group"
+          :aria-label="$t('leads:form.pageActionsAriaLabel')"
+        >
           <button
             type="button"
             class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
@@ -94,7 +118,7 @@ async function onSubmit(values: LeadFormValues) {
           :state="state"
           :errorMessage="errorMessage"
           :successMessage="successMessage"
-          :testId="'lead-form'"
+          testId="lead-form"
           @submit="onSubmit"
         />
       </div>

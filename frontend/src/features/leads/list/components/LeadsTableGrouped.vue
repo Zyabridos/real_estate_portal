@@ -4,192 +4,249 @@ import { computed } from "vue";
 import type { LeadListItemDto } from "@/features/leads/api/dtos/lead-list-item.dto";
 import type { SortDirection } from "@/shared/types/queries";
 
-import SortableHeader from "@/shared/ui/table/SortableHeader.vue";
-import routes from "@/shared/routes"
-import { formatDate } from "@/shared/utils/formatters/dates"
-
-type Group = {
-  propertyId: string;
-  items: LeadListItemDto[];
-};
-
 type Props = {
   items: LeadListItemDto[];
   sortBy: string;
   sortDirection: SortDirection;
-  onSort: (sortKey: string) => void;
+  onSort: (value: string) => void;
   propertyTitleById: Record<string, string>;
 };
 
 const props = defineProps<Props>();
 
-const groups = computed<Group[]>(() => {
-  const map = new Map<string, LeadListItemDto[]>();
-
-  for (const lead of props.items) {
-    const key = (lead.propertyId ?? "").trim() || "—";
-    const arr = map.get(key) ?? [];
-    arr.push(lead);
-    map.set(key, arr);
-  }
-
-  return Array.from(map.entries()).map(([propertyId, items]) => ({ propertyId, items }));
-});
-
-function valueOrDash(v: string | null | undefined): string {
-  const s = (v ?? "").trim();
-  return s.length ? s : "—";
-}
-
-function propertyLabel(propertyId: string): string {
-  return props.propertyTitleById[propertyId] ?? "Property";
-}
-
 const emit = defineEmits<{
   (e: "open-message", payload: { id: string; fullName: string | null }): void;
 }>();
 
-function propertyDetailsTo(propertyId: string) {
-  return routes.app.properties.details(propertyId);
+function toRecord(item: LeadListItemDto): Record<string, unknown> {
+  return item as unknown as Record<string, unknown>;
 }
 
+function readValue(item: LeadListItemDto, keys: string[]): unknown {
+  const record = toRecord(item);
+
+  for (const key of keys) {
+    if (key in record) {
+      return record[key];
+    }
+  }
+
+  return null;
+}
+
+function readString(item: LeadListItemDto, keys: string[]): string | null {
+  const value = readValue(item, keys);
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return null;
+}
+
+function leadIdOf(item: LeadListItemDto): string {
+  return readString(item, ["id", "Id", "leadId", "LeadId"]) ?? "";
+}
+
+function propertyIdOf(item: LeadListItemDto): string {
+  return readString(item, ["propertyId", "PropertyId"]) ?? "";
+}
+
+function fullNameOf(item: LeadListItemDto): string | null {
+  return readString(item, ["fullName", "FullName", "name", "Name"]);
+}
+
+function emailOf(item: LeadListItemDto): string | null {
+  return readString(item, ["email", "Email"]);
+}
+
+function phoneOf(item: LeadListItemDto): string | null {
+  return readString(item, ["phone", "Phone", "phoneNumber", "PhoneNumber"]);
+}
+
+function createdAtOf(item: LeadListItemDto): string | null {
+  return readString(item, ["createdAt", "CreatedAt"]);
+}
+
+function propertyTitleOf(item: LeadListItemDto): string {
+  const propertyId = propertyIdOf(item);
+
+  if (!propertyId) {
+    return "Unknown property";
+  }
+
+  return props.propertyTitleById[propertyId] ?? `Property #${propertyId}`;
+}
+
+function formatDate(value: string | null): string {
+  if (!value) {
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function isActiveSort(column: string): boolean {
+  return props.sortBy === column;
+}
+
+function sortArrow(column: string): string {
+  if (!isActiveSort(column)) {
+    return "";
+  }
+
+  return props.sortDirection === "asc" ? "↑" : "↓";
+}
+
+function openMessage(item: LeadListItemDto): void {
+  emit("open-message", {
+    id: leadIdOf(item),
+    fullName: fullNameOf(item),
+  });
+}
+
+const groups = computed(() => {
+  const map = new Map<string, LeadListItemDto[]>();
+
+  for (const item of props.items) {
+    const key = propertyIdOf(item) || "unknown";
+
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+
+    map.get(key)?.push(item);
+  }
+
+  return Array.from(map.entries()).map(([propertyId, leads]) => ({
+    propertyId,
+    propertyTitle: props.propertyTitleById[propertyId] ?? `Property #${propertyId}`,
+    leads,
+  }));
+});
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto" data-testid="leads-table-grouped-wrap">
-    <table class="min-w-[980px] w-full border-separate border-spacing-0" data-testid="leads-table-grouped">
-      <caption class="sr-only">{{ $t("pages:leads.table.captionGrouped") }}</caption>
+  <div class="space-y-6" data-testid="leads-grouped-table">
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        data-testid="sort-property"
+        @click="onSort('PropertyId')"
+      >
+        Property {{ sortArrow("PropertyId") }}
+      </button>
 
-      <thead class="sticky top-0 bg-white">
-      <tr class="border-b border-slate-200">
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.fullName')"
-          sortKey="FullName"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.email')"
-          sortKey="Email"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.phone')"
-          sortKey="PhoneNumber"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.status')"
-          sortKey="Status"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.created')"
-          sortKey="CreatedAt"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.updated')"
-          sortKey="UpdatedAt"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <th
-          scope="col"
-          class="whitespace-nowrap px-3 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-600"
-          data-testid="th-actions"
-        >
-          {{ $t("pages:leads.table.columns.actions") }}
-        </th>
-      </tr>
-      </thead>
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        data-testid="sort-fullname"
+        @click="onSort('FullName')"
+      >
+        Name {{ sortArrow("FullName") }}
+      </button>
 
-      <template v-for="g in groups" :key="g.propertyId">
-        <tbody :data-testid="`lead-group-${g.propertyId}`">
-        <!-- Group header -->
-        <tr class="bg-slate-50">
-          <th
-            scope="rowgroup"
-            :colspan="7"
-            class="px-3 py-3 text-sm font-semibold text-slate-900"
-            :data-testid="`lead-group-header-${g.propertyId}`"
+      <button
+        type="button"
+        class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        data-testid="sort-createdAt"
+        @click="onSort('CreatedAt')"
+      >
+        Created {{ sortArrow("CreatedAt") }}
+      </button>
+    </div>
+
+    <section
+      v-for="group in groups"
+      :key="group.propertyId"
+      class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+      :data-testid="`leads-group-${group.propertyId}`"
+    >
+      <header class="border-b border-slate-200 bg-slate-50 px-5 py-4">
+        <div class="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+          <h2 class="text-base font-semibold text-slate-900">
+            {{ group.propertyTitle }}
+          </h2>
+
+          <span class="text-xs text-slate-500">
+            Property ID: {{ group.propertyId }}
+          </span>
+        </div>
+      </header>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-white">
+          <tr>
+            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Name
+            </th>
+            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Email
+            </th>
+            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Phone
+            </th>
+            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Created
+            </th>
+            <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Actions
+            </th>
+          </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-100">
+          <tr
+            v-for="item in group.leads"
+            :key="leadIdOf(item)"
+            class="hover:bg-slate-50"
+            :data-testid="`lead-row-${leadIdOf(item)}`"
           >
-            <div class="flex flex-col gap-1">
-              <div class="flex items-center gap-2">
-                <RouterLink
-                  v-if="g.propertyId !== '—'"
-                  :to="propertyDetailsTo(g.propertyId)"
-                  class="inline-flex items-center rounded-md px-1 py-0.5 text-slate-900 hover:underline focus:outline-none focus:ring-2 focus:ring-slate-300"
-                  :data-testid="`lead-group-link-${g.propertyId}`"
-                  :aria-label="`Open property ${propertyLabel(g.propertyId)}`"
-                >
-                  {{ propertyLabel(g.propertyId) }}
-                </RouterLink>
-                <span v-else>
-                {{ propertyLabel(g.propertyId) }}
-                </span>
+            <td class="px-5 py-4 text-sm text-slate-900">
+              {{ fullNameOf(item) ?? "—" }}
+            </td>
 
-                <span class="text-xs font-normal text-slate-600">({{ g.items.length }})</span>
-              </div>
-            </div>
-          </th>
-        </tr>
+            <td class="px-5 py-4 text-sm text-slate-700">
+              {{ emailOf(item) ?? "—" }}
+            </td>
 
-        <!-- Rows -->
-        <tr
-          v-for="lead in g.items"
-          :key="lead.id"
-          class="border-b border-slate-100 hover:bg-slate-50"
-          :data-testid="`lead-row-${lead.id}`"
-        >
-          <td class="px-3 py-3 text-sm text-slate-900" :data-testid="`td-fullName-${lead.id}`">
-            {{ valueOrDash(lead.fullName) }}
-          </td>
+            <td class="px-5 py-4 text-sm text-slate-700">
+              {{ phoneOf(item) ?? "—" }}
+            </td>
 
-          <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-email-${lead.id}`">
-            {{ valueOrDash(lead.email) }}
-          </td>
+            <td class="px-5 py-4 text-sm text-slate-700">
+              {{ formatDate(createdAtOf(item)) }}
+            </td>
 
-          <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-phone-${lead.id}`">
-            {{ valueOrDash(lead.phoneNumber) }}
-          </td>
-
-          <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-status-${lead.id}`">
-            {{ valueOrDash(lead.status) }}
-          </td>
-
-          <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-createdAt-${lead.id}`">
-            {{ formatDate(lead.createdAt) }}
-          </td>
-
-          <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-updatedAt-${lead.id}`">
-            {{ formatDate(lead.updatedAt) }}
-          </td>
-
-          <td class="px-3 py-3 text-right" :data-testid="`td-actions-${lead.id}`">
-            <button
-              type="button"
-              class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
-              :data-testid="`lead-action-comment-${lead.id}`"
-              :aria-label="`Open message for ${valueOrDash(lead.fullName)}`"
-              @click="emit('open-message', { id: lead.id, fullName: lead.fullName ?? null })"
-            >
-              {{ $t("pages:leads.actions.comment") }}
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </template>
-    </table>
+            <td class="px-5 py-4 text-right">
+              <button
+                type="button"
+                class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
+                :data-testid="`open-message-${leadIdOf(item)}`"
+                @click="openMessage(item)"
+              >
+                Open message
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
 </template>

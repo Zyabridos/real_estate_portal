@@ -3,7 +3,7 @@ import { apiRoutes } from "../__fixtures__/apiRoutes";
 
 export async function updateLeadMessage(
   request: APIRequestContext,
-  leadId: string,
+  leadId: number,
   newMessage: string,
 ): Promise<void> {
   const resp = await request.put(apiRoutes.leads.byId(leadId), {

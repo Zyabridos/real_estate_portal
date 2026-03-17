@@ -6,7 +6,7 @@ namespace RealEstate.TestData.Requests;
 
 public static class TestLeadRequests
 {
-    public static CreateLeadRequest Valid(Guid propertyId) =>
+    public static CreateLeadRequest Valid(int propertyId) =>
         new(
             PropertyId: propertyId,
             FullName: "John Snow",

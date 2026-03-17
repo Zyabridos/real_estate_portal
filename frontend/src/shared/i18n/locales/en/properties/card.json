@@ -1,0 +1,44 @@
+{
+  "detailsCard": {
+    "detailsCardAriaLabel": "Property details card",
+    "priceValueAriaLabel": "Property price: {{value}}",
+    "metaSectionAriaLabel": "Main property information",
+    "descriptionSectionAriaLabel": "Property description",
+    "descriptionTitle": "Description",
+    "metaTitle": "Property information",
+    "typeLabel": "Type",
+    "statusLabel": "Status",
+    "cityLabel": "City",
+    "propertyIdLabel": "Property ID",
+    "createdAtLabel": "Created",
+    "bedroomsLabel": "Bedrooms",
+    "bathroomsLabel": "Bathrooms",
+    "areaLabel": "Area",
+    "areaUnit": "m²",
+    "brokerTitle": "Broker",
+    "brokerSubtitle": "Open the broker profile and explore more properties from the same broker.",
+    "priceLabel": "Price",
+    "streetLabel": "Street",
+    "actions": {
+      "createLead": "Create a lead"
+    }
+  },
+  "type": {
+    "apartment": "Apartment",
+    "house": "House",
+    "commercial": "Commercial property"
+  },
+  "status": {
+    "active": "Active",
+    "sold": "Sold"
+  },
+  "gallery": {
+    "ariaLabel": "Property image gallery",
+    "imageIndexAriaLabel": "Current image index",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "thumbnailAriaLabel": "Open image",
+    "openImage": "Open image in full size",
+    "lightboxAriaLabel": "Property image preview"
+  }
+}

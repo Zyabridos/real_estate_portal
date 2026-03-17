@@ -30,6 +30,7 @@ const vm = proxyRefs(
     onSubmit: (vals) => emit("submit", vals),
   })
 );
+
 defineExpose({
   applyServerErrors: vm.applyServerErrors,
 });
@@ -39,14 +40,14 @@ defineExpose({
   <section
     class="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
     :data-testid="testId"
-    aria-label="Lead form"
+    :aria-label="$t('leads:form.ariaLabel')"
   >
     <header class="mb-4">
       <h3 class="text-lg font-semibold text-slate-900" data-testid="lead-form-title">
-        {{ $t("forms:lead.title") }}
+        {{ $t("leads:form.title") }}
       </h3>
       <p class="mt-1 text-sm text-slate-600" data-testid="lead-form-subtitle">
-        {{ $t("forms:lead.subtitle") }}
+        {{ $t("leads:form.subtitle") }}
       </p>
     </header>
 
@@ -56,16 +57,16 @@ defineExpose({
       data-testid="lead-success"
       role="status"
     >
-      {{ props.successMessage || $t("pages:leads.success") }}
+      {{ props.successMessage || $t("leads:form.success") }}
     </div>
 
     <div
       v-if="vm.isError"
-      class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-x-4 py-3 text-sm text-rose-900"
+      class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
       data-testid="lead-error"
       role="alert"
     >
-      {{ props.errorMessage || $t("pages:leads.error") }}
+      {{ props.errorMessage || $t("leads:form.error") }}
     </div>
 
     <div
@@ -79,21 +80,21 @@ defineExpose({
 
     <form class="space-y-4" @submit.prevent="vm.submit" data-testid="lead-form-form" novalidate>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-        <!-- Full name -->
         <div class="space-y-1">
           <label class="text-sm font-medium text-slate-900" for="lead-fullName">
-            {{ $t("pages:leads.fields.fullName.label") }}
+            {{ $t("leads:form.fields.fullName.label") }}
           </label>
           <input
             id="lead-fullName"
             v-model.trim="vm.values.fullName"
             type="text"
             autocomplete="name"
-            :placeholder="$t('pages:leads.fields.fullName.placeholder')"
+            :placeholder="$t('leads:form.fields.fullName.placeholder')"
             class="w-full rounded-xl border bg-white px-3 py-2 text-slate-900 outline-none transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50"
             :class="[
-              vm.touched.fullName && vm.errors.fullName ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100' : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
+              vm.touched.fullName && vm.errors.fullName
+                ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+                : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
             ]"
             :disabled="vm.isFormDisabled"
             data-testid="lead-fullName"
@@ -109,10 +110,9 @@ defineExpose({
           </p>
         </div>
 
-        <!-- Email -->
         <div class="space-y-1">
           <label class="text-sm font-medium text-slate-900" for="lead-email">
-            {{ $t("pages:leads.fields.email.label") }}
+            {{ $t("leads:form.fields.email.label") }}
           </label>
           <input
             id="lead-email"
@@ -120,25 +120,30 @@ defineExpose({
             type="email"
             autocomplete="email"
             inputmode="email"
-            :placeholder="$t('pages:leads.fields.email.placeholder')"
+            :placeholder="$t('leads:form.fields.email.placeholder')"
             class="w-full rounded-xl border bg-white px-3 py-2 text-slate-900 outline-none transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50"
             :class="[
-              vm.touched.email && vm.errors.email ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100' : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
+              vm.touched.email && vm.errors.email
+                ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+                : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
             ]"
             :disabled="vm.isFormDisabled"
             data-testid="lead-email"
             @blur="vm.onBlur('email')"
             @input="vm.onInput('email')"
           />
-          <p v-if="vm.touched.email && vm.errors.email" class="text-xs text-rose-700" data-testid="lead-email-error">
+          <p
+            v-if="vm.touched.email && vm.errors.email"
+            class="text-xs text-rose-700"
+            data-testid="lead-email-error"
+          >
             {{ $t(vm.errors.email.key, vm.errors.email.params) }}
           </p>
         </div>
 
-        <!-- Phone -->
         <div class="space-y-1">
           <label class="text-sm font-medium text-slate-900" for="lead-phoneNumber">
-            {{ $t("pages:leads.fields.phoneNumber.label") }}
+            {{ $t("leads:form.fields.phoneNumber.label") }}
           </label>
           <input
             id="lead-phoneNumber"
@@ -146,10 +151,12 @@ defineExpose({
             type="tel"
             autocomplete="tel"
             inputmode="tel"
-            :placeholder="$t('pages:leads.fields.phoneNumber.placeholder')"
+            :placeholder="$t('leads:form.fields.phoneNumber.placeholder')"
             class="w-full rounded-xl border bg-white px-3 py-2 text-slate-900 outline-none transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50"
             :class="[
-              vm.touched.phoneNumber && vm.errors.phoneNumber ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100' : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
+              vm.touched.phoneNumber && vm.errors.phoneNumber
+                ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+                : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
             ]"
             :disabled="vm.isFormDisabled"
             data-testid="lead-phoneNumber"
@@ -165,26 +172,31 @@ defineExpose({
           </p>
         </div>
 
-        <!-- Message -->
         <div class="space-y-1 md:col-span-2">
           <label class="text-sm font-medium text-slate-900" for="lead-message">
-            {{ $t("pages:leads.fields.message.label") }}
+            {{ $t("leads:form.fields.message.label") }}
           </label>
           <textarea
             id="lead-message"
             v-model.trim="vm.values.message"
             rows="4"
-            :placeholder="$t('pages:leads.fields.message.placeholder')"
+            :placeholder="$t('leads:form.fields.message.placeholder')"
             class="w-full resize-none rounded-xl border bg-white px-3 py-2 text-slate-900 outline-none transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-slate-50"
             :class="[
-              vm.touched.message && vm.errors.message ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100' : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
+              vm.touched.message && vm.errors.message
+                ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+                : 'border-slate-200 focus:border-slate-300 focus:ring-slate-200'
             ]"
             :disabled="vm.isFormDisabled"
             data-testid="lead-message"
             @blur="vm.onBlur('message')"
             @input="vm.onInput('message')"
           />
-          <p v-if="vm.touched.message && vm.errors.message" class="text-xs text-rose-700" data-testid="lead-message-error">
+          <p
+            v-if="vm.touched.message && vm.errors.message"
+            class="text-xs text-rose-700"
+            data-testid="lead-message-error"
+          >
             {{ $t(vm.errors.message.key, vm.errors.message.params) }}
           </p>
 
@@ -196,7 +208,7 @@ defineExpose({
 
       <div class="flex items-center justify-between gap-3 pt-1">
         <p class="text-xs text-slate-500" data-testid="lead-form-note">
-          {{ $t("pages:leads.note") }}
+          {{ $t("leads:form.note") }}
         </p>
 
         <button
@@ -206,11 +218,15 @@ defineExpose({
           data-testid="lead-submit"
         >
           <span v-if="vm.isLoading" class="inline-flex items-center gap-2" data-testid="lead-submit-loading">
-            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
-            {{ $t("pages:leads.submitLoading") }}
+            <span
+              class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+              aria-hidden="true"
+            />
+            {{ $t("leads:form.submitLoading") }}
           </span>
+
           <span v-else data-testid="lead-submit-idle">
-            {{ $t("pages:leads.submit") }}
+            {{ $t("leads:form.submit") }}
           </span>
         </button>
       </div>

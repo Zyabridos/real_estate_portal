@@ -3,16 +3,16 @@ using RealEstate.Domain.Enums.Properties;
 namespace RealEstate.Application.Features.Properties.Create;
 
 public sealed record CreatePropertyRequest(
+    int BrokerId,
     string Title,
     string? Description,
     string Address,
     string City,
     decimal Price,
-    PropertyType Type,
+    decimal Area,
     int Bedrooms,
     int Bathrooms,
-    decimal Area,
+    PropertyType Type,
     PropertyStatus Status,
-    string? MainImageUrl,
-    Guid BrokerId
+    string? MainImageUrl
 );

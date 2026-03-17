@@ -6,9 +6,9 @@ import type { EmptyStatePropsProps } from "@/shared/types/states";
 
 const props = defineProps<EmptyStatePropsProps>();
 
-const resolvedTitle = computed(() => props.title?.trim() || String(i18n.t("states:empty.title")));
-const resolvedMessage = computed(() => props.message?.trim() || String(i18n.t("states:empty.message")));
-const resolvedActionLabel = computed(() => props.actionLabel?.trim() || String(i18n.t("states:empty.action")));
+const resolvedTitle = computed(() => props.title?.trim() || String(i18n.t("common:states.empty.title")));
+const resolvedMessage = computed(() => props.message?.trim() || String(i18n.t("common:states.empty.message")));
+const resolvedActionLabel = computed(() => props.actionLabel?.trim() || String(i18n.t("common:states.empty.action")));
 const testId = computed(() => props.testId?.trim() || "empty-state");
 </script>
 
@@ -18,7 +18,7 @@ const testId = computed(() => props.testId?.trim() || "empty-state");
     :data-testid="testId"
     role="status"
     aria-live="polite"
-    :aria-label="$t('states:empty.ariaLabel')"
+    :aria-label="$t('common:states.empty.ariaLabel')"
   >
     <div class="state__body">
       <h2 class="state__title" data-testid="empty-title">
@@ -35,7 +35,7 @@ const testId = computed(() => props.testId?.trim() || "empty-state");
         class="state__action"
         data-testid="empty-action"
         @click="props.onAction"
-        :aria-label="$t('states:empty.actionAria')"
+        :aria-label="$t('common:states.empty.actionAria')"
       >
         {{ resolvedActionLabel }}
       </button>

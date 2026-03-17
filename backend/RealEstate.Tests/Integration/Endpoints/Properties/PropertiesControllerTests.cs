@@ -117,7 +117,7 @@ public sealed class PropertiesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Details_non_existing_id_returns_404()
     {
-        var id = Guid.NewGuid();
+        const int id = 999999;
         var resp = await _client.GetAsync($"/api/properties/{id}");
         resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }

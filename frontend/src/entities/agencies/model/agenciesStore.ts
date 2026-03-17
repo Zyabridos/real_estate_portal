@@ -14,7 +14,6 @@ let activeDetailsController: AbortController | null = null;
 
 const agenciesStore = defineStore("agencies", {
   state: () => ({
-    // list
     agencies: [] as AgencyListItemDto[],
     lastPagedResult: null as PagedResultDto<AgencyListItemDto> | null,
     lastQuery: {} as AgenciesListQuery,
@@ -22,10 +21,9 @@ const agenciesStore = defineStore("agencies", {
     listStatus: "idle" as UIState,
     listError: null as ApiError | null,
 
-    // details
-    detailsById: {} as Record<string, AgencyDetailsDto>,
-    detailsStatusById: {} as Record<string, UIState>,
-    detailsErrorById: {} as Record<string, ApiError | null>,
+    detailsById: {} as Record<number, AgencyDetailsDto>,
+    detailsStatusById: {} as Record<number, UIState>,
+    detailsErrorById: {} as Record<number, ApiError | null>,
   }),
 
   getters: {
@@ -38,13 +36,16 @@ const agenciesStore = defineStore("agencies", {
 
     isLoading: (s) => s.listStatus === "loading",
 
-    getById: (s) => (id: string) => (id ? s.detailsById[id] ?? null : null),
-    getDetailsStatus: (s) => (id: string) => (id ? s.detailsStatusById[id] ?? "idle" : "idle"),
-    getDetailsError: (s) => (id: string) => (id ? s.detailsErrorById[id] ?? null : null),
+    getById: (s) => (id: number) => (id > 0 ? s.detailsById[id] ?? null : null),
+
+    getDetailsStatus: (s) => (id: number) =>
+      id > 0 ? s.detailsStatusById[id] ?? "idle" : "idle",
+
+    getDetailsError: (s) => (id: number) =>
+      id > 0 ? s.detailsErrorById[id] ?? null : null,
   },
 
   actions: {
-    // list
     async fetchAgenciesList(query: AgenciesListQuery = {}) {
       activeListController?.abort();
       const controller = new AbortController();
@@ -80,14 +81,14 @@ const agenciesStore = defineStore("agencies", {
       activeListController = null;
     },
 
-    // details
-    async fetchById(id: string, opts?: { force?: boolean }) {
-      const cleanId = String(id ?? "").trim();
-      if (!cleanId) return;
+    async fetchById(id: number, opts?: { force?: boolean }) {
+      if (!Number.isInteger(id) || id <= 0) {
+        return;
+      }
 
-      if (!opts?.force && this.detailsById[cleanId]) {
-        this.detailsStatusById[cleanId] = "success";
-        this.detailsErrorById[cleanId] = null;
+      if (!opts?.force && this.detailsById[id]) {
+        this.detailsStatusById[id] = "success";
+        this.detailsErrorById[id] = null;
         return;
       }
 
@@ -95,22 +96,22 @@ const agenciesStore = defineStore("agencies", {
       const controller = new AbortController();
       activeDetailsController = controller;
 
-      this.detailsStatusById[cleanId] = "loading";
-      this.detailsErrorById[cleanId] = null;
+      this.detailsStatusById[id] = "loading";
+      this.detailsErrorById[id] = null;
 
       try {
-        const res = await agenciesApi.getById(cleanId, { signal: controller.signal });
+        const res = await agenciesApi.getById(id, { signal: controller.signal });
 
         if (activeDetailsController !== controller) return;
 
-        this.detailsById[cleanId] = res;
-        this.detailsStatusById[cleanId] = "success";
-        this.detailsErrorById[cleanId] = null;
+        this.detailsById[id] = res;
+        this.detailsStatusById[id] = "success";
+        this.detailsErrorById[id] = null;
       } catch (err) {
         if (activeDetailsController !== controller) return;
 
-        this.detailsStatusById[cleanId] = "error";
-        this.detailsErrorById[cleanId] = err as ApiError;
+        this.detailsStatusById[id] = "error";
+        this.detailsErrorById[id] = err as ApiError;
       }
     },
 
@@ -129,9 +130,9 @@ const agenciesStore = defineStore("agencies", {
       this.listStatus = "idle";
       this.listError = null;
 
-      this.detailsById = {};
-      this.detailsStatusById = {};
-      this.detailsErrorById = {};
+      this.detailsById = {} as Record<number, AgencyDetailsDto>;
+      this.detailsStatusById = {} as Record<number, UIState>;
+      this.detailsErrorById = {} as Record<number, ApiError | null>;
     },
   },
 });

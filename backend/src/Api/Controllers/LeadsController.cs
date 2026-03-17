@@ -45,10 +45,10 @@ public sealed class LeadsController : ControllerBase
     [SwaggerResponseExample(StatusCodes.Status200OK, typeof(LeadDetailsResponseExample))]
     public async Task<ActionResult<LeadDetailsDto>> GetById(string id, CancellationToken ct)
     {
-        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        var bad = this.ParseIdOrProblem(id, EntityName, out var leadId);
         if (bad is not null) return bad;
 
-        var dto = await _service.GetByIdAsync(guid, ct);
+        var dto = await _service.GetByIdAsync(leadId, ct);
         if (dto is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(dto);
@@ -80,10 +80,10 @@ public sealed class LeadsController : ControllerBase
         [FromBody] UpdateLeadRequest request,
         CancellationToken ct)
     {
-        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        var bad = this.ParseIdOrProblem(id, EntityName, out var leadId);
         if (bad is not null) return bad;
 
-        var updated = await _service.UpdateAsync(guid, request, ct);
+        var updated = await _service.UpdateAsync(leadId, request, ct);
         if (updated is null) return this.EntityNotFound(EntityName, id);
 
         return Ok(updated);
@@ -96,10 +96,10 @@ public sealed class LeadsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Delete(string id, CancellationToken ct)
     {
-        var bad = this.ParseGuidOrProblem(id, EntityName, out var guid);
+        var bad = this.ParseIdOrProblem(id, EntityName, out var leadId);
         if (bad is not null) return bad;
 
-        var deleted = await _service.DeleteAsync(guid, ct);
+        var deleted = await _service.DeleteAsync(leadId, ct);
         if (!deleted) return this.EntityNotFound(EntityName, id);
 
         return NoContent();

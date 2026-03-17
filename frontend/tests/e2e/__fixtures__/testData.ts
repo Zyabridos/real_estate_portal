@@ -3,15 +3,10 @@ export const testData = {
     missing: {
       ids: {
         whitespaceEncoded: "%20",
-        nonGuid: "21",
-        missingGuid: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+        nonNumeric: "abc",
+        missingNumeric: "999999",
       },
-
-      backendLeakPhrases: [
-        "Agency id must be a valid GUID",
-        "valid GUID",
-      ],
-    }
+    },
   },
 
   blog: {
@@ -27,7 +22,7 @@ export const testData = {
     },
 
     labels: {
-      allOption: "All"
+      allOption: "All",
     },
   },
 
@@ -53,10 +48,10 @@ export const testData = {
       valid: "+47 123-45 678",
       invalid: {
         plusNotAtStart: "12+34567",
-        separatorsOverMax: "12 3-4 5-6", // separators: space, -, space, - => 4
-        tooShort: "123456",                 // 6 (< 7)
+        separatorsOverMax: "12 3-4 5-6",
+        tooShort: "123456",
         tooLong: "1".repeat(21),
-        forbiddenChars: "+47(123)456", // only '+', space and "-" are allowed
+        forbiddenChars: "+47(123)456",
       },
     },
 

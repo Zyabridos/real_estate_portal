@@ -1,0 +1,8 @@
+{
+  "gender": {
+    "male": "Mann",
+    "female": "Kvinne",
+    "other": "Annet",
+    "unspecified": "Ikke oppgitt"
+  }
+}

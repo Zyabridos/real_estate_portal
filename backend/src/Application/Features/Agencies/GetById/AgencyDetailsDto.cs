@@ -1,7 +1,7 @@
 namespace RealEstate.Application.Features.Agencies.GetById;
 
 public sealed record AgencyDetailsDto(
-    Guid Id,
+    int Id,
     string Name,
     string OrgNumber,
     string? PhoneNumber,

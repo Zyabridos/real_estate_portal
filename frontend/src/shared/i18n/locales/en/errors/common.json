@@ -1,0 +1,86 @@
+{
+  "title": {
+    "network": "Network error. Probably some unexpected request tp backend",
+    "timeout": "Request timed out",
+    "generic": "Something went wrong",
+    "badRequest": "Invalid request",
+    "notFound": {
+      "property": "Property not found",
+      "broker": "Broker not found",
+      "page": "Page not found"
+    },
+    "loadFailed": {
+      "property": "Failed to load property",
+      "broker": "Failed to load broker",
+      "brokers": "Failed to load brokers list",
+      "properties": "Failed to load properties list"
+    }
+  },
+  "message": {
+    "unexpected": "An unexpected error occurred.",
+    "invalidPropertyId": "Invalid property ID.",
+    "invalidBrokerId": "Invalid broker ID.",
+    "notFound": {
+      "property": "We couldn't find this property. It may have been removed or the link is incorrect.",
+      "broker": "We couldn't find this broker. It may have been removed or the link is incorrect."
+    }
+  },
+  "actions": {
+    "retry": "Try again"
+  },
+  "entityDetails": {
+    "ariaLabel": "Entity details error",
+    "asideAriaLabel": "What you can do next",
+    "requestedIdLabel": "Requested ID",
+    "requestedIdEmpty": "empty value",
+    "whatYouCanDoTitle": "What you can do",
+    "tip1": "Check the URL and make sure the ID is correct.",
+    "tip2": "Go back to the list and open the item again.",
+    "tip3": "Refresh the page or try again later.",
+    "note": "If the problem persists, the record may have been deleted or the link may be outdated.",
+    "invalidId": {
+      "agency": {
+        "badge": "Invalid ID",
+        "title": "Invalid agency ID",
+        "description": "Agency ID must be a number."
+      },
+      "property": {
+        "badge": "Invalid ID",
+        "title": "Invalid property ID",
+        "description": "Property ID must be a number."
+      },
+      "broker": {
+        "badge": "Invalid ID",
+        "title": "Invalid broker ID",
+        "description": "Broker ID must be a number."
+      },
+      "lead": {
+        "badge": "Invalid ID",
+        "title": "Invalid lead ID",
+        "description": "Lead ID must be a number."
+      }
+    },
+    "notFound": {
+      "agency": {
+        "badge": "Not found",
+        "title": "Agency not found",
+        "description": "No agency was found for this ID."
+      },
+      "property": {
+        "badge": "Not found",
+        "title": "Property not found",
+        "description": "No property was found for this ID."
+      },
+      "broker": {
+        "badge": "Not found",
+        "title": "Broker not found",
+        "description": "No broker was found for this ID."
+      },
+      "lead": {
+        "badge": "Not found",
+        "title": "Lead not found",
+        "description": "No lead was found for this ID."
+      }
+    }
+  }
+}

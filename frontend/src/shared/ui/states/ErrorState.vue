@@ -1,64 +1,44 @@
 <script setup lang="ts">
 import { computed } from "vue";
+
 import i18n from "@/shared/i18n";
-import type { ErrorStateProps } from "@/shared/types/states";
+import type { EmptyStatePropsProps } from "@/shared/types/states";
 
-const props = defineProps<ErrorStateProps>();
+const props = defineProps<EmptyStatePropsProps>();
 
-const resolvedTitle = computed(
-  () => props.title?.trim() || i18n.t("errors:generic.title")
-);
-
-const resolvedRetryLabel = computed(
-  () => props.retryLabel?.trim() || i18n.t("errors:actions.retry")
-);
-
-const resolvedMessage = computed(
-  () => props.message?.trim() || i18n.t("errors:message")
-);
-
-const testId = computed(() => props.testId?.trim() || "error-state");
-
-const showRetry = computed(() => typeof props.onRetry === "function");
+const resolvedTitle = computed(() => props.title?.trim() || String(i18n.t("common:states.empty.title")));
+const resolvedMessage = computed(() => props.message?.trim() || String(i18n.t("common:states.empty.message")));
+const resolvedActionLabel = computed(() => props.actionLabel?.trim() || String(i18n.t("common:states.empty.action")));
+const testId = computed(() => props.testId?.trim() || "empty-state");
 </script>
 
 <template>
   <section
+    class="state state--empty"
     :data-testid="testId"
-    role="alert"
-    aria-live="assertive"
-    :aria-label="$t('error.ariaLabel')"
-    class="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm ring-1 ring-black/5"
+    role="status"
+    aria-live="polite"
+    :aria-label="$t('common:states.empty.ariaLabel')"
   >
-    <div class="flex items-start gap-4">
-      <div
-        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-800"
-        aria-hidden="true"
+    <div class="state__body">
+      <h2 class="state__title" data-testid="empty-title">
+        {{ resolvedTitle }}
+      </h2>
+
+      <p class="state__desc" data-testid="empty-message">
+        {{ resolvedMessage }}
+      </p>
+
+      <button
+        v-if="props.onAction"
+        type="button"
+        class="state__action"
+        data-testid="empty-action"
+        @click="props.onAction"
+        :aria-label="$t('common:states.empty.actionAria')"
       >
-        <i class="pi pi-exclamation-triangle text-2xl" />
-      </div>
-
-      <div class="min-w-0 flex-1">
-        <h2 class="text-lg font-semibold text-rose-900" data-testid="error-title">
-          {{ resolvedTitle }}
-        </h2>
-
-        <p class="mt-1 text-sm leading-relaxed text-rose-800" data-testid="error-message">
-          {{ resolvedMessage }}
-        </p>
-
-        <div v-if="showRetry" class="mt-4">
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
-            data-testid="retry-button"
-            @click="props.onRetry"
-            :aria-label="$t('error.retryAria')"
-          >
-            {{ resolvedRetryLabel }}
-          </button>
-        </div>
-      </div>
+        {{ resolvedActionLabel }}
+      </button>
     </div>
   </section>
 </template>

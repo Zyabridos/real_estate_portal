@@ -23,7 +23,6 @@ function onKeydown(e: KeyboardEvent): void {
     return;
   }
 
-  // basic focus trap
   if (e.key !== "Tab") return;
 
   const root = dialogRef.value;
@@ -58,9 +57,11 @@ function onKeydown(e: KeyboardEvent): void {
 function focusFirst(): void {
   const root = dialogRef.value;
   if (!root) return;
+
   const el = root.querySelector<HTMLElement>(
     'button[data-testid="modal-close"],button,[tabindex]:not([tabindex="-1"])'
   );
+
   el?.focus();
 }
 
@@ -81,6 +82,7 @@ watch(
 );
 
 onMounted(() => window.addEventListener("keydown", onKeydown));
+
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", onKeydown);
   document.body.style.overflow = "";
@@ -95,7 +97,6 @@ onBeforeUnmount(() => {
       :data-testid="testId ?? 'modal-root'"
       aria-live="polite"
     >
-      <!-- Backdrop -->
       <div
         class="absolute inset-0 bg-slate-900/50"
         :data-testid="`${testId ?? 'modal'}-backdrop`"
@@ -103,7 +104,6 @@ onBeforeUnmount(() => {
         aria-hidden="true"
       />
 
-      <!-- Dialog -->
       <div class="relative flex min-h-full items-center justify-center p-4">
         <div
           ref="dialogRef"
@@ -125,10 +125,10 @@ onBeforeUnmount(() => {
               type="button"
               class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
               data-testid="modal-close"
-              aria-label="Close dialog"
+              :aria-label="$t('common:actions.close')"
               @click="onClose()"
             >
-              Close
+              {{ $t("common:actions.close") }}
             </button>
           </header>
 
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
                 data-testid="modal-ok"
                 @click="onClose()"
               >
-                OK
+                {{ $t("common:actions.ok") }}
               </button>
             </slot>
           </footer>

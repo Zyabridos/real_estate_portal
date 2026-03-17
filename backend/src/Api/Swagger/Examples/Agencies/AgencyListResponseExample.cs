@@ -13,7 +13,7 @@ public sealed class AgencyListResponseExample : IExamplesProvider<PagedResult<Ag
             Items =
             [
                 new AgencyListItemDto(
-                    Id: Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    Id: 1,
                     Name: "Eiendommenbyrå #1",
                     OrgNumber: "1234567891011",
                     PhoneNumber: "+47 111 11 111",
@@ -24,7 +24,7 @@ public sealed class AgencyListResponseExample : IExamplesProvider<PagedResult<Ag
                     UpdatedAt: DateTime.Parse("2024-01-10T13:00:00Z")
                 ),
                 new AgencyListItemDto(
-                    Id: Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    Id: 2,
                     Name: "Eiendommenbyrå #1 i Trondheim",
                     OrgNumber: "1112223334441",
                     PhoneNumber: "+47 222 22 222",

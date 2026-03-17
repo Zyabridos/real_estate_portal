@@ -1,5 +1,6 @@
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Application.Features.Brokers.GetById;
+using RealEstate.Domain.Enums.Brokers;
 
 namespace RealEstate.Api.Swagger.Examples.Brokers;
 
@@ -8,12 +9,13 @@ public sealed class BrokerDetailsResponseExample : IExamplesProvider<BrokerDetai
     public BrokerDetailsDto GetExamples()
     {
         return new BrokerDetailsDto(
-            Id: Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            AgencyId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            Id: 1000,
+            AgencyId: 1,
             FirstName: "Ola",
             LastName: "Nordmann",
             Email: "ola.nordmann@realestate.no",
             PhoneNumber: "+47 111 11 111",
+            Gender: BrokerGender.Female,
             PhotoUrl: "https://cdn.example.com/brokers/ola.jpg",
             CreatedAt: DateTime.Parse("2026-01-10T12:00:00Z"),
             UpdatedAt: DateTime.Parse("2026-01-11T10:30:00Z")

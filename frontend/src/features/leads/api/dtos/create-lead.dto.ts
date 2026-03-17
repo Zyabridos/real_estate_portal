@@ -1,5 +1,5 @@
 export type CreateLeadRequestDto = {
-  propertyId: string;
+  propertyId: number;
   fullName: string;
   email?: string | null;
   phoneNumber?: string | null;

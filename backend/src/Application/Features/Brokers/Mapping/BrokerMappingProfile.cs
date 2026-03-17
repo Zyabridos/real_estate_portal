@@ -21,10 +21,12 @@ public sealed class BrokerMappingProfile : Profile
                 b.Email,
                 b.PhoneNumber,
                 b.PhotoUrl,
+                b.Gender,
                 b.CreatedAt,
                 b.UpdatedAt
             ));
 
+        // DTO -> Entity  
         CreateMap<Broker, BrokerListItemDto>()
             .ConstructUsing(b => new BrokerListItemDto(
                 b.Id,
@@ -33,17 +35,19 @@ public sealed class BrokerMappingProfile : Profile
                 b.Email,
                 b.PhoneNumber,
                 b.PhotoUrl,
+                b.Gender,
                 b.CreatedAt,
                 b.UpdatedAt
             ));
 
-        // DTO -> Entity
         CreateMap<CreateBrokerRequest, Broker>()
             .ForMember(d => d.Id, opt => opt.Ignore())
-            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.UpdatedAt, opt => opt.Ignore());
 
         CreateMap<UpdateBrokerRequest, Broker>()
             .ForMember(d => d.Id, opt => opt.Ignore())
-            .ForMember(d => d.CreatedAt, opt => opt.Ignore());
+            .ForMember(d => d.CreatedAt, opt => opt.Ignore())
+            .ForMember(d => d.UpdatedAt, opt => opt.Ignore());
     }
 }

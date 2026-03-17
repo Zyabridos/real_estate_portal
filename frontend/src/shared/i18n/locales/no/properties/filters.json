@@ -1,0 +1,13 @@
+{
+  "filtersAriaLabel": "Filtre for eiendommer",
+  "cityLabel": "By",
+  "cityPlaceholder": "Skriv inn by",
+  "typeLabel": "Type",
+  "statusLabel": "Status",
+  "anyType": "Alle typer",
+  "anyStatus": "Alle statuser",
+  "priceRangeLabel": "Prisklasse",
+  "minPriceLabel": "Min pris",
+  "maxPriceLabel": "Maks pris",
+  "priceValueAriaLabel": "Eiendomspris: {value}"
+}

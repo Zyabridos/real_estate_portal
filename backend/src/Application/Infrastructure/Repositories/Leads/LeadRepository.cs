@@ -23,10 +23,10 @@ public sealed class LeadRepository : ILeadRepository
     public Task CreateAsync(Lead lead, CancellationToken ct) =>
         _collection.InsertOneAsync(lead, cancellationToken: ct);
 
-    public Task<Lead?> GetByIdAsync(Guid id, CancellationToken ct) =>
+    public Task<Lead?> GetByIdAsync(int id, CancellationToken ct) =>
         _collection.Find(x => x.Id == id).FirstOrDefaultAsync(ct);
 
-    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
         var result = await _collection.DeleteOneAsync(x => x.Id == id, ct);
         return result.DeletedCount == 1;

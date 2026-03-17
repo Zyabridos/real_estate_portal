@@ -1,0 +1,20 @@
+{
+  "captionGrouped": "Заявки, сгруппированные по объектам",
+  "captionList": "Список заявок",
+  "columns": {
+    "fullName": "ФИО",
+    "email": "Email",
+    "phone": "Телефон",
+    "status": "Статус",
+    "created": "Создано",
+    "updated": "Обновлено",
+    "property": "Объект",
+    "actions": "Действия"
+  },
+  "propertyFallback": "Объект",
+  "openPropertyAria": "Открыть объект {{title}}",
+  "openMessageAria": "Открыть сообщение для {{name}}",
+  "actions": {
+    "comment": "Комментарий"
+  }
+}

@@ -2,7 +2,7 @@ namespace RealEstate.Domain.Entities;
 
 public sealed class Agency
 {
-    public Guid Id { get; set; } = default!;
+    public int Id { get; set; } = default!;
     public string Name { get; set; } = default!;
     public string OrgNumber { get; set; }  = default!;
     public string? PhoneNumber { get; set; }

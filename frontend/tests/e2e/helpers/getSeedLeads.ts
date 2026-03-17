@@ -11,8 +11,8 @@ type PagedResultDto<T> = {
 };
 
 export type LeadListItemDto = {
-  id: string;
-  propertyId: string;
+  id: number;
+  propertyId: number;
   fullName: string;
   email: string | null;
   phoneNumber: string | null;
@@ -22,7 +22,7 @@ export type LeadListItemDto = {
 };
 
 export async function getSeedLeads(request: APIRequestContext): Promise<{
-  propertyId: string;
+  propertyId: number;
   emailOnly: LeadListItemDto;
   phoneOnly: LeadListItemDto;
   both: LeadListItemDto;
@@ -46,8 +46,10 @@ export async function getSeedLeads(request: APIRequestContext): Promise<{
   const phoneOnly = findByFullName(leadsSeed.phoneOnly.fullName);
   const both = findByFullName(leadsSeed.both.fullName);
 
-  const propertyId = (emailOnly.propertyId ?? "").trim();
-  if (!propertyId) throw new Error("Seed leads: propertyId is empty");
+  const propertyId = emailOnly.propertyId;
+  if (typeof propertyId !== "number" || Number.isNaN(propertyId)) {
+    throw new Error("Seed leads: propertyId is invalid");
+  }
 
   return { propertyId, emailOnly, phoneOnly, both, all: items };
 }

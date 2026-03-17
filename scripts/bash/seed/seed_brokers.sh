@@ -9,7 +9,6 @@ BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
 BROKERS_ENDPOINT="/api/brokers"
 HEALTH_PATH="${HEALTH_PATH:-/api/health/readiness}"
 PAGE_SIZE="${SEED_PAGE_SIZE:-100}"
-
 SEED_BROKERS_COUNT="${SEED_BROKERS_COUNT:-22}"
 
 require_cmd() {
@@ -23,7 +22,6 @@ seed_dir="${SCRIPT_DIR}/../../.seed"
 seed_env="${seed_dir}/seed.env"
 mkdir -p "${seed_dir}"
 
-# аккуратно source при set -u
 source_seed_env_if_exists() {
   if [[ -f "${seed_env}" ]]; then
     set +u
@@ -36,10 +34,15 @@ source_seed_env_if_exists() {
 assert_json() {
   local label="$1"
   local body="$2"
-  if [[ -z "$body" ]]; then error "[seed] ERROR: ${label} returned empty response."; exit 1; fi
-  if ! printf '%s' "$body" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
+
+  if [[ -z "${body}" ]]; then
+    error "[seed] ERROR: ${label} returned empty response."
+    exit 1
+  fi
+
+  if ! printf '%s' "${body}" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
     error "[seed] ERROR: ${label} did not return JSON. Response was:"
-    printf '%s\n' "$body" | head -n 80
+    printf '%s\n' "${body}" | head -n 80
     exit 1
   fi
 }
@@ -50,26 +53,29 @@ import sys, json
 data = json.load(sys.stdin)
 for x in (data.get("items") or []):
     _id = x.get("id")
-    if _id:
+    if _id is not None:
         print(_id)
 '
 }
 
 json_field() {
   local field="$1"
-  python3 -c "import sys,json; print(json.load(sys.stdin).get('${field}',''))"
+  python3 -c "import sys,json; print(json.load(sys.stdin).get('${field}', ''))"
 }
 
 http_post_json() {
   local url="$1"
   local payload="$2"
   local resp status
+
   resp="$(curl -sS -i -X POST "$url" -H "Content-Type: application/json" -d "$payload")"
   status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
+
   if [[ "$status" =~ ^2 ]]; then
     printf '%s' "$resp" | awk 'BEGIN{p=0} /^\r?$/{p=1;next} {if(p) print}'
     return 0
   fi
+
   error "[seed] POST failed: $url"
   warn "----- payload -----"
   printf '%s\n' "$payload" | head -n 200
@@ -81,40 +87,65 @@ http_post_json() {
 http_delete() {
   local url="$1"
   local resp status
+
   resp="$(curl -sS -i -X DELETE "$url" || true)"
   status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
+
   if [[ "$status" =~ ^2 ]] || [[ "$status" == "404" ]]; then
     return 0
   fi
+
   warn "[seed] DELETE failed: $url (status=$status)"
   printf '%s\n' "$resp" | head -n 80
   return 0
 }
 
-# ---- main ----
+create_broker_payload() {
+  local agency_id="$1"
+  local first="$2"
+  local last="$3"
+  local gender="$4"
+  local email="$5"
+  local phone="$6"
+
+  python3 - "$agency_id" "$first" "$last" "$gender" "$email" "$phone" <<'PY'
+import json, sys
+
+agency_id = int(sys.argv[1])
+first = sys.argv[2]
+last = sys.argv[3]
+gender = sys.argv[4]
+email = sys.argv[5]
+phone = sys.argv[6]
+
+print(json.dumps({
+  "agencyId": agency_id,
+  "firstName": first,
+  "lastName": last,
+  "gender": gender,
+  "email": email,
+  "phoneNumber": phone,
+  "photoUrl": None
+}))
+PY
+}
 
 neutral "Seeding brokers (distributed across 3 agencies)"
 neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
-# Берём реальные agency ids из seed.env
 source_seed_env_if_exists
 
-: "${AGENCY1_ID:?Missing AGENCY1_ID. Run seed_agencies.sh first (or make seed).}"
-: "${AGENCY2_ID:?Missing AGENCY2_ID. Run seed_agencies.sh first (or make seed).}"
-: "${AGENCY3_ID:?Missing AGENCY3_ID. Run seed_agencies.sh first (or make seed).}"
-
-# (необязательно, но полезно) Проверяем, что agencies реально существуют
-curl -fsS "${BACKEND_URL}/api/agencies/${AGENCY1_ID}" >/dev/null || { error "[seed] AGENCY1_ID not found: ${AGENCY1_ID}"; exit 1; }
-curl -fsS "${BACKEND_URL}/api/agencies/${AGENCY2_ID}" >/dev/null || { error "[seed] AGENCY2_ID not found: ${AGENCY2_ID}"; exit 1; }
-curl -fsS "${BACKEND_URL}/api/agencies/${AGENCY3_ID}" >/dev/null || { error "[seed] AGENCY3_ID not found: ${AGENCY3_ID}"; exit 1; }
+: "${AGENCY1_ID:?Missing AGENCY1_ID. Run seed-agencies first.}"
+: "${AGENCY2_ID:?Missing AGENCY2_ID. Run seed-agencies first.}"
+: "${AGENCY3_ID:?Missing AGENCY3_ID. Run seed-agencies first.}"
 
 neutral "Clearing existing brokers"
 brokers_json="$(curl -fsS "${BACKEND_URL}${BROKERS_ENDPOINT}?page=1&pageSize=${PAGE_SIZE}" || true)"
 
 broker_ids=""
-if [[ -n "${brokers_json}" ]] && printf '%s' "$brokers_json" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
+if [[ -n "${brokers_json}" ]] && printf '%s' "${brokers_json}" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
   broker_ids="$(printf '%s' "${brokers_json}" | extract_ids_from_paged || true)"
 else
   warn "[seed] Skipping brokers cleanup (GET list returned non-JSON or failed)."
@@ -130,23 +161,9 @@ else
   warn "[seed] No brokers to clear"
 fi
 
-create_broker_payload() {
-  local agency_id="$1" first="$2" last="$3" email="$4" phone="$5"
-  python3 - <<PY
-import json
-print(json.dumps({
-  "agencyId": "${agency_id}",
-  "firstName": "${first}",
-  "lastName": "${last}",
-  "email": "${email}",
-  "phoneNumber": "${phone}",
-  "photoUrl": None
-}))
-PY
-}
-
 first_names=("Ola" "Kari" "Anders" "Ingrid" "Erik" "Nora" "Jonas" "Maja" "Lars" "Emma" "Sindre" "Hanna")
 last_names=("Nordmann" "Hansen" "Johansen" "Olsen" "Larsen" "Andersen" "Nilsen" "Berg" "Haugen" "Moen" "Dahl" "Solberg")
+genders=(0 1 2 3)
 agencies=("${AGENCY1_ID}" "${AGENCY2_ID}" "${AGENCY3_ID}")
 
 neutral "Creating ${SEED_BROKERS_COUNT} brokers distributed across 3 agencies"
@@ -157,12 +174,17 @@ i=1
 while [[ "${i}" -le "${SEED_BROKERS_COUNT}" ]]; do
   first="${first_names[$(((i-1) % ${#first_names[@]}))]}"
   last="${last_names[$(((i-1) % ${#last_names[@]}))]}"
+  gender="${genders[$(((i-1) % ${#genders[@]}))]}"
   email="broker${i}.seed@broker.no"
   phone=$(printf "+47 900 %02d %03d" $(((i-1) / 100)) $(((i-1) % 1000)))
 
   agency_id="${agencies[$(((i-1) % ${#agencies[@]}))]}"
 
-  resp="$(http_post_json "${BACKEND_URL}${BROKERS_ENDPOINT}" "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${email}" "${phone}")")"
+  resp="$(http_post_json \
+    "${BACKEND_URL}${BROKERS_ENDPOINT}" \
+    "$(create_broker_payload "${agency_id}" "${first}" "${last}" "${gender}" "${email}" "${phone}")"
+  )"
+
   assert_json "POST ${BROKERS_ENDPOINT} #${i}" "${resp}"
 
   id="$(printf '%s' "${resp}" | json_field "id")"

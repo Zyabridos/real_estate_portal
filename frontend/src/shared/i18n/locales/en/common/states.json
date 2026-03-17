@@ -1,0 +1,13 @@
+{
+  "loading": {
+    "genericTitle": "Loading...",
+    "ariaLabel": "Loading content"
+  },
+  "empty": {
+    "title": "Nothing found",
+    "message": "There is no data to display yet.",
+    "action": "Try again",
+    "ariaLabel": "Empty state",
+    "actionAria": "Try loading data again"
+  }
+}

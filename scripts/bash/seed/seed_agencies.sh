@@ -84,7 +84,6 @@ neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
-# Чтобы можно было удалить agencies без “хвостов” — чистим brokers
 neutral "Clearing existing brokers"
 brokers_json="$(curl -fsS "${BACKEND_URL}/api/brokers?page=1&pageSize=${PAGE_SIZE}" || true)"
 broker_ids=""

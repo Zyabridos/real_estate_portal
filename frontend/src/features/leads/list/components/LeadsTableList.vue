@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import SortableHeader from "@/shared/ui/table/SortableHeader.vue";
 import type { LeadListItemDto } from "@/features/leads/api/dtos/lead-list-item.dto";
 import type { SortDirection } from "@/shared/types/queries";
 
@@ -7,155 +6,194 @@ type Props = {
   items: LeadListItemDto[];
   sortBy: string;
   sortDirection: SortDirection;
-  onSort: (sortKey: string) => void;
+  onSort: (value: string) => void;
   propertyTitleById: Record<string, string>;
 };
+
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: "open-message", payload: { id: string; fullName: string | null }): void;
 }>();
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+function toRecord(item: LeadListItemDto): Record<string, unknown> {
+  return item as unknown as Record<string, unknown>;
+}
+
+function readValue(item: LeadListItemDto, keys: string[]): unknown {
+  const record = toRecord(item);
+
+  for (const key of keys) {
+    if (key in record) {
+      return record[key];
+    }
+  }
+
+  return null;
+}
+
+function readString(item: LeadListItemDto, keys: string[]): string | null {
+  const value = readValue(item, keys);
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return null;
+}
+
+function leadIdOf(item: LeadListItemDto): string {
+  return readString(item, ["id", "Id", "leadId", "LeadId"]) ?? "";
+}
+
+function propertyIdOf(item: LeadListItemDto): string {
+  return readString(item, ["propertyId", "PropertyId"]) ?? "";
+}
+
+function fullNameOf(item: LeadListItemDto): string | null {
+  return readString(item, ["fullName", "FullName", "name", "Name"]);
+}
+
+function emailOf(item: LeadListItemDto): string | null {
+  return readString(item, ["email", "Email"]);
+}
+
+function phoneOf(item: LeadListItemDto): string | null {
+  return readString(item, ["phone", "Phone", "phoneNumber", "PhoneNumber"]);
+}
+
+function createdAtOf(item: LeadListItemDto): string | null {
+  return readString(item, ["createdAt", "CreatedAt"]);
+}
+
+function propertyTitleOf(item: LeadListItemDto): string {
+  const propertyId = propertyIdOf(item);
+
+  if (!propertyId) {
+    return "Unknown property";
+  }
+
+  return props.propertyTitleById[propertyId] ?? `Property #${propertyId}`;
+}
+
+function formatDate(value: string | null): string {
+  if (!value) {
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
   return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(d);
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
-function valueOrDash(v: string | null | undefined): string {
-  const s = (v ?? "").trim();
-  return s.length ? s : "—";
+function sortArrow(column: string): string {
+  if (props.sortBy !== column) {
+    return "";
+  }
+
+  return props.sortDirection === "asc" ? "↑" : "↓";
 }
 
-const props = defineProps<Props>();
-
-function propertyLabel(id: string): string {
-  return props.propertyTitleById[id] ?? "Property";
+function openMessage(item: LeadListItemDto): void {
+  emit("open-message", {
+    id: leadIdOf(item),
+    fullName: fullNameOf(item),
+  });
 }
 </script>
 
 <template>
-  <div class="w-full overflow-x-auto" data-testid="leads-table-list-wrap">
-    <table class="min-w-[980px] w-full border-separate border-spacing-0" data-testid="leads-table-list">
-      <caption class="sr-only">{{ $t("pages:leads.table.captionList") }}</caption>
+  <div
+    class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+    data-testid="leads-list-table"
+  >
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+        <tr>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <button type="button" class="hover:text-slate-900" @click="onSort('PropertyId')">
+              Property {{ sortArrow("PropertyId") }}
+            </button>
+          </th>
 
-      <thead class="sticky top-0 bg-white">
-      <tr class="border-b border-slate-200">
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.fullName')"
-          sortKey="FullName"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.email')"
-          sortKey="Email"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.phone')"
-          sortKey="PhoneNumber"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.status')"
-          sortKey="Status"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.created')"
-          sortKey="CreatedAt"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.updated')"
-          sortKey="UpdatedAt"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <SortableHeader
-          :label="$t('pages:leads.table.columns.property')"
-          sortKey="PropertyId"
-          :activeSortBy="sortBy"
-          :activeSortDirection="sortDirection"
-          :onSort="onSort"
-        />
-        <th
-          scope="col"
-          class="whitespace-nowrap px-3 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-600"
-          data-testid="th-actions"
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <button type="button" class="hover:text-slate-900" @click="onSort('FullName')">
+              Name {{ sortArrow("FullName") }}
+            </button>
+          </th>
+
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Email
+          </th>
+
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Phone
+          </th>
+
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <button type="button" class="hover:text-slate-900" @click="onSort('CreatedAt')">
+              Created {{ sortArrow("CreatedAt") }}
+            </button>
+          </th>
+
+          <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Actions
+          </th>
+        </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100 bg-white">
+        <tr
+          v-for="item in items"
+          :key="leadIdOf(item)"
+          class="hover:bg-slate-50"
+          :data-testid="`lead-row-${leadIdOf(item)}`"
         >
-          {{ $t("pages:leads.table.columns.actions") }}
-        </th>
-      </tr>
-      </thead>
+          <td class="px-5 py-4 text-sm text-slate-900">
+            {{ propertyTitleOf(item) }}
+          </td>
 
-      <tbody data-testid="leads-tbody-list">
-      <tr
-        v-for="lead in items"
-        :key="lead.id"
-        class="border-b border-slate-100 hover:bg-slate-50"
-        :data-testid="`lead-row-${lead.id}`"
-      >
-        <td class="px-3 py-3 text-sm text-slate-900" :data-testid="`td-fullName-${lead.id}`">
-          {{ valueOrDash(lead.fullName) }}
-        </td>
+          <td class="px-5 py-4 text-sm text-slate-900">
+            {{ fullNameOf(item) ?? "—" }}
+          </td>
 
-        <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-email-${lead.id}`">
-          {{ valueOrDash(lead.email) }}
-        </td>
+          <td class="px-5 py-4 text-sm text-slate-700">
+            {{ emailOf(item) ?? "—" }}
+          </td>
 
-        <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-phone-${lead.id}`">
-          {{ valueOrDash(lead.phoneNumber) }}
-        </td>
+          <td class="px-5 py-4 text-sm text-slate-700">
+            {{ phoneOf(item) ?? "—" }}
+          </td>
 
-        <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-status-${lead.id}`">
-          {{ valueOrDash(lead.status) }}
-        </td>
+          <td class="px-5 py-4 text-sm text-slate-700">
+            {{ formatDate(createdAtOf(item)) }}
+          </td>
 
-        <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-createdAt-${lead.id}`">
-          {{ formatDate(lead.createdAt) }}
-        </td>
-
-        <td class="px-3 py-3 text-sm text-slate-700" :data-testid="`td-updatedAt-${lead.id}`">
-          {{ formatDate(lead.updatedAt) }}
-        </td>
-
-        <td class="px-3 py-3" :data-testid="`td-property-${lead.id}`">
-          <div class="mt-1 font-mono text-[11px] text-slate-500" :data-testid="`lead-property-id-${lead.id}`">
-            {{ lead.propertyId }}
-          </div>
-        </td>
-
-        <td class="px-3 py-3 text-right" :data-testid="`td-actions-${lead.id}`">
-          <button
-            type="button"
-            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            :data-testid="`lead-action-comment-${lead.id}`"
-            :aria-label="$t('pages:leads.table.openMessageAria', { name: valueOrDash(lead.fullName) })"
-            @click="emit('open-message', { id: lead.id, fullName: lead.fullName ?? null })"
-          >
-            {{ $t("pages:leads.actions.comment") }}
-          </button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+          <td class="px-5 py-4 text-right">
+            <button
+              type="button"
+              class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
+              :data-testid="`open-message-${leadIdOf(item)}`"
+              @click="openMessage(item)"
+            >
+              Open message
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>

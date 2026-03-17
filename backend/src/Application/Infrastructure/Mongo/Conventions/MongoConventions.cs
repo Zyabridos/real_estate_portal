@@ -1,5 +1,4 @@
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 
@@ -14,9 +13,6 @@ public static class MongoConventions
         // Prevent multiple registrations since MongoDB serializers and conventions are global
         if (_registered) return;
         _registered = true;
-
-        // Global serializers (to string). Evnt use: Id = Guid.Parse("qwerty123-")
-        BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 
         // Convention pack
         var pack = new ConventionPack

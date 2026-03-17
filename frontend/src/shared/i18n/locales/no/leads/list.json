@@ -1,0 +1,21 @@
+{
+  "pageTitle": "Henvendelser",
+  "pageSubtitle": "Gruppert etter PropertyId (standard) eller listevisning",
+  "viewToggleAria": "Visningsmodus for henvendelser",
+  "view": {
+    "grouped": "Gruppert",
+    "list": "Liste"
+  },
+  "total": "Totalt: {{count}}",
+  "message": {
+    "loadError": "Kunne ikke laste meldingen."
+  },
+  "modal": {
+    "title": "Melding",
+    "subtitleFrom": "Fra: {{name}}",
+    "subtitleFallback": "Meldingsdetaljer",
+    "loading": "Laster melding…",
+    "empty": "— Ingen melding oppgitt —",
+    "close": "Lukk"
+  }
+}

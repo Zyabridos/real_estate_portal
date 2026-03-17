@@ -4,7 +4,7 @@ using RealEstate.Domain.Enums.Common;
 namespace RealEstate.Application.Features.Agencies.List;
 
 public sealed record AgencyListQuery(
-    Guid? Id = null,
+    int? Id = null,
     string? Name = null,
     string? OrgNumber = null,
     string? PhoneNumber = null,

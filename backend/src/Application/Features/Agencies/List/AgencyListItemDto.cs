@@ -3,7 +3,7 @@ using RealEstate.Domain.Enums.Agencies;
 namespace RealEstate.Application.Features.Agencies.List;
 
 public sealed record AgencyListItemDto(
-    Guid Id,
+    int Id,
     string Name,
     string OrgNumber,
     string? PhoneNumber,

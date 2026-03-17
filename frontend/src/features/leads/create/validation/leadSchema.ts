@@ -24,17 +24,10 @@ const normalizeSpaces = (v: unknown) => {
 
 const isValidFullNameTokens = (fullName: string) => {
   const tokens = fullName.split(" ").filter(Boolean);
-  // allow single token ("asfd") as valid; just ensure each token length >= 2
   return tokens.length > 0 && tokens.every((t) => t.length >= 2);
 };
 
-// Email: simple, pragmatic (client-side), backend will validate too
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-// Phone - same validation as on backend:
-// - only digits, spaces, '-' and optional '+' at start
-// - '+' only once and only at beginning
-// - after optional '+', must start with digit
 const phoneAllowedRegex = /^\+?\d[\d -]*$/;
 
 const countSeparators = (phone: string) => (phone.match(/[ -]/g) ?? []).length;
@@ -51,7 +44,6 @@ export const leadSchema = z
         .refine(isValidFullNameTokens, { message: "tokenMin" })
     ),
 
-    // optional; validate only when provided
     email: z.preprocess(
       emptyToUndefined,
       z
@@ -62,7 +54,6 @@ export const leadSchema = z
         .optional()
     ),
 
-    // optional; validate only when provided
     phoneNumber: z.preprocess(
       emptyToUndefined,
       z
@@ -83,7 +74,6 @@ export const leadSchema = z
     const hasEmail = !!val.email?.trim();
     const hasPhone = !!val.phoneNumber?.trim();
 
-    // for better UI - show only after both empty
     if (!hasEmail && !hasPhone) {
       ctx.addIssue({
         code: "custom",

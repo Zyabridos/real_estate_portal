@@ -7,7 +7,7 @@ import type { LoadingStateProps } from "@/shared/types/states";
 const props = defineProps<LoadingStateProps>();
 
 const resolvedTitle = computed(
-  () => props.title?.trim() || i18n.t("states:loading.genericTitle")
+  () => props.title?.trim() || i18n.t("common:states.loading.genericTitle")
 );
 
 const testId = computed(() => props.testId?.trim() || "loading-state");
@@ -20,7 +20,7 @@ const testId = computed(() => props.testId?.trim() || "loading-state");
     :data-testid="testId"
     role="status"
     aria-live="polite"
-    :aria-label="$t('states:loading.ariaLabel')"
+    :aria-label="$t('common:states.loading.ariaLabel')"
   >
     <div class="state__body">
       <div class="state__spinner" aria-hidden="true"></div>

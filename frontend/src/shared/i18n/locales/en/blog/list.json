@@ -1,0 +1,6 @@
+{
+  "title": "Blog",
+  "subtitle": "Articles are loaded from Sanity CMS.",
+  "empty": "No articles yet.",
+  "filterLabel": "Category"
+}

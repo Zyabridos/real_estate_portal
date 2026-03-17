@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import i18n from "@/shared/i18n";
 import { leadsApi } from "@/features/leads/api/leadsApi";
 import { propertiesApi } from "@/features/properties/api/propertiesApi";
 
@@ -15,7 +16,6 @@ import ErrorState from "@/shared/ui/states/ErrorState.vue";
 import EmptyState from "@/shared/ui/states/EmptyState.vue";
 
 import LeadMessageModal from "@/features/leads/list/components/LeadMessageModal.vue";
-
 import LeadsTableGrouped from "@/features/leads/list/components/LeadsTableGrouped.vue";
 import LeadsTableList from "@/features/leads/list/components/LeadsTableList.vue";
 
@@ -38,7 +38,9 @@ const view = computed<ViewMode>(() => {
 });
 
 const sortBy = computed(() => String(route.query.sortBy ?? "PropertyId"));
-const sortDirection = computed<SortDirection>(() => (route.query.sortDirection === "desc" ? "desc" : "asc"));
+const sortDirection = computed<SortDirection>(() =>
+  route.query.sortDirection === "desc" ? "desc" : "asc"
+);
 
 const isLoading = computed(() => state.value === "loading");
 const isError = computed(() => state.value === "error");
@@ -89,9 +91,16 @@ function setView(next: ViewMode): void {
 
 function onSort(nextSortBy: string): void {
   const same = sortBy.value === nextSortBy;
-  const nextDir: SortDirection = same ? (sortDirection.value === "asc" ? "desc" : "asc") : "asc";
+  const nextDir: SortDirection = same
+    ? sortDirection.value === "asc"
+      ? "desc"
+      : "asc"
+    : "asc";
 
-  router.replace({ query: { ...route.query, sortBy: nextSortBy, sortDirection: nextDir } });
+  router.replace({
+    query: { ...route.query, sortBy: nextSortBy, sortDirection: nextDir },
+  });
+
   void load();
 }
 
@@ -123,7 +132,10 @@ function closeMessageModal(): void {
   messageLoading.value = false;
 }
 
-async function openMessageModal(payload: { id: string; fullName: string | null }): Promise<void> {
+async function openMessageModal(payload: {
+  id: string;
+  fullName: string | null;
+}): Promise<void> {
   isMessageOpen.value = true;
   messageLeadId.value = payload.id;
   messageFullName.value = payload.fullName;
@@ -131,12 +143,19 @@ async function openMessageModal(payload: { id: string; fullName: string | null }
   messageError.value = null;
 
   messageLoading.value = true;
+
   try {
-    const dto = await leadsApi.getById(payload.id);
+    const leadId = Number(payload.id);
+
+    if (!Number.isInteger(leadId) || leadId <= 0) {
+      return;
+    }
+
+    const dto = await leadsApi.getById(leadId);
     messageText.value = dto.message ?? null;
   } catch (e) {
     const err = e as ApiError;
-    messageError.value = err.message ?? "Failed to load message.";
+    messageError.value = err.message ?? i18n.t("leads:list.message.loadError");
   } finally {
     messageLoading.value = false;
   }
@@ -148,19 +167,23 @@ async function openMessageModal(payload: { id: string; fullName: string | null }
     <header class="mb-6">
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 id="leads-list-title" class="text-2xl font-semibold tracking-tight text-slate-900" data-testid="leads-list-title">
-            Leads list
+          <h1
+            id="leads-list-title"
+            class="text-2xl font-semibold tracking-tight text-slate-900"
+            data-testid="leads-list-title"
+          >
+            {{ $t("leads:list.pageTitle") }}
           </h1>
+
           <p class="mt-1 text-sm text-slate-600" data-testid="leads-list-subtitle">
-            {{ $t("pages:leads.list.pageSubtitle") }}
+            {{ $t("leads:list.pageSubtitle") }}
           </p>
         </div>
 
-        <!-- Toggle -->
         <div
           class="inline-flex rounded-xl border border-slate-200 bg-white p-1"
           role="group"
-          aria-label="Leads view mode"
+          :aria-label="$t('leads:list.viewToggleAria')"
           data-testid="leads-view-toggle"
         >
           <button
@@ -171,7 +194,7 @@ async function openMessageModal(payload: { id: string; fullName: string | null }
             data-testid="view-grouped"
             @click="setView('grouped')"
           >
-            Grouped
+            {{ $t("leads:list.view.grouped") }}
           </button>
 
           <button
@@ -182,29 +205,27 @@ async function openMessageModal(payload: { id: string; fullName: string | null }
             data-testid="view-list"
             @click="setView('list')"
           >
-            List
+            {{ $t("leads:list.view.list") }}
           </button>
         </div>
       </div>
 
       <p class="mt-3 text-xs text-slate-500" data-testid="leads-total">
-        Total: {{ totalItems }}
+        {{ $t("leads:list.total", { count: totalItems }) }}
       </p>
     </header>
 
-    <!-- States -->
     <LoadingState v-if="isLoading" data-testid="leads-list-loading" />
 
     <ErrorState
       v-else-if="isError"
       data-testid="leads-list-error"
-      :message="error?.message ?? $t('errors:messages.unexpected')"
+      :message="error?.message ?? $t('errors:common.message.unexpected')"
       :onRetry="retry"
     />
 
     <EmptyState v-else-if="isEmpty" data-testid="leads-list-empty" />
 
-    <!-- Tables -->
     <div v-else class="max-w-6xl" data-testid="leads-list-content">
       <LeadsTableGrouped
         v-if="view === 'grouped'"
@@ -236,6 +257,5 @@ async function openMessageModal(payload: { id: string; fullName: string | null }
       :errorMessage="messageError"
       :onClose="closeMessageModal"
     />
-
   </section>
 </template>

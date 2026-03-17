@@ -1,8 +1,8 @@
 import type {LeadStatus} from "@/entities/leads/model/types";
 
 export type LeadDetailsDto = {
-  id: string;
-  propertyId: string;
+  id: number;
+  propertyId: number;
   fullName: string;
   email?: string;
   phoneNumber?: string;

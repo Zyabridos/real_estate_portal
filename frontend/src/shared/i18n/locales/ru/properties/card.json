@@ -1,0 +1,35 @@
+{
+  "detailsCard": {
+    "detailsCardAriaLabel": "Карточка с деталями объекта недвижимости",
+    "priceValueAriaLabel": "Цена объекта: {{value}}",
+    "metaSectionAriaLabel": "Основная информация об объекте",
+    "descriptionSectionAriaLabel": "Описание объекта",
+    "descriptionTitle": "Описание",
+    "metaTitle": "Информация об объекте",
+    "typeLabel": "Тип",
+    "statusLabel": "Статус",
+    "cityLabel": "Город",
+    "propertyIdLabel": "ID объекта",
+    "createdAtLabel": "Создано",
+    "bedroomsLabel": "Спальни",
+    "bathroomsLabel": "Ванные комнаты",
+    "areaLabel": "Площадь",
+    "areaUnit": "м²",
+    "brokerTitle": "Брокер",
+    "brokerSubtitle": "Откройте профиль брокера и посмотрите другие объекты этого же брокера.",
+    "priceLabel": "Цена",
+    "streetLabel": "Улица",
+    "actions": {
+      "createLead": "Оставить заявку"
+    }
+  },
+  "type": {
+    "apartment": "Квартира",
+    "house": "Дом",
+    "commercial": "Коммерческая недвижимость"
+  },
+  "status": {
+    "active": "Активно",
+    "sold": "Продано"
+  }
+}
