@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using RealEstate.Application;
 using RealEstate.Application.Features.Properties.Services;
 using RealEstate.Application.Common.Abstractions;
+using RealEstate.Infrastructure.DependencyInjection;
 using RealEstate.Infrastructure.HealthChecks;
 using RealEstate.Infrastructure.Mongo;
 using RealEstate.Infrastructure.Mongo.Conventions;

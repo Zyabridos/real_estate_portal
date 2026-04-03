@@ -1,18 +1,11 @@
-using RealEstate.Application.Features.Agencies.List;
-using RealEstate.Domain.Entities;
+namespace RealEstate.Application.Features.Users.Contracts;
 
-namespace RealEstate.Application.Features.Agencies.Contracts;
+using RealEstate.Domain.Entities.Users;
 
-public interface IAgencyRepository
+public interface IUserRepository
 {
-    Task<Agency?> GetById(int id, CancellationToken ct);
-    Task<IReadOnlyList<Agency>> GetAllAsync(CancellationToken ct);
-
-    Task CreateAsync(Agency entity, CancellationToken ct);
-    Task<bool> UpdateAsync(Agency entity, CancellationToken ct);
-    Task<bool> DeleteAsync(int id, CancellationToken ct);
-    
-    Task<(IReadOnlyList<Agency> Items, long TotalItems)> GetListAsync(
-        AgencyListQuery query,
-        CancellationToken ct);
+    Task<User?> GetByEmailAsync(string email, CancellationToken ct);
+    Task<User?> GetByIdAsync(int id, CancellationToken ct);
+    Task<User> CreateAsync(User user, CancellationToken ct);
+    Task<User?> UpdateAsync(User user, CancellationToken ct);
 }
