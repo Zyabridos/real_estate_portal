@@ -51,7 +51,15 @@ jobs:
           MONGO_ROOT_PASSWORD=ci
           MONGO_PORT=27017
           PING_PROPERTIES=http://localhost:5055/api/properties?page=1&pageSize=20
-          
+
+          JWT_ISSUER=${{ secrets.JWT_ISSUER }}
+          JWT_AUDIENCE=${{ secrets.JWT_AUDIENCE }}
+          JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}
+          JWT_ACCESS_TOKEN_MINUTES=90
+
+          AUTH_SEED_ADMIN_EMAIL=${{ secrets.AUTH_SEED_ADMIN_EMAIL }}
+          AUTH_SEED_ADMIN_PASSWORD=${{ secrets.AUTH_SEED_ADMIN_PASSWORD }}
+
           VITE_SANITY_PROJECT_ID=${{ secrets.VITE_SANITY_PROJECT_ID }}
           VITE_SANITY_DATASET=${{ secrets.VITE_SANITY_DATASET }}
           VITE_SANITY_API_VERSION=2025-01-01
