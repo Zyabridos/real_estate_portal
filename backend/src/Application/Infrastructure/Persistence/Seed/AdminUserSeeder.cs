@@ -28,13 +28,20 @@ public sealed class AdminUserSeeder
 
     public async Task SeedAsync(CancellationToken ct)
     {
-        var email = _configuration["AUTH_SEED_ADMIN_EMAIL"]?.Trim().ToLowerInvariant();
-        var password = _configuration["AUTH_SEED_ADMIN_PASSWORD"];
+        var email =
+            _configuration["AUTH_SEED_ADMIN_EMAIL"]
+            ?? _configuration["AuthSeed:AdminEmail"];
+
+        email = email?.Trim().ToLowerInvariant();
+
+        var password =
+            _configuration["AUTH_SEED_ADMIN_PASSWORD"]
+            ?? _configuration["AuthSeed:AdminPassword"];
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             _logger.LogInformation(
-                "Admin seed skipped because AUTH_SEED_ADMIN_EMAIL or AUTH_SEED_ADMIN_PASSWORD is not configured.");
+                "Admin seed skipped because admin seed credentials are not configured.");
 
             return;
         }
