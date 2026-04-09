@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../../lib/config.sh"
 source "${SCRIPT_DIR}/../../lib/log.sh"
+source "${SCRIPT_DIR}/../../lib/auth.sh"
 
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
 HEALTH_PATH="${HEALTH_PATH:-/api/health/readiness}"
@@ -34,14 +35,14 @@ assert_json() {
   local label="$1"
   local body="$2"
 
-  if [[ -z "$body" ]]; then
+  if [[ -z "${body}" ]]; then
     error "[seed] ERROR: ${label} returned empty response."
     exit 1
   fi
 
-  if ! printf '%s' "$body" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
+  if ! printf '%s' "${body}" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
     error "[seed] ERROR: ${label} did not return JSON. Response was:"
-    printf '%s\n' "$body" | head -n 120
+    printf '%s\n' "${body}" | head -n 120
     exit 1
   fi
 }
@@ -62,12 +63,23 @@ json_field() {
   python3 -c "import sys,json; print(json.load(sys.stdin).get('${field}', ''))"
 }
 
+http_get_json() {
+  local url="$1"
+  curl -fsS \
+    -H "Authorization: Bearer ${SEED_TOKEN}" \
+    "$url"
+}
+
 http_post_json() {
   local url="$1"
   local payload="$2"
   local resp status
 
-  resp="$(curl -sS -i -X POST "$url" -H "Content-Type: application/json" -d "$payload")"
+  resp="$(curl -sS -i -X POST "$url" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${SEED_TOKEN}" \
+    -d "$payload")"
+
   status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
 
   if [[ "$status" =~ ^2 ]]; then
@@ -83,6 +95,24 @@ http_post_json() {
   warn "----- response (body) -----"
   printf '%s' "$resp" | awk 'BEGIN{p=0} /^\r?$/{p=1;next} {if(p) print}'
   return 22
+}
+
+http_delete() {
+  local url="$1"
+  local resp status
+
+  resp="$(curl -sS -i -X DELETE "$url" \
+    -H "Authorization: Bearer ${SEED_TOKEN}" || true)"
+
+  status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
+
+  if [[ "$status" =~ ^2 ]] || [[ "$status" == "404" ]]; then
+    return 0
+  fi
+
+  warn "[seed] DELETE failed: $url (status=$status)"
+  printf '%s\n' "$resp" | head -n 120
+  return 0
 }
 
 create_property_payload() {
@@ -127,11 +157,15 @@ neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
+neutral "Logging in as seed admin"
+SEED_TOKEN="$(seed_login)"
+success "[seed] Admin token acquired"
+
 neutral "Clearing existing properties"
-props_json="$(curl -fsS "${BACKEND_URL}/api/properties?page=1&pageSize=${PAGE_SIZE}" || true)"
+props_json="$(http_get_json "${BACKEND_URL}/api/properties?page=1&pageSize=${PAGE_SIZE}" || true)"
 
 prop_ids=""
-if [[ -n "${props_json}" ]] && printf '%s' "$props_json" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
+if [[ -n "${props_json}" ]] && printf '%s' "${props_json}" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
   prop_ids="$(printf '%s' "${props_json}" | extract_ids_from_paged || true)"
 else
   warn "[seed] Skipping properties cleanup (GET list returned non-JSON or failed)."
@@ -140,7 +174,7 @@ fi
 if [[ -n "${prop_ids}" ]]; then
   while IFS= read -r id; do
     [[ -z "$id" ]] && continue
-    curl -fsS -X DELETE "${BACKEND_URL}/api/properties/${id}" >/dev/null || true
+    http_delete "${BACKEND_URL}/api/properties/${id}" || true
   done <<< "${prop_ids}"
   success "[seed] Properties cleared: $(echo "${prop_ids}" | wc -l | tr -d ' ')"
 else
@@ -190,13 +224,10 @@ i=1
 for broker_index in "${!broker_ids[@]}"; do
   broker_id="${broker_ids[$broker_index]}"
 
-  # Последний брокер без объектов
   if [[ "${broker_index}" -eq 21 ]]; then
     continue
   fi
 
-  # Первые 8 брокеров -> по 3 объекта
-  # Остальные 13 брокеров -> по 2 объекта
   if [[ "${broker_index}" -lt 8 ]]; then
     per_broker=3
   else
