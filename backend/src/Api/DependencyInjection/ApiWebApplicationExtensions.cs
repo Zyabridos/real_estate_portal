@@ -18,6 +18,9 @@ public static class ApiWebApplicationExtensions
             app.UseSwaggerUI();
         }
 
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         app.MapControllers();
         MapHealthEndpoints(app);
 
@@ -38,7 +41,6 @@ public static class ApiWebApplicationExtensions
             }
         });
 
-        // Mongo ok ? 200 : 503
         app.MapHealthChecks("/api/health/readiness", new HealthCheckOptions
         {
             Predicate = r => r.Tags.Contains("ready"),
