@@ -83,9 +83,16 @@ jobs:
           echo "Backend health check failed"; docker compose --env-file .env.ci logs --no-color; exit 1
 
       - name: Seed database
+        env:
+          BACKEND_PORT: "5055"
+          BACKEND_URL: "http://localhost:5055"
+          AUTH_SEED_ADMIN_EMAIL: ${{ secrets.AUTH_SEED_ADMIN_EMAIL }}
+          AUTH_SEED_ADMIN_PASSWORD: ${{ secrets.AUTH_SEED_ADMIN_PASSWORD }}
+          SEED_AUTH_EMAIL: ${{ secrets.AUTH_SEED_ADMIN_EMAIL }}
+          SEED_AUTH_PASSWORD: ${{ secrets.AUTH_SEED_ADMIN_PASSWORD }}
         run: |
           chmod +x scripts/bash/seed/*.sh
-          BACKEND_PORT=5055 BACKEND_URL=http://localhost:5055 make seed
+          make seed
 
       - name: Wait for frontend
         run: |
