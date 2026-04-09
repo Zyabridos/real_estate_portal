@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Agencies;
@@ -54,6 +55,7 @@ public sealed class AgenciesController : ControllerBase
     }
 
     // POST /api/ageincies
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     [ProducesResponseType(typeof(AgencyDetailsDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -70,6 +72,7 @@ public sealed class AgenciesController : ControllerBase
     }
     
     // PUT /api/agencies/{id}
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(AgencyDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -89,6 +92,7 @@ public sealed class AgenciesController : ControllerBase
     }
 
     // DELETE /api/agencies/{id}
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]

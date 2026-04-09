@@ -65,14 +65,14 @@ public sealed class PasswordHasherTests
         Assert.True(result);
     }
 
-    private static PasswordHasher CreateSut(int iterationCount)
+    private static UserPasswordHasher CreateSut(int iterationCount)
     {
         var options = Options.Create(new PasswordHasherOptions
         {
             IterationCount = iterationCount
         });
 
-        return new PasswordHasher(options);
+        return new UserPasswordHasher(options);
     }
 
     private static User CreateUser()

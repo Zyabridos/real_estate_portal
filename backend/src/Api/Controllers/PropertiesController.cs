@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Properties;
@@ -32,7 +33,6 @@ public sealed class PropertiesController : ControllerBase
         [FromQuery] PropertyListQuery query,
         CancellationToken ct)
     {
-        // Validation of query is done by FluentValidation va filter/auto-validation.
         var result = await _service.GetListAsync(query, ct);
         return Ok(result);
     }
@@ -55,6 +55,7 @@ public sealed class PropertiesController : ControllerBase
 }
 
     // POST /api/properties
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     [ProducesResponseType(typeof(PropertyDetailsDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -71,6 +72,7 @@ public sealed class PropertiesController : ControllerBase
     }
 
     // PUT /api/properties/{id}
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(PropertyDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -90,6 +92,7 @@ public sealed class PropertiesController : ControllerBase
     }
 
     // DELETE /api/properties/{id}
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
