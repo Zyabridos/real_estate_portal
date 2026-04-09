@@ -105,6 +105,8 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Create_returns_201_and_GetById_returns_created()
     {
+        var adminClient = await Ctx.GetAdminClientAsync();
+
         var request = new CreateAgencyRequest(
             Name: "Created Agency",
             OrgNumber: "999999",
@@ -114,7 +116,7 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
             ZipCode: "7010"
         );
 
-        var createResponse = await Ctx.Client.PostAsJsonAsync("/api/agencies", request);
+        var createResponse = await adminClient.PostAsJsonAsync("/api/agencies", request);
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var created = await createResponse.Content.ReadFromJsonAsync<AgencyDetailsDto>();
@@ -135,8 +137,27 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     }
 
     [Fact]
+    public async Task Create_returns_401_for_anonymous()
+    {
+        var request = new CreateAgencyRequest(
+            Name: "Created Agency",
+            OrgNumber: "999999",
+            PhoneNumber: "+47 111 22 333",
+            City: "Trondheim",
+            Street: "NewStreet 1",
+            ZipCode: "7010"
+        );
+
+        var response = await Ctx.Client.PostAsJsonAsync("/api/agencies", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task Update_existing_returns_200_and_updates_fields()
     {
+        var adminClient = await Ctx.GetAdminClientAsync();
+
         var existing = TestAgencies.Create(
             id: 1,
             name: "Old Name",
@@ -160,7 +181,7 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
             ZipCode: "7010"
         );
 
-        var response = await Ctx.Client.PutAsJsonAsync($"/api/agencies/{existing.Id}", request);
+        var response = await adminClient.PutAsJsonAsync($"/api/agencies/{existing.Id}", request);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var dto = await response.Content.ReadFromJsonAsync<AgencyDetailsDto>();
@@ -179,6 +200,7 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Update_missing_returns_404()
     {
+        var adminClient = await Ctx.GetAdminClientAsync();
         const int id = 999999;
 
         var request = new UpdateAgencyRequest(
@@ -190,13 +212,31 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
             ZipCode: "Zip"
         );
 
-        var response = await Ctx.Client.PutAsJsonAsync($"/api/agencies/{id}", request);
+        var response = await adminClient.PutAsJsonAsync($"/api/agencies/{id}", request);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Theory]
     [InlineData("not-an-int")]
     public async Task Update_invalid_id_returns_400(string rawId)
+    {
+        var adminClient = await Ctx.GetAdminClientAsync();
+
+        var request = new UpdateAgencyRequest(
+            Id: 1,
+            Name: "Name",
+            PhoneNumber: "+47 111 11 111",
+            City: "City",
+            Street: "Street",
+            ZipCode: "Zip"
+        );
+
+        var response = await adminClient.PutAsJsonAsync($"/api/agencies/{rawId}", request);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Update_returns_401_for_anonymous()
     {
         var request = new UpdateAgencyRequest(
             Id: 1,
@@ -207,13 +247,16 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
             ZipCode: "Zip"
         );
 
-        var response = await Ctx.Client.PutAsJsonAsync($"/api/agencies/{rawId}", request);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var response = await Ctx.Client.PutAsJsonAsync("/api/agencies/1", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
     public async Task Delete_existing_returns_204_and_entity_is_gone()
     {
+        var adminClient = await Ctx.GetAdminClientAsync();
+
         var agency = TestAgencies.Create(
             id: 1,
             name: "To Delete",
@@ -226,7 +269,7 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
 
         await _agencies.InsertOneAsync(agency);
 
-        var response = await Ctx.Client.DeleteAsync($"/api/agencies/{agency.Id}");
+        var response = await adminClient.DeleteAsync($"/api/agencies/{agency.Id}");
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var get = await Ctx.Client.GetAsync($"/api/agencies/{agency.Id}");
@@ -236,7 +279,9 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [Fact]
     public async Task Delete_missing_returns_404()
     {
-        var response = await Ctx.Client.DeleteAsync("/api/agencies/999999");
+        var adminClient = await Ctx.GetAdminClientAsync();
+
+        var response = await adminClient.DeleteAsync("/api/agencies/999999");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -244,7 +289,17 @@ public sealed class AgenciesControllerTests : IntegrationTestBase
     [InlineData("not-an-int")]
     public async Task Delete_invalid_id_returns_400(string rawId)
     {
-        var response = await Ctx.Client.DeleteAsync($"/api/agencies/{rawId}");
+        var adminClient = await Ctx.GetAdminClientAsync();
+
+        var response = await adminClient.DeleteAsync($"/api/agencies/{rawId}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Delete_returns_401_for_anonymous()
+    {
+        var response = await Ctx.Client.DeleteAsync("/api/agencies/1");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 }

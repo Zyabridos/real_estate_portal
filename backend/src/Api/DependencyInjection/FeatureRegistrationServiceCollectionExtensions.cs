@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using RealEstate.Application.Features.Auth.Login;
 using RealEstate.Application.Features.Properties.Services;
 using RealEstate.Infrastructure.Mongo.Indexes;
 
@@ -20,6 +21,8 @@ public static class FeatureRegistrationServiceCollectionExtensions
             .AddClasses(c => c.Where(t => t.Name.EndsWith("Repository")))
             .AsMatchingInterface()
             .WithScopedLifetime());
+        
+        services.AddScoped<LoginHandler>();
 
         return services;
     }

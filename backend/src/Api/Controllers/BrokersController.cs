@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Filters;
 using RealEstate.Api.Swagger.Examples.Brokers;
@@ -54,6 +55,7 @@ public sealed class BrokersController : ControllerBase
     }
 
     // POST /api/brokers
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     [ProducesResponseType(typeof(BrokerDetailsDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -70,6 +72,7 @@ public sealed class BrokersController : ControllerBase
     }
 
     // PUT /api/brokers/{id}
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(BrokerDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -89,6 +92,7 @@ public sealed class BrokersController : ControllerBase
     }
 
     // DELETE /api/brokers/{id}
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

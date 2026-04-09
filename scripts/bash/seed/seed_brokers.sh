@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../../lib/config.sh"
 source "${SCRIPT_DIR}/../../lib/log.sh"
+source "${SCRIPT_DIR}/../../lib/auth.sh"
 
 BACKEND_URL="${BACKEND_URL:-http://localhost:5055}"
 BROKERS_ENDPOINT="/api/brokers"
@@ -42,7 +43,7 @@ assert_json() {
 
   if ! printf '%s' "${body}" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
     error "[seed] ERROR: ${label} did not return JSON. Response was:"
-    printf '%s\n' "${body}" | head -n 80
+    printf '%s\n' "${body}" | head -n 120
     exit 1
   fi
 }
@@ -63,12 +64,23 @@ json_field() {
   python3 -c "import sys,json; print(json.load(sys.stdin).get('${field}', ''))"
 }
 
+http_get_json() {
+  local url="$1"
+  curl -fsS \
+    -H "Authorization: Bearer ${SEED_TOKEN}" \
+    "$url"
+}
+
 http_post_json() {
   local url="$1"
   local payload="$2"
   local resp status
 
-  resp="$(curl -sS -i -X POST "$url" -H "Content-Type: application/json" -d "$payload")"
+  resp="$(curl -sS -i -X POST "$url" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${SEED_TOKEN}" \
+    -d "$payload")"
+
   status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
 
   if [[ "$status" =~ ^2 ]]; then
@@ -88,7 +100,9 @@ http_delete() {
   local url="$1"
   local resp status
 
-  resp="$(curl -sS -i -X DELETE "$url" || true)"
+  resp="$(curl -sS -i -X DELETE "$url" \
+    -H "Authorization: Bearer ${SEED_TOKEN}" || true)"
+
   status="$(printf '%s' "$resp" | head -n 1 | awk '{print $2}')"
 
   if [[ "$status" =~ ^2 ]] || [[ "$status" == "404" ]]; then
@@ -96,7 +110,7 @@ http_delete() {
   fi
 
   warn "[seed] DELETE failed: $url (status=$status)"
-  printf '%s\n' "$resp" | head -n 80
+  printf '%s\n' "$resp" | head -n 120
   return 0
 }
 
@@ -114,7 +128,7 @@ import json, sys
 agency_id = int(sys.argv[1])
 first = sys.argv[2]
 last = sys.argv[3]
-gender = sys.argv[4]
+gender = int(sys.argv[4])
 email = sys.argv[5]
 phone = sys.argv[6]
 
@@ -135,6 +149,10 @@ neutral "Checking API health: ${BACKEND_URL}${HEALTH_PATH}"
 curl -fsS "${BACKEND_URL}${HEALTH_PATH}" >/dev/null
 success "[seed] API health OK"
 
+neutral "Logging in as seed admin"
+SEED_TOKEN="$(seed_login)"
+success "[seed] Admin token acquired"
+
 source_seed_env_if_exists
 
 : "${AGENCY1_ID:?Missing AGENCY1_ID. Run seed-agencies first.}"
@@ -142,7 +160,7 @@ source_seed_env_if_exists
 : "${AGENCY3_ID:?Missing AGENCY3_ID. Run seed-agencies first.}"
 
 neutral "Clearing existing brokers"
-brokers_json="$(curl -fsS "${BACKEND_URL}${BROKERS_ENDPOINT}?page=1&pageSize=${PAGE_SIZE}" || true)"
+brokers_json="$(http_get_json "${BACKEND_URL}${BROKERS_ENDPOINT}?page=1&pageSize=${PAGE_SIZE}" || true)"
 
 broker_ids=""
 if [[ -n "${brokers_json}" ]] && printf '%s' "${brokers_json}" | python3 -c 'import sys,json; json.load(sys.stdin)' >/dev/null 2>&1; then
@@ -177,7 +195,6 @@ while [[ "${i}" -le "${SEED_BROKERS_COUNT}" ]]; do
   gender="${genders[$(((i-1) % ${#genders[@]}))]}"
   email="broker${i}.seed@broker.no"
   phone=$(printf "+47 900 %02d %03d" $(((i-1) / 100)) $(((i-1) % 1000)))
-
   agency_id="${agencies[$(((i-1) % ${#agencies[@]}))]}"
 
   resp="$(http_post_json \
